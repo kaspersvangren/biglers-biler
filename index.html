@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.23.0)
+//  Biglers Biler – etape 3  (v0.24.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -1500,13 +1500,14 @@ const OBSTACLES = [
         sc.tweens.add({ targets: head, y: y - 88, duration: 450, ease: 'Back.out', onComplete: () => sc.tweens.add({ targets: head, angle: { from: -10, to: 10 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' }) }); };
       obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; SFX.clunk(); SFX.boing(); s.tweens.killTweensOf(head); head.destroy();
         s.tweens.add({ targets: lid, y: s.groundY(x + 90) - 8, x: x + 90, angle: 200, duration: 500, ease: 'Quad.in' });
-        const cb = s.add.image(x - 20, y - 20, 'snake').setOrigin(0.5, 1).setDepth(7).setScale(1, 0.3); obs.gos = [lid, cb];
+        const cb = s.add.image(x - 20, y - 20, 'snake').setOrigin(0.5, 1).setDepth(7).setScale(1, 0.4); obs.gos = [lid, cb];
         s.makeLoose(b, { type: 'rectangle', width: 70, height: 66 }, 6, { cols: [0xd4a056, 0xa67c45], snd: 'wood' }); obs.bodies = [];
-        s.tweens.add({ targets: cb, scaleY: 1, duration: 700, ease: 'Elastic.out', onComplete: () => {   // fjeder-hop væk
-          let hx = cb.x; cb.setFlipX(true); const hop = (n) => { if (!cb.active || n > 40 || cb.x < s.cameras.main.scrollX - 120) { if (cb.active) cb.setVisible(false); return; }   // hopper videre, til den er ude af skærmen
-            const x0 = hx, x1 = hx - 130, gy0 = s.groundY(x0) + 4, gy1 = s.groundY(x1) + 4; hx = x1; SFX.boing();   // hopper mod venstre
-            s.tweens.add({ targets: cb, scaleY: 0.6, duration: 90, yoyo: true, onComplete: () => s.tweens.addCounter({ from: 0, to: 1, duration: 520, onUpdate: tw => { const t = tw.getValue(); cb.x = x0 + (x1 - x0) * t; cb.y = gy0 + (gy1 - gy0) * t - Math.sin(Math.PI * t) * 150; cb.setAngle(-Math.sin(Math.PI * t) * 12); cb.scaleY = 1 + Math.sin(Math.PI * t) * 0.25; }, onComplete: () => hop(n + 1) }) }); };
-          hop(0); } }); };
+        let hx = cb.x; cb.setFlipX(true);
+        const hop = (n) => { if (!cb.active || n > 40 || cb.x < s.cameras.main.scrollX - 120) { if (cb.active) cb.setVisible(false); return; }   // hopper videre, til den er ude af skærmen
+          const x0 = hx, x1 = hx - 150, gy0 = s.groundY(x0) + 4, gy1 = s.groundY(x1) + 4; hx = x1; SFX.boing();   // som på en pogostylte: høje, bløde hop mod venstre – kroppen holder formen
+          s.tweens.addCounter({ from: 0, to: 1, duration: 780, onUpdate: tw => { if (!cb.active) return; const t = tw.getValue(); cb.x = x0 + (x1 - x0) * t; cb.y = gy0 + (gy1 - gy0) * t - Math.sin(Math.PI * t) * 210; cb.setAngle(-Math.sin(Math.PI * t) * 9);
+            if (n === 0) cb.scaleY = Math.min(1, 0.4 + t * 2.5); }, onComplete: () => hop(n + 1) }); };
+        hop(0); };
       return obs; } },
   // ---------- Jungle ----------
   { minD: 0, w: 3, biome: 'jungle', make(s, x, y) {   // kokospalme: vælter, og kokosnødderne falder og triller – saven kan save den
@@ -1702,11 +1703,16 @@ const OBSTACLES = [
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; obs.bodies = []; const ch = s.chassis;
         const n = s.matter.add.image(r.x, r.y, 'rocket2', null, { shape: { type: 'rectangle', width: 50, height: 196 }, density: 0.0008, friction: 0.3, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(6);
         n.setVelocity(Math.max(3, ch && ch.body ? ch.body.velocity.x * 0.8 : 3), -3); n.setAngularVelocity(0.04); r.destroy(); obs.gos = [n]; SFX.clunk();
-        s.time.delayedCall(300, () => { if (!n.active) return; const a0 = n.angle;   // tænder hurtigt og flyver lige den vej, den peger
-          const f = s.add.image(n.x, n.y, 'rocket2').setDepth(6).setAngle(a0); n.destroy(); obs.gos = [f]; SFX.zap(); SFX.whoosh();
-          const t = Phaser.Math.DegToRad(a0), dx = Math.sin(t), dy = -Math.cos(t); let last = 0;
-          s.tweens.add({ targets: f, x: f.x + dx * 1600, y: f.y + dy * 1600, duration: 1500, ease: 'Quad.in', onUpdate: (tw) => { if (tw.elapsed - last < 35) return; last = tw.elapsed;
-              const p = s.add.image(f.x - dx * 105, f.y - dy * 105, 'smoke').setTint(Math.random() < 0.5 ? 0xf39c12 : 0xbdc3c7).setDepth(5.9).setScale(0.9); s.tweens.add({ targets: p, scale: 2.2, alpha: 0, duration: 700, onComplete: () => p.destroy() }); },
+        s.time.delayedCall(300, () => { if (!n.active) return;   // tænder og flyver flydende videre: beholder sin fart og drejning, drejningen aftager, farten vokser
+          let vx = n.body.velocity.x * 60, vy = n.body.velocity.y * 60, om = Phaser.Math.RadToDeg(n.body.angularVelocity) * 60, thr = 0, prev = 0, last = 0;
+          const f = s.add.image(n.x, n.y, 'rocket2').setDepth(6).setAngle(n.angle), sx = f.x, sy = f.y; n.destroy(); obs.gos = [f]; SFX.zap(); SFX.whoosh();
+          s.tweens.addCounter({ from: 0, to: 1, duration: 5000, onUpdate: (tw) => { if (!f.active) { tw.stop(); return; } const el = tw.elapsed, dt = Math.min(50, el - prev) / 1000; prev = el; if (dt <= 0) return;
+              om *= Math.exp(-dt * 3); f.angle += om * dt; thr = Math.min(2600, thr + 5200 * dt);
+              const t = Phaser.Math.DegToRad(f.angle), dx = Math.sin(t), dy = -Math.cos(t), dr = Math.exp(-dt * 0.6);
+              vx = (vx + dx * thr * dt) * dr; vy = (vy + dy * thr * dt) * dr; f.x += vx * dt; f.y += vy * dt;
+              const gy = s.groundY(f.x) - 20; if (f.y > gy) { f.y = gy; vy = Math.min(vy, 0); }   // glider hen ad jorden, hvis den peger nedad
+              if (el - last > 35) { last = el; const p = s.add.image(f.x - dx * 105, f.y - dy * 105, 'smoke').setTint(Math.random() < 0.5 ? 0xf39c12 : 0xbdc3c7).setDepth(5.9).setScale(0.9); s.tweens.add({ targets: p, scale: 2.2, alpha: 0, duration: 700, onComplete: () => p.destroy() }); }
+              if (Math.hypot(f.x - sx, f.y - sy) > 1900) { f.setVisible(false); tw.stop(); } },
             onComplete: () => f.setVisible(false) }); }); };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'maane', make(s, x, y) {   // månebil
@@ -1745,12 +1751,12 @@ const OBSTACLES = [
       const e = s.obsImage('degg2', x, y - 42, { shape: { type: 'rectangle', width: 50, height: 64, chamfer: { radius: [24, 24, 12, 12] } }, isStatic: true }); e.setDepth(6);
       s.tweens.add({ targets: e, angle: { from: -3, to: 3 }, duration: 260, yoyo: true, repeat: -1, repeatDelay: 1400 });
       const obs = { gos: [e, nest], bodies: [e.body], hardness: 0.05, done: false, fragile: true };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(e.body); obs.bodies = []; s.tweens.killTweensOf(e); SFX.bonk(); const ch = s.chassis;
-        const v = ch && ch.body ? Math.abs(ch.body.velocity.x) : 5, dist = Phaser.Math.Clamp(v * 75, 200, 900), x0 = e.x, y0 = e.y, x1 = x0 + dist, y1 = s.groundY(x1) - 32, hgt = 90 + dist * 0.35;   // jo hurtigere, jo længere
+      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(e.body); obs.bodies = []; s.tweens.killTweensOf(e); e.setDepth(8.5); SFX.bonk(); const ch = s.chassis;
+        const v = ch && ch.body ? Math.abs(ch.body.velocity.x) : 5, dist = Phaser.Math.Clamp(v * 100, 650, 1100), x0 = e.x, y0 = e.y, x1 = x0 + dist, y1 = s.groundY(x1) - 32, hgt = 90 + dist * 0.35;   // jo hurtigere, jo længere
         s.tweens.addCounter({ from: 0, to: 1, duration: 400 + dist * 0.45, onUpdate: tw => { if (!e.active || !e.body) { tw.stop(); return; } const t = tw.getValue(); obs.x = Math.max(obs.x || 0, x0 + (x1 - x0) * t); e.x = x0 + (x1 - x0) * t; e.y = y0 + (y1 - y0) * t - Math.sin(Math.PI * t) * hgt; e.angle = t * 540; },
           onComplete: () => { if (!e.active) return; e.setAngle(0).setTexture('degg2_crack'); SFX.crunch(); s.puffAt(x1, y1 + 20); s.cameras.main.shake(80, 0.003);   // krakelerer, når det lander
             s.tweens.add({ targets: e, angle: { from: -6, to: 6 }, duration: 70, yoyo: true, repeat: 3 });
-            s.time.delayedCall(380, () => { if (!e.active) return; SFX.pop(); s.spawnPieces(e.x, e.y, 0x58d68d, 6, 12, 6); s.spawnPieces(e.x, e.y, 0x28b463, 4, 8, 5);
+            s.time.delayedCall(250, () => { if (!e.active) return; SFX.pop(); s.spawnPieces(e.x, e.y, 0x58d68d, 6, 12, 6); s.spawnPieces(e.x, e.y, 0x28b463, 4, 8, 5);
               const d = s.add.image(e.x, e.y - 10, 'babydragon').setDepth(8); e.setVisible(false); SFX.boing(); obs.gos.push(d);
               s.tweens.add({ targets: d, scaleY: 0.6, duration: 120, yoyo: true, repeat: 12 });
               s.tweens.add({ targets: d, x: d.x + 520, y: d.y - 420, duration: 2400, ease: 'Sine.in', onComplete: () => d.setVisible(false) }); }); } }); };
@@ -1761,13 +1767,13 @@ const OBSTACLES = [
       const bots = keys.map((k, i) => { const b = s.add.image(x - 36 + i * 36, y - 60 - 22, k).setDepth(6.1); b.k = k; s.tweens.add({ targets: b, y: b.y - 3, duration: 600 + i * 150, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); return b; });
       const obs = { gos: [sh, ...bots], bodies: [sh.body], hardness: 0.05, done: false, fragile: true, material: 'porcelain' };
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true;
-        const drift = [[-170, -150], [0, -230], [170, -170]];   // hver sky sin vej: op til venstre, lige op, op til højre
+        const drift = [[-110, -150], [0, -200], [110, -160]];   // hver sky sin vej: op til venstre, lige op, op til højre
         bots.forEach((b, i) => s.time.delayedCall(i * 110, () => { if (!b.active) return; SFX.glass(); const c = tints[b.k], tx = b.x + drift[i][0], ty = b.y + drift[i][1];
           for (let k = 0; k < 7; k++) { const a = k / 7 * Math.PI * 2, ox = Math.cos(a) * 34, oy = Math.sin(a) * 24;
             const pf = s.add.image(b.x, b.y, 'smoke').setTint(c).setAlpha(0.85).setScale(1).setDepth(8);
-            s.tweens.add({ targets: pf, x: tx + ox, y: ty + oy, scale: 3.4, duration: 900, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pf, alpha: 0, scale: 4.2, y: pf.y - 30, duration: 1300, delay: 400, onComplete: () => pf.destroy() }) }); }
+            s.tweens.add({ targets: pf, x: tx + ox, y: ty + oy, scale: 3.4, duration: 900, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pf, alpha: 0, scale: 4.2, y: pf.y - 30, duration: 700, delay: 100, onComplete: () => pf.destroy() }) }); }
           const pic = s.add.image(b.x, b.y, { potion_r: 'p_heart', potion_g: 'p_skull', potion_b: 'p_bolt' }[b.k]).setDepth(8.1).setAlpha(0).setScale(0.4).setTint({ potion_r: 0xffb3c1, potion_g: 0xd5f5e3, potion_b: 0xf9e79f }[b.k]);   // billedet midt i sin egen sky
-          s.tweens.add({ targets: pic, x: tx, y: ty, alpha: 0.95, scale: 1.4, duration: 900, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pic, alpha: 0, scale: 1.7, y: pic.y - 30, duration: 1300, delay: 400, onComplete: () => pic.destroy() }) });
+          s.tweens.add({ targets: pic, x: tx, y: ty, alpha: 0.95, scale: 1.4, duration: 900, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pic, alpha: 0, scale: 1.7, y: pic.y - 30, duration: 700, delay: 100, onComplete: () => pic.destroy() }) });
           const sp = s.add.image(b.x, b.y - 20, 'star_s').setDepth(8).setTint(c); s.tweens.add({ targets: sp, y: sp.y - 60, alpha: 0, angle: 180, duration: 800, onComplete: () => sp.destroy() });
           s.spawnPieces(b.x, b.y, 0xd6eaf8, 3, 7, 5); b.destroy(); }));
         s.makeLoose(sh, { type: 'rectangle', width: 116, height: 58 }, 4); obs.gos = []; obs.bodies = []; };
@@ -3115,7 +3121,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.23.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.24.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
@@ -3905,9 +3911,12 @@ class Game extends Phaser.Scene {
       for (let i = 0; i < n; i++) { const pa = world(x0 + i * segW, i % 2 ? amp : -amp), pb = world(x0 + (i + 1) * segW, i % 2 ? -amp : amp); this.armG.beginPath(); this.armG.moveTo(pa.x, pa.y); this.armG.lineTo(pb.x, pb.y); this.armG.strokePath();
         const pc = world(x0 + i * segW, i % 2 ? -amp : amp), pd = world(x0 + (i + 1) * segW, i % 2 ? amp : -amp); this.armG.beginPath(); this.armG.moveTo(pc.x, pc.y); this.armG.lineTo(pd.x, pd.y); this.armG.strokePath(); }
     } else if (h.anim === 'sway') {
-      const ang = moving ? Math.sin(time / 110) * 0.35 : 0;
-      const px = bw / 2 - 2, py = h.pivot.y;
-      lx = px + Math.sin(ang) * h.len * -1 + h.w / 2 - 8; ly = py + Math.cos(ang) * h.len; la = ang;
+      const cb = this.chassis.body, vy = cb.velocity.y, av = cb.angularVelocity;   // hovedet sidder fast for enden af skaftet og giver sig lidt i leddet
+      const dvy = vy - (this.bPrevVy === undefined ? vy : this.bPrevVy), dav = av - (this.bPrevAv === undefined ? av : this.bPrevAv); this.bPrevVy = vy; this.bPrevAv = av;
+      this.bVel = ((this.bVel || 0) - dvy * 0.02 - dav * 0.6 - (this.bAng || 0) * 0.12) * 0.86;
+      this.bAng = Phaser.Math.Clamp((this.bAng || 0) + this.bVel, -0.18, 0.18);
+      const ang = this.bAng + (moving ? Math.sin(time / 90) * 0.03 : 0), jx = bw / 2 - 4, jy = 0;   // leddet ved det røde bånd
+      lx = jx + Math.cos(ang) * 12; ly = jy + Math.sin(ang) * 12; la = ang;
     } else if (h.anim === 'scrub') {
       lx = bw / 2 + h.w / 2 - 16 + (moving ? Math.sin(time / 60) * 7 : 0); ly = 0;   // skaftet bliver altid inde i holderen
     }
