@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.17.0)
+//  Biglers Biler – etape 3  (v0.18.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -726,6 +726,62 @@ function makeTextures(s) {
     if (part === 'arm') limb(14, 16, 46, 16);
     if (part === 'leg') limb(16, 14, 16, 48); };
   cre('gingerbread', 130, 162, () => gb('all')); cre('gb_head', 60, 60, () => gb('head')); cre('gb_body', 64, 72, () => gb('body')); cre('gb_arm', 60, 32, () => gb('arm')); cre('gb_leg', 32, 64, () => gb('leg'));
+  // ---- Ørken, Jungle, Bjerg (v0.18) ----
+  cre('jar', 56, 72, () => { const T = 0xc0602b, TD = 0xa04a1e; g.fillStyle(TD); g.fillRoundedRect(16, 0, 24, 10, 3); g.fillStyle(T); g.fillRect(20, 8, 16, 10); g.fillEllipse(28, 42, 52, 56);
+    g.fillStyle(0x000000, 0.12); g.fillEllipse(38, 44, 20, 46); g.fillStyle(TD); g.fillRect(14, 64, 28, 8); g.fillStyle(0x2c3e50); g.fillRect(6, 34, 44, 5); g.fillStyle(0xf1c40f); g.fillRect(8, 44, 40, 3);
+    g.fillStyle(0x2c3e50); [14, 24, 34, 42].forEach(x => g.fillTriangle(x - 3, 52, x + 3, 52, x, 58)); });
+  cre('sblock', 66, 46, () => { g.fillStyle(0xd9b77a); g.fillRect(0, 0, 66, 46); g.fillStyle(0xc4a065); g.fillRect(0, 38, 66, 8); g.fillRect(58, 0, 8, 46);
+    g.fillStyle(0x8a6d3b); g.fillEllipse(18, 16, 14, 7); g.fillStyle(0xd9b77a); g.fillEllipse(18, 16, 8, 4); g.fillStyle(0x8a6d3b); g.fillCircle(18, 16, 2); g.fillRect(34, 8, 4, 18); g.fillRect(30, 12, 12, 3); g.fillTriangle(46, 26, 52, 10, 56, 26); g.fillRect(12, 26, 22, 3); });
+  const chest = (open) => { const W1 = 0x8d5a2b, W2 = 0x6e4420, GO = 0xf1c40f;
+    g.fillStyle(W1); g.fillRect(4, 30, 92, 40); g.fillStyle(W2); [46, 58].forEach(y => g.fillRect(4, y, 92, 2)); g.fillStyle(GO); g.fillRect(4, 30, 92, 5); g.fillRect(14, 30, 8, 40); g.fillRect(78, 30, 8, 40);
+    if (open) { g.fillStyle(W2); g.fillRect(6, 0, 88, 10); g.fillStyle(W1); g.fillRect(8, 8, 84, 22); g.fillStyle(GO); g.fillRect(14, 4, 8, 26); g.fillRect(78, 4, 8, 26);
+      g.fillStyle(0xf9e04b); [[22, 32], [34, 28], [48, 30], [62, 27], [76, 31], [40, 34], [56, 34]].forEach(([x, y]) => g.fillCircle(x, y, 7)); g.fillStyle(0xe74c3c); g.fillCircle(50, 24, 5); g.fillStyle(0x3498db); g.fillCircle(30, 25, 4); }
+    else { g.fillStyle(W1); g.fillRoundedRect(4, 10, 92, 26, { tl: 16, tr: 16, bl: 0, br: 0 }); g.fillStyle(GO); g.fillRect(14, 12, 8, 24); g.fillRect(78, 12, 8, 24); g.fillRect(4, 30, 92, 5); g.fillRoundedRect(42, 26, 16, 18, 3); g.fillStyle(0x2c3e50); g.fillCircle(50, 33, 3); g.fillRect(49, 33, 2, 6); } };
+  cre('chest', 100, 70, () => chest(false)); cre('chest_open', 100, 70, () => chest(true));
+  cre('coin', 18, 18, () => { g.fillStyle(0xd4ac0d); g.fillCircle(9, 9, 9); g.fillStyle(0xf9e04b); g.fillCircle(9, 9, 6.5); g.fillStyle(0xfff7c2); g.fillCircle(7, 6, 2); });
+  cre('basket', 76, 70, () => { const B1 = 0xd4a056, B2 = 0xa67c45; g.fillStyle(B1); g.fillRoundedRect(6, 6, 64, 64, { tl: 8, tr: 8, bl: 20, br: 20 }); g.fillStyle(B2);
+    for (let y = 14; y < 66; y += 10) g.fillRect(8, y, 60, 3); for (let x = 14; x < 66; x += 12) g.fillRect(x, 8, 3, 58); g.fillStyle(B2); g.fillRoundedRect(2, 2, 72, 10, 4); });
+  cre('basket_lid', 76, 22, () => { g.fillStyle(0xd4a056); g.fillEllipse(38, 14, 74, 16); g.fillStyle(0xa67c45); g.fillRoundedRect(30, 0, 16, 10, 4); g.fillRect(4, 14, 68, 3); });
+  cre('cobra', 64, 120, () => { const G1 = 0x2e8b57, G2 = 0x9acd32;
+    g.fillStyle(G1); g.fillRoundedRect(24, 40, 16, 80, 8); g.fillEllipse(32, 34, 56, 50); g.fillStyle(G2); g.fillEllipse(32, 40, 30, 36); g.fillRoundedRect(28, 56, 8, 64, 4);
+    g.fillStyle(G1); g.fillEllipse(32, 16, 26, 22); g.fillStyle(0xffffff); g.fillCircle(26, 13, 5); g.fillCircle(38, 13, 5); g.fillStyle(0x222222); g.fillCircle(26, 14, 2.4); g.fillCircle(38, 14, 2.4);
+    g.lineStyle(2, 0xe74c3c); g.beginPath(); g.moveTo(32, 26); g.lineTo(32, 32); g.lineTo(29, 36); g.moveTo(32, 32); g.lineTo(35, 36); g.strokePath(); g.fillStyle(0xf5b7b1); g.fillCircle(22, 20, 2.5); g.fillCircle(42, 20, 2.5); });
+  cre('cpalm', 200, 300, () => { g.fillStyle(0x8d5a2b); g.beginPath(); g.moveTo(88, 300); g.lineTo(112, 300); g.lineTo(110, 70); g.lineTo(96, 70); g.closePath(); g.fillPath();
+    g.fillStyle(0x6e4420); for (let y = 90; y < 296; y += 18) g.fillRect(92, y, 22, 4);
+    for (let k = 0; k < 7; k++) { const a = -Math.PI / 2 + (k - 3) * 0.48; g.fillStyle(k % 2 ? 0x27ae60 : 0x1e8449); g.fillEllipse(103 + Math.cos(a) * 52, 60 + Math.sin(a) * 30 + 10, 100, 26); } });
+  cre('coconut', 28, 28, () => { g.fillStyle(0x6e4420); g.fillCircle(14, 14, 13); g.fillStyle(0x8d5a2b); g.fillCircle(10, 10, 5); g.fillStyle(0x3b2410); g.fillCircle(11, 17, 2); g.fillCircle(17, 17, 2); g.fillCircle(14, 21, 2); });
+  cre('bcrate', 96, 76, () => { g.fillStyle(0xf4d03f); [[20, 22], [44, 16], [68, 22], [32, 6], [58, 6]].forEach(([x, y]) => { g.fillEllipse(x, y + 10, 30, 14); g.fillStyle(0xd4ac0d); g.fillEllipse(x + 4, y + 13, 20, 6); g.fillStyle(0xf4d03f); });
+    g.fillStyle(0x5d4037); [8, 32, 56, 80].forEach(x => g.fillRect(x, 6, 3, 12));
+    g.fillStyle(0xc98f4a); g.fillRect(4, 30, 88, 46); g.fillStyle(0x9c6b30); [42, 58].forEach(y => g.fillRect(4, y, 88, 3)); g.fillRect(4, 30, 6, 46); g.fillRect(86, 30, 6, 46); });
+  cre('banana', 36, 16, () => { g.fillStyle(0xf4d03f); g.beginPath(); g.arc(18, -10, 24, 0.55, Math.PI - 0.55, false); g.arc(18, -14, 18, Math.PI - 0.6, 0.6, true); g.closePath(); g.fillPath(); g.fillStyle(0x5d4037); g.fillRect(2, 4, 4, 4); });
+  cre('vine', 30, 280, () => { g.lineStyle(6, 0x1e8449); g.beginPath(); for (let y = 0; y <= 280; y += 10) g.lineTo(15 + Math.sin(y / 22) * 5, y); g.strokePath();
+    g.fillStyle(0x27ae60); for (let y = 20; y < 280; y += 34) { g.fillEllipse(15 + Math.sin(y / 22) * 5 + 9, y, 16, 9); g.fillEllipse(15 + Math.sin((y + 17) / 22) * 5 - 9, y + 17, 16, 9); } g.fillStyle(0x52be80); g.fillEllipse(15, 276, 14, 10); });
+  cre('jbranch', 340, 50, () => { g.fillStyle(0x6e4420); g.fillRoundedRect(0, 14, 340, 22, 11); g.fillStyle(0x5d3a1a); for (let x = 20; x < 340; x += 46) g.fillRect(x, 18, 18, 3);
+    g.fillStyle(0x1e8449); [[30, 12], [120, 8], [210, 12], [300, 8]].forEach(([x, y]) => { g.fillEllipse(x, y + 4, 60, 18); }); g.fillStyle(0x27ae60); [[70, 40], [170, 42], [260, 40]].forEach(([x, y]) => g.fillEllipse(x, y, 40, 14)); });
+  const bigflower = (open) => { g.fillStyle(0x1e8449); g.fillRect(64, 70, 12, 110); g.fillEllipse(44, 140, 56, 22); g.fillEllipse(98, 120, 56, 22);
+    if (open) { g.fillStyle(0xe74c3c); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.fillEllipse(70 + Math.cos(a) * 34, 52 + Math.sin(a) * 34, 40, 40); }
+      g.fillStyle(0xc0392b); g.fillCircle(70, 52, 30); g.fillStyle(0xf1c40f); g.fillCircle(70, 52, 22); g.fillStyle(0xd4ac0d); [[64, 46], [76, 48], [70, 58], [62, 58], [78, 58]].forEach(([x, y]) => g.fillCircle(x, y, 3)); }
+    else { g.fillStyle(0xe74c3c); g.fillEllipse(70, 48, 60, 80); g.fillStyle(0xc0392b); g.fillTriangle(70, 8, 52, 70, 88, 70); g.fillStyle(0x1e8449); g.fillTriangle(48, 80, 70, 60, 92, 80); } };
+  cre('bigflower', 140, 180, () => bigflower(true)); cre('bigflower_shut', 140, 180, () => bigflower(false));
+  cre('perch', 90, 150, () => { g.fillStyle(0x8d5a2b); g.fillRect(40, 20, 10, 130); g.fillRoundedRect(4, 14, 82, 10, 5); g.fillStyle(0x27ae60); g.fillEllipse(12, 12, 20, 10); g.fillEllipse(80, 10, 22, 10); });
+  cre('parrot', 48, 64, () => { g.fillStyle(0x3498db); g.fillTriangle(20, 40, 28, 40, 18, 64); g.fillTriangle(26, 40, 32, 40, 30, 64); g.fillStyle(0xe74c3c); g.fillEllipse(24, 32, 28, 40); g.fillCircle(26, 12, 12);
+    g.fillStyle(0xf1c40f); g.fillEllipse(18, 34, 14, 22); g.fillStyle(0x2ecc71); g.fillEllipse(16, 40, 10, 14); g.fillStyle(0xffffff); g.fillCircle(30, 10, 5); g.fillStyle(0x222222); g.fillCircle(31, 10, 2.4);
+    g.fillStyle(0xf4d03f); g.fillTriangle(36, 10, 46, 14, 36, 20); g.fillStyle(0x7f8c8d); g.fillRect(18, 50, 4, 4); g.fillRect(26, 50, 4, 4); });
+  cre('parrot_fly', 84, 50, () => { g.fillStyle(0xe74c3c); g.fillEllipse(42, 28, 40, 20); g.fillCircle(62, 22, 11); g.fillStyle(0x3498db); g.fillTriangle(22, 28, 2, 22, 4, 36); g.fillStyle(0xf1c40f);
+    g.fillTriangle(34, 24, 18, 0, 48, 22); g.fillStyle(0x2ecc71); g.fillTriangle(40, 24, 30, 2, 50, 22); g.fillStyle(0xffffff); g.fillCircle(65, 19, 4); g.fillStyle(0x222222); g.fillCircle(66, 19, 2); g.fillStyle(0xf4d03f); g.fillTriangle(71, 20, 82, 24, 71, 28); });
+  cre('logend', 48, 48, () => { g.fillStyle(0x6e4420); g.fillCircle(24, 24, 23); g.fillStyle(0xe0b97a); g.fillCircle(24, 24, 19); g.lineStyle(2, 0xb7955f); g.strokeCircle(24, 24, 14); g.strokeCircle(24, 24, 9); g.strokeCircle(24, 24, 4); });
+  cre('logend_l', 24, 48, () => { g.fillStyle(0x6e4420); g.slice(24, 24, 23, Math.PI / 2, Math.PI * 1.5, false); g.fillPath(); g.fillStyle(0xe0b97a); g.slice(24, 24, 19, Math.PI / 2, Math.PI * 1.5, false); g.fillPath(); });
+  cre('logend_r', 24, 48, () => { g.fillStyle(0x6e4420); g.slice(0, 24, 23, -Math.PI / 2, Math.PI / 2, false); g.fillPath(); g.fillStyle(0xe0b97a); g.slice(0, 24, 19, -Math.PI / 2, Math.PI / 2, false); g.fillPath(); });
+  cre('slide_sign', 70, 110, () => { g.fillStyle(0x7f8c8d); g.fillRect(32, 50, 6, 60); g.fillStyle(0xe74c3c); g.fillTriangle(35, 0, 0, 60, 70, 60); g.fillStyle(0xffffff); g.fillTriangle(35, 12, 11, 53, 59, 53);
+    g.fillStyle(0x2c3e50); g.fillCircle(30, 42, 5); g.fillCircle(40, 34, 4); g.fillCircle(42, 46, 6); g.fillTriangle(18, 52, 26, 30, 30, 52); });
+  cre('cstone', 80, 44, () => { g.fillStyle(0x7f8c8d); g.fillEllipse(40, 22, 80, 44); g.fillStyle(0x95a5a6); g.fillEllipse(34, 16, 52, 22); g.fillStyle(0x6c7a7b); g.fillEllipse(56, 30, 18, 8); });
+  cre('rail', 260, 20, () => { g.fillStyle(0x6e4420); for (let x = 8; x < 260; x += 32) g.fillRect(x, 6, 16, 14); g.fillStyle(0x7f8c8d); g.fillRect(0, 2, 260, 6); });
+  const cart = (flat) => { const M = 0x5d6d7e, M2 = 0x34495e, GO = 0xf1c40f;
+    if (flat) { g.fillStyle(M); g.fillRect(4, 44, 104, 18); g.fillStyle(M2); g.fillRect(4, 44, 104, 4); g.fillStyle(GO); [[20, 42], [44, 40], [70, 42], [92, 41]].forEach(([x, y]) => g.fillCircle(x, y, 6)); g.fillStyle(0x222222); g.fillEllipse(24, 64, 26, 10); g.fillEllipse(88, 64, 26, 10); return; }
+    g.fillStyle(GO); [[26, 16], [44, 10], [62, 14], [80, 12], [36, 6], [70, 4], [54, 2]].forEach(([x, y]) => g.fillCircle(x, y + 8, 9)); g.fillStyle(0xf9e04b); g.fillCircle(42, 14, 4); g.fillCircle(68, 12, 4);
+    g.fillStyle(M); g.beginPath(); g.moveTo(0, 20); g.lineTo(112, 20); g.lineTo(102, 58); g.lineTo(10, 58); g.closePath(); g.fillPath(); g.fillStyle(M2); g.fillRect(0, 20, 112, 6); g.fillRect(30, 26, 4, 32); g.fillRect(78, 26, 4, 32);
+    g.fillStyle(0x222222); g.fillCircle(26, 60, 10); g.fillCircle(86, 60, 10); g.fillStyle(0x7f8c8d); g.fillCircle(26, 60, 4); g.fillCircle(86, 60, 4); };
+  cre('minecart', 112, 70, () => cart(false)); cre('minecart_flat', 112, 70, () => cart(true));
   g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, rr = i % 2 ? 5 : 11; g.lineTo(12 + Math.cos(a) * rr, 12 + Math.sin(a) * rr); } g.closePath(); g.fillPath(); g.generateTexture('star_s', 24, 24); g.clear();
   g.fillStyle(0xffffff); g.fillRect(0, 0, 30, 36); g.fillStyle(0xe8eef2); for (let yy = 6; yy < 36; yy += 8) g.fillRect(4, yy, 22, 2); g.generateTexture('tp_sheet', 30, 36); g.clear();
   // strandbold
@@ -1167,6 +1223,161 @@ const OBSTACLES = [
           pc.setVelocity(Phaser.Math.FloatBetween(i % 2 ? 3 : -1, i % 2 ? 9 : 5), Phaser.Math.FloatBetween(-12, -5)); pc.setAngularVelocity(Phaser.Math.FloatBetween(-0.35, 0.35));
           s.tweens.add({ targets: pc, alpha: 0, delay: 3000, duration: 700, onComplete: () => pc.destroy() }); });
         s.spawnPieces(x, y - 80, 0xb9770e, 10, 8, 6); s.spawnPieces(x, y - 80, 0x8d5a2b, 6, 6, 5); s.puffAt(x, y - 80); img.destroy(); obs.gos = []; };
+      return obs; } },
+  // ---------- Ørken (Ægypten) ----------
+  { minD: 0, w: 3, flat: true, biome: 'orken', make(s, x, y) {   // lerkrukker: tre i en stak – den ramte går i skår, de andre vælter
+      const gos = [], bodies = [], obs = { gos, bodies, hardness: 0.05, broken: false, fragile: true, material: 'porcelain' };
+      [[-30, 0], [30, 0], [0, -66]].forEach(([dx, dy]) => { const j = s.obsImage('jar', x + dx, y - 34 + dy, { shape: { type: 'rectangle', width: 46, height: 66 }, isStatic: true }); gos.push(j); bodies.push(j.body); });
+      obs.onHit = (imp, part, body) => { if (obs.broken || imp < 1.5) return; obs.broken = true; SFX.porcelain(); const hit = body && body.gameObject;
+        gos.forEach(j => { if (j === hit || Math.random() < 0.34) { s.spawnPieces(j.x, j.y, 0xc0602b, 7, 12, 6); s.spawnPieces(j.x, j.y, 0xa04a1e, 4, 8, 5); j.destroy(); } else s.makeLoose(j, { type: 'rectangle', width: 46, height: 66 }, 5); });
+        obs.gos = []; obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'orken', make(s, x, y) {   // pyramidesten: tre sandstensblokke – bor og kølle smadrer dem, ellers vælter de
+      const gos = [], bodies = [], obs = { gos, bodies, hardness: 0.5, material: 'stone', done: false };
+      [[-34, 0], [34, 0], [0, -46]].forEach(([dx, dy]) => { const b = s.obsImage('sblock', x + dx, y - 22 + dy, { shape: { type: 'rectangle', width: 66, height: 46 }, isStatic: true }); gos.push(b); bodies.push(b.body); });
+      obs.onHit = (imp, part) => { if (obs.done) return;
+        const smash = part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.breaks.includes('stone') && imp >= 4;
+        if (!smash && imp < 3) return; obs.done = true; obs.hardness = 0;
+        if (smash) { SFX.rockBreak(); gos.forEach(b => { s.spawnPieces(b.x, b.y, 0xd9b77a, 6, 14, 7); s.spawnPieces(b.x, b.y, 0xc4a065, 3, 10, 6); b.destroy(); }); }
+        else { SFX.clunk(); s.cameras.main.shake(100, 0.004); gos.forEach(b => s.makeLoose(b, { type: 'rectangle', width: 66, height: 46 }, 4)); }
+        obs.gos = []; obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'orken', make(s, x, y) {   // skattekiste: låget springer op, og guldmønter sprøjter ud
+      const c = s.obsImage('chest', x, y - 32, { shape: { type: 'rectangle', width: 92, height: 58 }, isStatic: true });
+      const obs = { gos: [c], bodies: [c.body], hardness: 0.1, done: false, fragile: true };
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(c.body); obs.bodies = []; c.setTexture('chest_open'); SFX.clunk(); SFX.smp('enarmet_ding', 0.5);
+        s.tweens.add({ targets: c, scaleY: 1.12, duration: 120, yoyo: true });
+        for (let i = 0; i < 14; i++) { const k = s.matter.add.image(x + Phaser.Math.Between(-30, 30), y - 60, 'coin', null, { shape: { type: 'circle', radius: 8 }, density: 0.0005, restitution: 0.5, friction: 0.4, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
+          k.setVelocity(Phaser.Math.FloatBetween(-4, 8), Phaser.Math.FloatBetween(-14, -6)); k.setAngularVelocity(Phaser.Math.FloatBetween(-0.3, 0.3));
+          s.tweens.add({ targets: k, alpha: 0, delay: 3500 + i * 40, duration: 600, onComplete: () => k.destroy() }); }
+        for (let i = 0; i < 5; i++) s.time.delayedCall(i * 100, () => { const sp = s.add.image(x + Phaser.Math.Between(-40, 40), y - 70 - Math.random() * 40, 'star_s').setDepth(8).setScale(0.7); s.tweens.add({ targets: sp, alpha: 0, scale: 0.2, duration: 500, onComplete: () => sp.destroy() }); }); };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'orken', make(s, x, y) {   // slangekurv: låget hopper af, og kobraen skyder op og svajer
+      const cobra = s.add.image(x, y - 30, 'cobra').setOrigin(0.5, 1).setDepth(5.9).setScale(1, 0.05);
+      const b = s.obsImage('basket', x, y - 34, { shape: { type: 'rectangle', width: 70, height: 66 }, isStatic: true }); b.setDepth(6);
+      const lid = s.add.image(x, y - 70, 'basket_lid').setDepth(6.1);
+      const obs = { gos: [cobra, b, lid], bodies: [b.body], hardness: 0.1, done: false, fragile: true };
+      const watch = s.add.zone(x, y, 1, 1); watch.up = false; s.actors.push(watch);
+      watch.tick = (sc) => { if (watch.up || obs.done || !b.active || sc.chassis.x < x - 460) return; watch.up = true; SFX.boing();
+        sc.tweens.add({ targets: lid, y: lid.y - 70, x: lid.x - 50, angle: -200, duration: 450, ease: 'Quad.out', onComplete: () => sc.tweens.add({ targets: lid, y: sc.groundY(x - 90) - 8, x: x - 90, angle: -360, duration: 350, ease: 'Quad.in' }) });
+        sc.tweens.add({ targets: cobra, scaleY: 1, duration: 450, ease: 'Back.out', onComplete: () => sc.tweens.add({ targets: cobra, angle: { from: -10, to: 10 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' }) });
+        sc.time.delayedCall(200, () => SFX.pff()); };
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; SFX.clunk(); s.tweens.killTweensOf(cobra);
+        s.tweens.add({ targets: cobra, x: cobra.x + 360, y: cobra.y - 160, angle: 540, alpha: 0, duration: 1200, ease: 'Quad.out' });
+        s.makeLoose(b, { type: 'rectangle', width: 70, height: 66 }, 6); obs.gos = [cobra, lid]; obs.bodies = []; };
+      return obs; } },
+  // ---------- Jungle ----------
+  { minD: 0, w: 3, biome: 'jungle', make(s, x, y) {   // kokospalme: vælter, og kokosnødderne falder og triller – saven kan save den
+      const body = s.matter.add.rectangle(x, y - 120, 34, 240, { isStatic: true, label: 'obs' });
+      const img = s.add.image(x, y + 6, 'cpalm').setOrigin(100 / 200, 1).setDepth(6);
+      const nuts = [[-14, -232], [6, -228], [-4, -218]].map(([dx, dy]) => s.add.image(x + dx, y + 6 + dy, 'coconut').setDepth(6.1));
+      const obs = { gos: [img, ...nuts], bodies: [body], hardness: 0.15, material: 'wood', sawable: true, done: false };
+      const fall = (sawn) => { if (obs.done) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.whoosh(); if (sawn) { SFX.wood(); s.spawnPieces(x, y - 20, 0xe8c58f, 10, 5, 4); }
+        nuts.forEach((n, i) => { const c = s.matter.add.image(n.x, n.y, 'coconut', null, { shape: { type: 'circle', radius: 12 }, density: 0.001, restitution: 0.4, friction: 0.5, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
+          c.setVelocity(Phaser.Math.FloatBetween(1, 5), Phaser.Math.FloatBetween(-3, 0)); c.setAngularVelocity(0.2); s.time.delayedCall(300 + i * 150, () => SFX.bonk()); n.destroy();
+          s.tweens.add({ targets: c, alpha: 0, delay: 4500, duration: 600, onComplete: () => c.destroy() }); });
+        s.tweens.add({ targets: img, angle: 82, duration: 850, ease: 'Quad.in', onComplete: () => { SFX.pff(); s.puffAt(x + 220, y - 10); s.cameras.main.shake(100, 0.003); } }); };
+      obs.onHit = (imp, part) => { if (part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.drawSpin) return; if (imp >= 1.5) fall(false); };
+      obs.saw = () => fall(true);
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'jungle', make(s, x, y) {   // bananstabel: kassen splintrer, og bananerne flyver
+      const c = s.obsImage('bcrate', x, y - 38, { shape: { type: 'rectangle', width: 88, height: 70 }, isStatic: true });
+      const obs = { gos: [c], bodies: [c.body], hardness: 0.1, done: false, fragile: true, material: 'wood' };
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; SFX.wood(); s.time.delayedCall(80, () => SFX.pop());
+        s.spawnPieces(c.x, c.y + 10, 0xc98f4a, 6, 16, 6);
+        for (let i = 0; i < 10; i++) { const bn = s.matter.add.image(x + Phaser.Math.Between(-30, 30), y - 70, 'banana', null, { shape: { type: 'rectangle', width: 30, height: 12 }, density: 0.0005, restitution: 0.4, friction: 0.4, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
+          bn.setVelocity(Phaser.Math.FloatBetween(-3, 9), Phaser.Math.FloatBetween(-14, -6)); bn.setAngularVelocity(Phaser.Math.FloatBetween(-0.4, 0.4));
+          s.tweens.add({ targets: bn, alpha: 0, delay: 3500 + i * 50, duration: 600, onComplete: () => bn.destroy() }); }
+        c.destroy(); obs.gos = []; obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, biome: 'jungle', make(s, x, y) {   // lianer: svinger til side, når bilen kører igennem – saven klipper dem over
+      const top = y - 330, br = s.add.image(x, top, 'jbranch').setDepth(6.2), gos = [br], bodies = [];
+      const obs = { gos, bodies, hardness: 0 };
+      [-60, 0, 60].forEach((dx, i) => { const len = 230 + i * 18 + Math.random() * 20;
+        const v = s.add.image(x + dx, top + 10, 'vine').setOrigin(0.5, 0).setDepth(6.1).setCrop(0, 0, 30, len); gos.push(v);
+        s.tweens.add({ targets: v, angle: { from: -2, to: 2 }, duration: 1300 + i * 200, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+        const sb = s.matter.add.rectangle(x + dx, top + 10 + len / 2, 16, len, { isStatic: true, isSensor: true, label: 'obs' }); sb.vine = v; sb.len = len; bodies.push(sb); });
+      obs.onHit = (imp, part, body) => { const v = body && body.vine; if (!v || !v.active) return;
+        if (part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.drawSpin && !v.cut) {   // saven klipper: underdelen falder
+          v.cut = true; SFX.wood(); const keep = Math.max(40, (s.tool ? s.tool.y : y - 60) - (top + 10));
+          s.spawnPieces(v.x, top + 10 + keep, 0x27ae60, 5, 8, 4);
+          const low = s.add.image(v.x, top + 10 + keep, 'vine').setOrigin(0.5, 0).setDepth(6.1).setCrop(0, keep, 30, body.len - keep); low.y -= keep;
+          s.tweens.add({ targets: low, y: low.y + 260, alpha: 0, angle: 20, duration: 900, ease: 'Quad.in', onComplete: () => low.destroy() });
+          v.setCrop(0, 0, 30, keep); s.matter.world.remove(body); obs.bodies = obs.bodies.filter(b => b !== body); return; }
+        if (v.swing) return; v.swing = true; SFX.whoosh(); s.tweens.killTweensOf(v);
+        s.tweens.add({ targets: v, angle: -55, duration: 260, ease: 'Quad.out', onComplete: () => s.tweens.add({ targets: v, angle: 0, duration: 1600, ease: 'Elastic.out', onComplete: () => { v.swing = false; } }) }); };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'jungle', make(s, x, y) {   // stor blomst: klapper sammen om bilen og spytter frø ud
+      const f = s.add.image(x, y + 6, 'bigflower').setOrigin(0.5, 1).setDepth(6);
+      const body = s.matter.add.rectangle(x, y - 90, 70, 170, { isStatic: true, isSensor: true, label: 'obs' });
+      const obs = { gos: [f], bodies: [body], hardness: 0, done: false };
+      obs.onHit = () => { if (obs.done) return; obs.done = true; f.setTexture('bigflower_shut'); SFX.chomp();
+        s.tweens.add({ targets: f, angle: 18, duration: 200, yoyo: true, ease: 'Quad.out' });
+        s.time.delayedCall(700, () => { if (!f.active) return; f.setTexture('bigflower'); SFX.pop(); s.time.delayedCall(120, () => SFX.pop());
+          for (let i = 0; i < 12; i++) { const sd = s.add.image(x, y - 128, 'piece').setTint(i % 2 ? 0x3b2410 : 0xf1c40f).setDisplaySize(8, 8).setDepth(7);
+            s.tweens.add({ targets: sd, x: sd.x + Phaser.Math.Between(-200, 260), y: sd.y - Phaser.Math.Between(60, 200), duration: 450, ease: 'Quad.out',
+              onComplete: () => s.tweens.add({ targets: sd, y: s.groundY(sd.x) - 4, duration: 600, ease: 'Quad.in', onComplete: () => s.tweens.add({ targets: sd, alpha: 0, delay: 1500, duration: 500, onComplete: () => sd.destroy() }) }) }); } }); };
+      return obs; } },
+  { minD: 0, w: 3, biome: 'jungle', make(s, x, y) {   // papegøje på en pind: letter med et skrig, når bilen kommer
+      const pole = s.add.image(x, y + 6, 'perch').setOrigin(0.5, 1).setDepth(5.8), p = s.add.image(x + 6, y + 6 - 132 - 30, 'parrot').setDepth(5.9);
+      s.tweens.add({ targets: p, angle: { from: -4, to: 4 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      const obs = { gos: [pole, p], bodies: [], hardness: 0 };
+      const watch = s.add.zone(x, y, 1, 1); watch.gone = false; s.actors.push(watch);
+      watch.tick = (sc) => { if (watch.gone || !p.active || sc.chassis.x < x - 440) return; watch.gone = true; sc.tweens.killTweensOf(p);
+        SFX.blip(1200, 1800, 0.1, 'square', 0.12); sc.time.delayedCall(140, () => SFX.blip(1400, 2000, 0.09, 'square', 0.1));
+        p.setTexture('parrot_fly').setAngle(-10); sc.spawnPieces(p.x, p.y, 0xe74c3c, 2, 6, 3); sc.spawnPieces(p.x, p.y, 0x2ecc71, 2, 6, 3);
+        sc.tweens.add({ targets: p, scaleY: 0.4, duration: 110, yoyo: true, repeat: 10 });
+        sc.tweens.add({ targets: p, x: p.x + 600, y: p.y - 380, duration: 2200, ease: 'Sine.in', onComplete: () => p.setVisible(false) }); };
+      return obs; } },
+  // ---------- Bjerg ----------
+  { minD: 0, w: 3, flat: true, biome: 'bjerg', make(s, x, y) {   // tømmerstabel: stammerne triller – saven saver dem over
+      const gos = [], bodies = [], obs = { gos, bodies, hardness: 0.3, material: 'wood', sawable: true, done: false };
+      [[-46, 0], [0, 0], [46, 0], [-23, -40], [23, -40], [0, -80]].forEach(([dx, dy]) => { const l = s.obsImage('logend', x + dx, y - 22 + dy, { shape: { type: 'circle', radius: 22 }, isStatic: true }); gos.push(l); bodies.push(l.body); });
+      const roll = () => { if (obs.done) return; obs.done = true; obs.hardness = 0; SFX.wood();
+        gos.forEach(l => { if (!l.active) return; const r = s.matter.add.image(l.x, l.y, 'logend', null, { shape: { type: 'circle', radius: 22 }, density: 0.0012, friction: 0.5, restitution: 0.2, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
+          r.setVelocity(Phaser.Math.FloatBetween(1, 5), Phaser.Math.FloatBetween(-3, 0)); r.setAngularVelocity(0.15); l.destroy();
+          s.tweens.add({ targets: r, alpha: 0, delay: 4000, duration: 600, onComplete: () => r.destroy() }); });
+        obs.gos = []; obs.bodies = []; };
+      obs.onHit = (imp, part) => { if (part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.drawSpin) return; if (imp >= 2) roll(); };
+      obs.saw = (body) => { const l = body.gameObject; if (!l || !l.active) return; SFX.wood(); s.spawnPieces(l.x, l.y, 0xe8c58f, 8, 5, 4);
+        [['logend_l', -12, -3], ['logend_r', 12, 3]].forEach(([k, dx, vx]) => { const h = s.obsImage(k, l.x + dx, l.y, { shape: { type: 'rectangle', width: 22, height: 44 }, density: 0.001, friction: 0.4, label: 'piece', collisionFilter: { group: GRP_PIECE } });
+          h.setVelocity(vx, -3); h.setAngularVelocity(vx * 0.05); s.tweens.add({ targets: h, alpha: 0, delay: 3500, duration: 600, onComplete: () => h.destroy() }); });
+        obs.bodies = obs.bodies.filter(b => b !== body); obs.gos = obs.gos.filter(g2 => g2 !== l); l.destroy(); roll(); };
+      return obs; } },
+  { minD: 0, w: 3, biome: 'bjerg', make(s, x, y) {   // stenskred: et skilt advarer – og så ruller en håndfuld sten ned foran bilen
+      const sign = s.add.image(x - 120, y + 6, 'slide_sign').setOrigin(0.5, 1).setDepth(5.8), gos = [sign], bodies = [];
+      const obs = { gos, bodies, hardness: 0.3, material: 'stone' };
+      const watch = s.add.zone(x, y, 1, 1); watch.go = false; s.actors.push(watch);
+      watch.tick = (sc) => { if (watch.go || sc.chassis.x < x - 700) return; watch.go = true; sc.cameras.main.shake(400, 0.004); SFX.crunch();
+        for (let i = 0; i < 5; i++) sc.time.delayedCall(i * 160, () => { if (!sign.active) return; const r = 16 + Math.random() * 12;
+          const st = sc.obsImage('rock', x + 120 + i * 50, y - 520 - i * 40, { shape: { type: 'circle', radius: r }, density: 0.003, friction: 0.9, frictionAir: 0.01, restitution: 0.25 }, r * 2.2, r * 2.2);
+          st.setVelocity(-3 - Math.random() * 3, 4); st.setAngularVelocity(-0.1); st.obs = obs; st.body.obs = obs; gos.push(st); bodies.push(st.body); obs.bodies = bodies;
+          sc.time.delayedCall(700, () => { if (st.active) { sc.puffAt(st.x, st.y + r); SFX.clunk(); } }); }); };
+      obs.onHit = (imp, part, body) => { const st = body && body.gameObject; if (!st || !st.active || st.texture.key !== 'rock') return;
+        if (!(part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.breaks.includes('stone') && imp >= 4)) return;
+        SFX.rockBreak(); s.spawnPieces(st.x, st.y, 0x6c757d, 6, 12, 6); obs.bodies = obs.bodies.filter(b => b !== body); st.destroy(); };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'bjerg', make(s, x, y) {   // stenvarde: et tårn af stablede sten – bor og kølle smadrer det, ellers vælter det
+      const gos = [], bodies = [], obs = { gos, bodies, hardness: 0.4, material: 'stone', done: false }; let py = y + 2;
+      [[78, 38], [66, 34], [58, 30], [46, 26], [34, 22]].forEach(([w, h], i) => { py -= h / 2; const st = s.obsImage('cstone', x + (i % 2 ? 4 : -4), py, { shape: { type: 'rectangle', width: w * 0.92, height: h * 0.9, chamfer: { radius: h * 0.3 } }, isStatic: true }, w, h); gos.push(st); bodies.push(st.body); py -= h / 2 - 2; });
+      obs.onHit = (imp, part) => { if (obs.done) return;
+        const smash = part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.breaks.includes('stone') && imp >= 4;
+        if (!smash && imp < 2.5) return; obs.done = true; obs.hardness = 0;
+        if (smash) { SFX.rockBreak(); gos.forEach(st => { s.spawnPieces(st.x, st.y, 0x7f8c8d, 4, 12, 7); st.destroy(); }); }
+        else { SFX.clunk(); gos.forEach(st => s.makeLoose(st, { type: 'rectangle', width: st.displayWidth * 0.9, height: st.displayHeight * 0.9, chamfer: { radius: 8 } }, 4)); }
+        obs.gos = []; obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'bjerg', make(s, x, y) {   // minevogn på skinner: ramt fra siden triller den og taber guld – landes ovenpå, bliver den mast flad
+      const rail = s.add.image(x, y + 2, 'rail').setOrigin(0.5, 1).setDepth(5.7);
+      const c = s.obsImage('minecart', x, y - 33, { shape: { type: 'rectangle', width: 104, height: 54 }, isStatic: true });
+      const obs = { gos: [rail, c], bodies: [c.body], hardness: 0.2, material: 'metal', done: false };
+      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; const ch = s.chassis; if (!ch || !ch.body) return;
+        obs.done = true; s.matter.world.remove(c.body); obs.bodies = []; obs.hardness = 0;
+        if (ch.y < c.y - 30 && ch.body.velocity.y > 0.5) {   // bilen kom ovenfra: flad
+          SFX.crunch(); c.setTexture('minecart_flat'); s.spawnPieces(c.x, c.y, 0xf1c40f, 6, 9, 6); s.cameras.main.shake(120, 0.005); return; }
+        SFX.clunk(); const v = Math.max(5, ch.body.velocity.x * 1.2);   // ramt fra siden: den triller væk og taber guldklumper
+        s.spawnPieces(c.x, c.y - 30, 0xf1c40f, 7, 10, 6);
+        s.tweens.add({ targets: c, x: c.x + v * 70, duration: 1800, ease: 'Quad.out', onUpdate: () => { c.y = s.groundY(c.x) - 33; c.setRotation(s.slopeAt(c.x)); } }); };
       return obs; } },
   { minD: 0, w: 2, biomes: ['jungle'], make(s, x, y) {        // kæmpe strandbold
       const b = s.obsImage('ball', x, y - 45, { shape: { type: 'circle', radius: 44 }, density: 0.0003, friction: 0.2, restitution: 0.9 });
@@ -1997,7 +2208,6 @@ function makeBiomeTextures(g) {
   dec('deadbush', 70, 50, () => { g.lineStyle(4, 0x3d2b1f); [[35, 50, 10, 14], [35, 50, 22, 6], [35, 50, 40, 2], [35, 50, 56, 10], [35, 50, 64, 26], [22, 30, 8, 28], [50, 28, 60, 20]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.strokePath(); }); });
   // Jul: juletræ med lys i baggrunden og små gaver langs vejen
   mid('mid_xtree', 110, 230, () => { Q(g, 48, 196, 14, 34, 0x5d4037); g.fillStyle(0x2e7d5b); g.fillTriangle(55, 10, 14, 90, 96, 90); g.fillTriangle(55, 50, 6, 140, 104, 140); g.fillTriangle(55, 100, 0, 200, 110, 200);
-    g.fillStyle(0xffffff); g.fillTriangle(55, 10, 36, 48, 74, 48); g.fillTriangle(55, 50, 30, 98, 80, 98);
     const cols = [0xe74c3c, 0xf1c40f, 0x3498db, 0x2ecc71, 0xff79c6]; [[40, 80], [70, 74], [30, 128], [58, 120], [84, 132], [22, 186], [50, 176], [78, 182], [96, 190]].forEach(([x, y], i) => C(g, x, y, 5, cols[i % 5]));
     g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, r = i % 2 ? 6 : 14; g.lineTo(55 + Math.cos(a) * r, 12 + Math.sin(a) * r); } g.closePath(); g.fillPath(); });
   dec('gift_s', 44, 40, () => { Q(g, 4, 14, 36, 26, 0xe74c3c); Q(g, 19, 10, 6, 30, 0xf1c40f); Q(g, 4, 20, 36, 5, 0xf1c40f); g.fillStyle(0xf1c40f); g.fillEllipse(15, 9, 14, 8); g.fillEllipse(29, 9, 14, 8); });
@@ -2486,7 +2696,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.17.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.18.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
