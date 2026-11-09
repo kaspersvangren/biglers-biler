@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.14.1)
+//  Biglers Biler – etape 3  (v0.14.2)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -1868,8 +1868,11 @@ class Build extends Phaser.Scene {
   }
 
   pull() {
-    if (this.spinning || this.ready || this.busy || this.step >= STEPS.length) return;
-    this.spinning = true;
+    if (this.spinning || this.busy || this.step >= STEPS.length) return;
+    if (this.ready) {   // man må gerne trække igen og få fem nye dele, så længe man ikke har valgt
+      this.ready = false; this.windows.forEach(x => { this.tweens.killTweensOf(x.glow); x.glow.setVisible(false).setAlpha(1); });
+    }
+    this.spinning = true; this.hintText.setText('');
     SFX.init();
     this.tweens.add({ targets: this.arm, angle: 125, duration: 220, yoyo: true, hold: 200, ease: 'Quad.out' });
     const kind = STEPS[this.step].kind, list = PARTS[kind];
@@ -1893,7 +1896,7 @@ class Build extends Phaser.Scene {
           if (!SFX.smp('enarmet_ding', 0.8)) SFX.stop(); w.part = picks[i];   // ding, når vinduet stopper
           if (left === 1 && spin) spin.stop();
           this.tweens.add({ targets: w.strip, y: w.y, duration: 220, ease: 'Bounce.easeOut' });
-          if (--left === 0) { this.spinning = false; this.ready = true; this.hintText.setText('Tryk på den, du vil have!'); this.windows.forEach(x => { x.glow.setVisible(true); this.tweens.add({ targets: x.glow, alpha: 0.3, duration: 400, yoyo: true, repeat: -1 }); }); }
+          if (--left === 0) { this.spinning = false; this.ready = true; this.hintText.setText('Tryk på den, du vil have – eller træk igen!'); this.windows.forEach(x => { x.glow.setVisible(true); this.tweens.add({ targets: x.glow, alpha: 0.3, duration: 400, yoyo: true, repeat: -1 }); }); }
         } });
     });
   }
@@ -2046,7 +2049,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.14.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.14.2', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => startDemo(this)); } });
