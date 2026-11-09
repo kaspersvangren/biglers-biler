@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.13.1)
+//  Biglers Biler – etape 3  (v0.14.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -224,7 +224,7 @@ SFX.smp = function (k, vol, rate) {   // spil en optaget lyd; false hvis den ikk
 // ---------- Kaspers egne lyde og musik (filer i mappen lyd/, ved siden af spillet) ----------
 // korte lyde hentes ved første tryk; motoren hentes, når bilen er bygget; musikken hentes ét nummer ad gangen
 const LYD_KORT = ['pop1', 'pop2', 'pop3', 'pop4', 'strandbold', 'dyr_ko', 'dyr_pingvin', 'dyr_kamel', 'dyr_abe', 'dyr_ged', 'dyr_astronaut',
-  'm_chassis', 'm_hjul', 'm_motor', 'm_vaerktoej_B', 'enarmet_spin', 'enarmet_ding', 'tada', 'bonk', 'f_lander', 'f_bump', 'bounce_B', 'krak_bil', 'krak_ufo', 'hop', 'ufo_straale'];
+  'm_chassis', 'm_hjul', 'm_motor', 'm_vaerktoej_B', 'enarmet_spin', 'enarmet_ding', 'tada', 'bonk', 'f_lander', 'f_bump', 'bounce_B', 'krak_bil', 'krak_ufo', 'hop', 'ufo_straale', 'saw_loop', 'dyr_hest'];
 const LYD_MONTERING = { chassis: 'm_chassis', wheels: 'm_hjul', motors: 'm_motor', tools: 'm_vaerktoej_B' };   // lyden, når delen lander på bilen i værkstedet
 const LYD_SIG = { moo: 'dyr_ko', squawk: 'dyr_pingvin', grunt: 'dyr_kamel', ooh: 'dyr_abe', baa: 'dyr_ged', whee: 'dyr_astronaut' };
 const LYD_MOTOR = { standard: 'motor_standard', v8: 'motor_v8', electric: 'motor_electric', hamster: 'motor_hamster', rubber: 'motor_rubber', jet: 'motor_jet', rocket: 'motor_rocket' };
@@ -243,7 +243,7 @@ SFX.hent = function (k, decode = true) {
   const init1 = SFX.init; SFX.init = function () { const first = !this.ctx; init1.call(this); if (first && this.ctx) { LYD_KORT.forEach(k => this.hent(k)); if (this.wantMusic) this.music(this.wantMusic); if (this.wantMotor) this.hentMotor(this.wantMotor); } };
   const pop1 = SFX.pop; SFX.pop = function () { if (this.smp('pop' + (1 + Math.floor(Math.random() * 4)), 0.8)) return; pop1.call(this); };   // fire forskellige ballon-pop
   const pfft1 = SFX.pfft; SFX.pfft = function () { if (this.smp('strandbold', 0.8, 1.3)) return; pfft1.call(this); };   // 30 % lysere end optagelsen   // strandbolden punkterer
-  const say1 = SFX.say; SFX.say = function (k) { const f = LYD_SIG[k]; if (f && this.smp(f, 0.8)) return; say1.call(this, k); };
+  const say1 = SFX.say; SFX.say = function (k) { if (k === 'chime') this.smp('dyr_hest', 0.8); const f = LYD_SIG[k]; if (f && this.smp(f, 0.8)) return; say1.call(this, k); };   // enhjørningen vrinsker oven i klokkerne
   // Kaspers effekter oven på de gamle (de gamle bruges kun, hvis filen ikke kan hentes)
   [['tada', 'tada', 0.8], ['bonk', 'bonk', 0.8], ['clunk', 'f_lander', 0.8], ['pff', 'f_bump', 0.9], ['bounce', 'bounce_B', 0.8], ['crash', 'krak_bil', 0.85], ['jump', 'hop', 0.8]].forEach(([fn, k, v]) => {
     const o = SFX[fn]; SFX[fn] = function (...a) { if (this.smp(k, v)) return; return o.apply(this, a); };
@@ -421,6 +421,15 @@ function makeTextures(s) {
   g.generateTexture('snow', 76, 76); g.clear();
   g.fillStyle(0x222222); g.fillRect(0, 16, 56, 8); g.fillRect(12, 0, 32, 18); g.fillStyle(0xe74c3c); g.fillRect(12, 12, 32, 4);
   g.generateTexture('hat', 56, 24); g.clear();
+  // fluesvamp: hat (130 x 70) og stok (40 x 76)
+  g.fillStyle(0xf5e6c8); g.fillEllipse(65, 52, 120, 26);   // undersiden
+  g.fillStyle(0xe74c3c); g.beginPath(); g.slice(65, 52, 62, Math.PI, 0, false); g.fillPath();   // rød hat
+  g.fillStyle(0xc0392b); g.fillEllipse(65, 52, 124, 10);
+  g.fillStyle(0xffffff); [[40, 30, 9], [70, 18, 8], [96, 34, 7], [55, 44, 5], [88, 48, 5], [22, 44, 5]].forEach(([cx, cy, r]) => g.fillCircle(cx, cy, r));
+  g.lineStyle(3, 0x2c3e50); g.beginPath(); g.arc(65, 52, 62, Math.PI, 0, false); g.strokePath();
+  g.generateTexture('mush_cap', 130, 70); g.clear();
+  g.fillStyle(0xfdf2e9); g.fillRoundedRect(6, 0, 28, 76, 10); g.fillStyle(0xe8d5b7); g.fillRoundedRect(22, 4, 8, 68, 4); g.lineStyle(3, 0x2c3e50); g.strokeRoundedRect(6, 0, 28, 76, 10);
+  g.generateTexture('mush_stem', 40, 76); g.clear();
   // parkeret bil
   g.fillStyle(0x27ae60); g.fillRoundedRect(0, 30, 190, 44, 10); g.fillRoundedRect(40, 0, 104, 40, { tl: 20, tr: 20, bl: 0, br: 0 });
   g.fillStyle(0x1e8449); g.fillRoundedRect(0, 60, 190, 14, { tl: 0, tr: 0, bl: 10, br: 10 });
@@ -554,6 +563,15 @@ function bakeTex(scene, key, x0, y0, w, h, draw, grad) {
   if (grad) { const ctx = t.getContext(); ctx.save(); ctx.translate(-x0, -y0); grad(ctx); ctx.restore(); }
   const g = scene.make.graphics({ add: false }); g.translateCanvas(-x0, -y0); if (draw) draw(g); g.generateTexture(key, w, h); g.destroy();
   return key;
+}
+// konfetti over hele skærmen (bilen er færdig, ny rekord)
+function confetti(scene) {
+  if (!scene.textures.exists('confetto')) { const g = scene.make.graphics({ add: false }); g.fillStyle(0xffffff); g.fillRect(0, 0, 10, 16); g.generateTexture('confetto', 10, 16); g.destroy(); }
+  const em = scene.add.particles(0, 0, 'confetto', {
+    x: { min: 0, max: W }, y: -20, lifespan: 4200, speedY: { min: 180, max: 380 }, speedX: { min: -90, max: 90 }, gravityY: 60,
+    rotate: { start: 0, end: 720 }, scaleX: { start: 1, end: 0.2, ease: 'Sine.inOut', yoyo: true }, quantity: 4, frequency: 30,
+    tint: [0xe74c3c, 0xf1c40f, 0x2ecc71, 0x3498db, 0x9b59b6, 0xe67e22, 0xff79c6] }).setScrollFactor(0).setDepth(80);
+  scene.time.delayedCall(1300, () => em.stop()); scene.time.delayedCall(6000, () => em.destroy());
 }
 function bake(scene, key, x0, y0, w, h, draw, grad) { return scene.add.image(x0, y0, bakeTex(scene, key, x0, y0, w, h, draw, grad)).setOrigin(0); }
 // lodret farveovergang direkte på lærredet (Phasers egne overgange findes kun i WebGL-tegningen)
@@ -759,6 +777,15 @@ const OBSTACLES = [
       s.actors.push(cow);
       return null; } },
   { minD: 0, w: 3, biome: 'fantasy', make(s, x, y) { return surpriseObstacle(s, x, y, 'troll', 150, 160); } },   // trold
+  { minD: 0, w: 4, biome: 'fantasy', flat: true, make(s, x, y) {   // kæmpe fluesvamp: smadres let – hatten flyver, stokken knækker, sporer glimter
+      const stem = s.obsImage('mush_stem', x, y - 36, { shape: { type: 'rectangle', width: 34, height: 72 }, isStatic: true });
+      const cap = s.obsImage('mush_cap', x, y - 72 - 26, { shape: { type: 'rectangle', width: 124, height: 48 }, isStatic: true }); cap.setDepth(6.5);
+      const obs = { gos: [stem, cap], bodies: [stem.body, cap.body], hardness: 0.05, broken: false, fragile: true };
+      obs.onHit = (imp) => { if (obs.broken || imp < 1.5) return; obs.broken = true; SFX.splat();
+        s.spawnPieces(x, y - 100, 0xfff3b0, 8, 6, 7); s.spawnPieces(x, y - 100, 0xe74c3c, 4, 8, 6);
+        s.makeLoose(cap, { type: 'rectangle', width: 124, height: 48 }, 9); s.makeLoose(stem, { type: 'rectangle', width: 34, height: 72 }, 4);
+        obs.gos = []; obs.bodies = []; };
+      return obs; } },
   { minD: 0, w: 3, biome: 'orken', make(s, x, y) { return surpriseObstacle(s, x, y, 'mummy', 130, 160); } },     // mumie
   { minD: 0, w: 2, make(s, x, y) {        // kæmpe strandbold
       const b = s.obsImage('ball', x, y - 45, { shape: { type: 'circle', radius: 44 }, density: 0.0003, friction: 0.2, restitution: 0.9 });
@@ -1010,7 +1037,7 @@ PARTS.chassis = [
       Q(g, 4, 62, 146, 3, 0xdfe6ea);                                                // let skygge
       [[22, 96], [128, 96]].forEach(([x, y]) => { RO(g, x - 6, y - 2, 12, 8, 3, GLD, O, 2); });   // løvefødder
     } },
-  { id: 'bus', name: 'Skolebus', roof: [168, 45], full: true, rearY: 108, w: 240, h: 50, topH: 100, topW: 250, topOx: 5, density: 0.0040, back: -58, front: 102, motorX: 199, motorY: 77, motorScale: 0.46, scale: 1.3,
+  { id: 'bus', name: 'Skolebus', roof: [96, 52], full: true, rearY: 108, w: 240, h: 50, topH: 100, topW: 250, topOx: 5, density: 0.0040, back: -58, front: 102, motorX: 199, motorY: 77, motorScale: 0.46, scale: 1.3,
     lights: [{ x: 10, y: 48, c: 0xe74c3c }, { x: 174, y: 48, c: 0xf39c12 }],
     body(g) {},
     top(g) { const O = 0x3b2a2a, Y = 0xf7c21b, YD = 0xe0a800, GL = 0xa6e4ff;   // 250 x 150 – samme proportioner som referencen, men kortere (5 vinduer)
@@ -1025,7 +1052,7 @@ PARTS.chassis = [
       C(g, 234, 124, 6, O); C(g, 234, 124, 4, 0xfff3b0); RO(g, 2, 112, 8, 6, 1, 0xe74c3c, O, 1.5);   // forlygte, baglygte
       Q(g, 189, 66, 2, 28, O); RO(g, 186, 63, 7, 10, 2, 0x6f6f6f, O, 2);   // sidespejl
       RO(g, 4, 46, 12, 8, 2, 0xe74c3c, O, 2); RO(g, 168, 46, 12, 8, 2, 0xf39c12, O, 2); } },   // blink på taget
-  { id: 'police', name: 'Politibil', roof: [106, 23], full: true, rearY: 80, w: 180, h: 46, topH: 60, topW: 200, topOx: 10, density: 0.003, back: -38, front: 69, motorX: 152, motorY: 38, motorScale: 0.44, scale: 1.3,
+  { id: 'police', name: 'Politibil', roof: [60, 24], full: true, rearY: 80, w: 180, h: 46, topH: 60, topW: 200, topOx: 10, density: 0.003, back: -38, front: 69, motorX: 152, motorY: 38, motorScale: 0.44, scale: 1.3,
     lights: [{ x: 80, y: 21, c: 0xe74c3c }, { x: 90, y: 21, c: 0x3498db }],
     body(g) {},
     top(g) { const O = 0x2b2b3a, D = 0x4a4a66, GL = 0xa6e4ff;   // 200 x 106 – målt af på referencen (627 px lang -> 200)
@@ -1037,7 +1064,7 @@ PARTS.chassis = [
       Q(g, 142, 58, 44, 5, 0x3a3a52);   // skygge på hjelmen
       RO(g, 191, 64, 8, 9, 2, GL, O, 2); RO(g, 3, 62, 7, 9, 2, 0xe74c3c, O, 2);   // for- og baglygte
       Q(g, 0, 94, 200, 6, 0x8e8e9e); Q(g, 0, 98, 200, 3, O); } },   // kofanger / kant i bunden
-  { id: 'ambulance', name: 'Ambulance', roof: [136, 51], full: true, rearY: 112, w: 223, h: 50, topH: 100, topW: 223, topOx: 0, density: 0.0034, back: -74, front: 57, motorX: 183, motorY: 86, motorScale: 0.42, scale: 1.3,
+  { id: 'ambulance', name: 'Ambulance', roof: [70, 60], full: true, rearY: 112, w: 223, h: 50, topH: 100, topW: 223, topOx: 0, density: 0.0034, back: -74, front: 57, motorX: 183, motorY: 86, motorScale: 0.42, scale: 1.3,
     lights: [{ x: 135, y: 59, c: 0xe74c3c }],
     body(g) {},
     top(g) {   // målt af på referencen (spejlet, så den kører mod højre)
@@ -1160,13 +1187,15 @@ PARTS.wheels = [
       Q(g, c - 18, c + 5, 36, 5, 0xbdc3c7); [c - 9, c + 9].forEach(x => { C(g, x, c + 16, 7, 0xff8c00); C(g, x, c + 16, 2.5, 0xffffff); }); } },
   { id: 'cheese', name: 'Ostehjul', r: 34, density: 0.003, grip: 0.9,
     draw(g, r) { const c = r + 2; C(g, c, c, r, 0xf4d03f); C(g, c - 10, c - 8, 6, 0xd4ac0d); C(g, c + 12, c + 4, 5, 0xd4ac0d); C(g, c - 4, c + 14, 4, 0xd4ac0d); C(g, c + 8, c - 14, 3, 0xd4ac0d); } },
-  { id: 'square', name: 'Firkantede hjul', r: 30, density: 0.004, grip: 1.0, shape: 'square',
+  { id: 'square', name: 'Firkantede hjul', r: 36, density: 0.004, grip: 1.0, shape: 'square',
     draw(g, r) { const c = r + 2, s = r * 0.9; R(g, c - s, c - s, s * 2, s * 2, 6, 0x222222); R(g, c - s * 0.6, c - s * 0.6, s * 1.2, s * 1.2, 4, 0x95a5a6); C(g, c, c, 5, 0xe67e22); } },
   { id: 'triangle', sharp: true, name: 'Trekanter', r: 34, density: 0.004, grip: 1.0, shape: 'triangle',
-    draw(g, r) { const c = r + 2, R3 = r * 1.4; g.fillStyle(0x222222); g.beginPath(); for (let i = 0; i < 3; i++) { const a = i * Math.PI * 2 / 3 - Math.PI / 2; i ? g.lineTo(c + Math.cos(a) * R3, c + Math.sin(a) * R3) : g.moveTo(c + Math.cos(a) * R3, c + Math.sin(a) * R3); } g.closePath(); g.fillPath();
-      g.fillStyle(0x3498db); g.beginPath(); for (let i = 0; i < 3; i++) { const a = i * Math.PI * 2 / 3 - Math.PI / 2; i ? g.lineTo(c + Math.cos(a) * R3 * 0.55, c + Math.sin(a) * R3 * 0.55) : g.moveTo(c + Math.cos(a) * R3 * 0.55, c + Math.sin(a) * R3 * 0.55); } g.closePath(); g.fillPath(); C(g, c, c, 4, 0xffffff); } },
-  { id: 'star', sharp: true, name: 'Stjerner', r: 32, density: 0.003, grip: 1.0, shape: 'star',
-    draw(g, r) { const c = r + 2; g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, rr = i % 2 ? r * 0.5 : r; i ? g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr) : g.moveTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); } g.closePath(); g.fillPath(); C(g, c, c, 6, 0xf39c12); } },
+    draw(g, r) {   // hjørnerne samme sted som fysikkens trekant (60°, 180°, 300°), så den ruller på de tegnede kanter
+      const c = r + 2, R3 = r * 1.4; g.fillStyle(0x222222); g.beginPath(); for (let i = 0; i < 3; i++) { const a = i * Math.PI * 2 / 3 + Math.PI / 3; i ? g.lineTo(c + Math.cos(a) * R3, c + Math.sin(a) * R3) : g.moveTo(c + Math.cos(a) * R3, c + Math.sin(a) * R3); } g.closePath(); g.fillPath();
+      g.fillStyle(0x3498db); g.beginPath(); for (let i = 0; i < 3; i++) { const a = i * Math.PI * 2 / 3 + Math.PI / 3; i ? g.lineTo(c + Math.cos(a) * R3 * 0.55, c + Math.sin(a) * R3 * 0.55) : g.moveTo(c + Math.cos(a) * R3 * 0.55, c + Math.sin(a) * R3 * 0.55); } g.closePath(); g.fillPath(); C(g, c, c, 4, 0xffffff); } },
+  { id: 'star', sharp: true, name: 'Stjerner', r: 38, density: 0.003, grip: 1.0, shape: 'star',
+    draw(g, r) {   // takkerne samme sted som fysikkens femkant
+      const c = r + 2; g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 + Math.PI / 5, rr = i % 2 ? r * 0.5 : r; i ? g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr) : g.moveTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); } g.closePath(); g.fillPath(); C(g, c, c, 6, 0xf39c12); } },
   { id: 'egg', name: 'Æg', r: 30, density: 0.003, grip: 0.9, shape: 'egg',
     draw(g, r) { const c = r + 2; g.fillStyle(0xfdf2e9); g.fillEllipse(c, c, r * 1.7, r * 2.1); C(g, c - 8, c - 10, 5, 0xffffff); C(g, c + 6, c + 4, 3, 0xf5cba7); C(g, c - 4, c + 12, 2, 0xf5cba7); } },
   { id: 'pogo', name: 'Fjedre', r: 26, density: 0.003, grip: 1.0, spring: true,
@@ -1325,6 +1354,11 @@ PARTS.tools = [
 
 // det der er bygget nu (eller en standardbil, hvis man springer direkte ind)
 const BUILD = { chassis: PARTS.chassis[1], wheels: PARTS.wheels[1], motor: PARTS.motors[1], tool: null };
+let TRYCAR = null;   // bilen fra forsidens "Prøv mig!", som værkstedet skal bygge
+let DEMO = false;    // den hemmelige prøvebane
+let BUILT = false;   // er der bygget en bil i denne omgang?
+const DEMO_ORDER = ['eng', 'sne', 'orken', 'jungle', 'by', 'nat', 'bjerg', 'maane', 'fantasy'];
+function startDemo(scene) { DEMO = true; if (!BUILT) { BUILD.chassis = PARTS.chassis.find(c => c.id === 'racer') || PARTS.chassis[0]; BUILD.wheels = PARTS.wheels[0]; BUILD.motor = PARTS.motors[0]; BUILD.tool = null; } scene.scene.start('Game'); }
 
 function partTextureKey(kind, part) { return 'p_' + kind + '_' + part.id; }
 // overdelens midte i forhold til undervognens midte (uskaleret). 'full'-biler tegner hele bilen i overdelen, som så dækker undervognen
@@ -1370,7 +1404,7 @@ function addBlinks(scene, container, ch, topX, topY, sc) {   // lægger blinkend
 // (hjulenes radius er i spil-pixels, bilen er tegnet uskaleret, så alt deles med bilens skala)
 function wheelGeom(ch, wh) {
   const sc = ch.scale || 1, hs = ch.h * sc, r = wh.r;
-  const oy = (wh.upright ? hs / 2 + r - 5 : Math.max(hs / 2 - 2, hs / 2 - r + 14)) / sc;   // skøjterne går lidt op under bunden, så de tydeligt sidder fast
+  const oy = (wh.upright ? hs / 2 + r - 5 : Math.max(hs / 2 - 2, hs / 2 - r + 14)) / sc - (wh.upright ? ch.visGap || 0 : 0);   // skøjterne går lidt op under den TEGNEDE bund, så de tydeligt sidder fast
   const cy = -r / sc - oy - (wh.spring ? 50 : 0);
   const xs = r >= 60 ? [-giantHalf(ch, r) / sc, giantHalf(ch, r) / sc] : [ch.back, ch.front];
   return { oy, cy, xs };
@@ -1397,12 +1431,12 @@ function assembleCar(scene, p, ch, wh, mo, to) {
     if (wh.spring) p.add(springImg(scene, ch, ox, cy, cy + oy + 50 + dy));
     const w = scene.add.image(ox, cy + oy + (wh.spring ? 50 : 0) + dy, 'p_wheels_' + wh.id + (wh.belt ? '_one' : '')).setScale(k / sc0); p.add(w); wheels.push(w);
   });
-  if (ch.susp) {   // tegnes bagest, så karrosseri og hjul ligger ovenpå
+  if (suspFor(ch, wh)) {   // tegnes bagest, så karrosseri og hjul ligger ovenpå
     const sg = scene.add.graphics(), TW = ch.topW || ch.w, TH = ch.topH + (ch.full ? ch.h : 0), tx = ch.topOx || 0, ty = cy + topRel(ch);
     drawSusp(sg, ch, (x, y) => [tx + x - TW / 2, ty + y - TH / 2], wheels.map(w => [w.x, w.y]), 1); p.addAt(sg, 0);
   }
   const ms = ch.motorScale || 1;
-  if (mo.rear) { const rp = rearMotorPos(ch, mo); p.addAt(scene.add.image(rp.x, cy + rp.y, 'rm_' + mo.id).setScale(rmS(mo)), 0); }
+  if (mo.rear) { const rp = rearMotorPos(ch, mo), im = scene.add.image(rp.x, cy + rp.y, 'rm_' + mo.id).setScale(rmS(mo)); if (wh && wh.r >= 60) p.add(im); else p.addAt(im, 0); }   // kæmpehjul ville dække motoren – så ligger den foran
   else { const mp = motorPlace(ch, mo); p.add(scene.add.image(-ch.w / 2 + mp.x + 31 * mp.s, cy - ch.h / 2 - ch.topH + mp.y + 11 * mp.s, 'p_motors_' + mo.id).setScale(mp.s)); }
   if (to) {
     const mount = toolMount(ch, wh);
@@ -1559,6 +1593,7 @@ const RM_SCALE = 0.85;   // standardstørrelse i forhold til tegningen (uskalere
 function rmS(mo) { return (mo && mo.rmScale) || RM_SCALE; }
 // monstertruckens affjedring: ramme og støddæmpere tegnes løbende fra bilen ind til hvert hjuls midte, så de passer til alle hjul og fjedrer med
 // map(x, y) omregner et punkt i bilens tegning til målets koordinater; wheels = [baghjul, forhjul] i samme koordinater; k = stregtykkelsens skala
+function suspFor(ch, wh) { return ch && ch.susp && !(wh && (wh.spring || wh.upright)); }   // monstertruckens støddæmpere – ikke når hjulene selv har fjedre eller er skøjter
 function drawSusp(g, ch, map, wheels, k) {
   const sp = ch.susp, O = 0x3b2a2a; if (!sp || wheels.length < 2) return;
   const bar = (a, b, w, c) => { g.lineStyle((w + 3) * k, O); g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.strokePath(); g.lineStyle(w * k, c); g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.strokePath(); };
@@ -1627,6 +1662,10 @@ function makePartTextures(s) {
   PARTS.motors.forEach(p => { p.draw(g, 2, 24); g.generateTexture('p_motors_' + p.id, 66, 70); g.clear(); if (p.rear) { p.draw(g, 1, 0); g.generateTexture('rm_' + p.id, 68, 42); g.clear(); } });
   PARTS.tools.forEach(p => { p.draw(g); g.generateTexture('p_tools_' + p.id, p.w, p.h); g.clear(); if (p.drawSpin) { p.drawSpin(g); g.generateTexture('p_tools_' + p.id + '_spin', p.h, p.h); g.clear(); } });
   g.destroy();
+  // hvor meget højere den tegnede bund sidder end bilens usynlige kasse (bruges til skøjterne)
+  PARTS.chassis.forEach(ch => { const k = 'p_chassis_' + ch.id;
+    const bt = [ch.back, ch.front].map(ox => carBottom(s, [{ key: k + '_body', cx: 0, cy: 0, sc: 1 }, { key: k + '_top', cx: ch.topOx || 0, cy: topRel(ch), sc: 1 }], ox)).filter(v => v !== null);
+    ch.visGap = bt.length ? Math.max(0, ch.h / 2 - Math.max(...bt) - 1) : 0; });
 }
 // laver teksturerne til den byggede bil (overdel inkl. motor)
 function makeVehicleTextures(s) {
@@ -1666,7 +1705,7 @@ function vehicleFromBuild() {
   const mass = chMass + 2 * Math.PI * wr * wr * wd + (to ? to.w * to.h * 0.002 : 0);
   return {
     chassis: { w, h, density: ch.density, topH: (ch.topH + 24) * sc, scale: sc, topOx: (ch.topOx || 0) * sc, toolOffset: (ch.toolOffset || 0) * sc, dangle: ch.dangle ? { ox: ch.dangle.ox * sc, oy: ch.dangle.oy * sc, w: ch.dangle.w, h: ch.dangle.h, prop: ch.dangle.prop ? { ox: ch.dangle.prop.ox * sc, oy: ch.dangle.prop.oy * sc } : null } : null },
-    wheel: { r: wr, back: wh.r >= 60 ? -giantHalf(ch, wh.r) : ch.back * sc, front: wh.r >= 60 ? giantHalf(ch, wh.r) : ch.front * sc, oy: wh.upright ? h / 2 + wh.r - 5 : Math.max(h / 2 - 2, h / 2 - wh.r + 14), density: wd, grip: wh.grip, shape: wh.shape || 'circle' },   // kæmpehjul sidder under bilens ender
+    wheel: { r: wr, back: wh.r >= 60 ? -giantHalf(ch, wh.r) : ch.back * sc, front: wh.r >= 60 ? giantHalf(ch, wh.r) : ch.front * sc, oy: wh.upright ? h / 2 + wh.r - 5 - (ch.visGap || 0) * sc : Math.max(h / 2 - 2, h / 2 - wh.r + 14), density: wd, grip: wh.grip, shape: wh.shape || 'circle' },   // kæmpehjul sidder under bilens ender
     motor: { power: mo.power * Math.pow(30 / wr, 0.8), pitch: mo.pitch, thrust: mo.thrust || 0, frames: mo.rear ? 0 : (mo.frames || 0), accel: Phaser.Math.Clamp(0.15 * (mo.power / 0.33) / (mass / 45), 0.04, 0.4) },
     tool: to,
     smoke: mo.rear ? { ox: (rearMotorPos(ch, mo).x - 32 * rmS(mo)) * sc, oy: rearMotorPos(ch, mo).y * sc } : { ox: (motorPlace(ch, mo).x + (mo.smokeAt ? mo.smokeAt.x : 10) * motorPlace(ch, mo).s - ch.w / 2) * sc, oy: (-(ch.h / 2 + ch.topH) + motorPlace(ch, mo).y + (mo.smokeAt ? mo.smokeAt.y : -10) * motorPlace(ch, mo).s) * sc },   // udstødningens plads = motorens
@@ -1716,21 +1755,22 @@ class Build extends Phaser.Scene {
     this.titleText = O(this.add.text(780, 194, '', { fontFamily: FONT, fontSize: '38px', color: '#fff', stroke: '#2c3e50', strokeThickness: 7 }).setOrigin(0.5));
     this.hintText = O(this.add.text(780, 435, '', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(0.5));
 
-    // tre vinduer
-    this.windows = [0, 1, 2].map(i => {
-      const x = 560 + i * 220, y = 316;
-      const frame = O(bake(this, 'b_frame', x - 100, y - 90, 200, 180, (frame) => {
-        frame.fillStyle(0x2c3e50); frame.fillRoundedRect(x - 100, y - 90, 200, 180, 16);
-        frame.fillStyle(0xfdfefe); frame.fillRoundedRect(x - 92, y - 82, 184, 164, 12); }));
-      const glow = O(bake(this, 'b_glow', x - 108, y - 98, 216, 196, (glow) => { glow.lineStyle(8, 0xf1c40f); glow.strokeRoundedRect(x - 104, y - 94, 208, 188, 18); }).setVisible(false));
+    // fem vinduer (smallere end de gamle tre, så de kan være i kabinettet)
+    const NW = 5, FW = 128, IW = FW - 12; this.fitW = IW - 10;
+    this.windows = Array.from({ length: NW }, (_, i) => i).map(i => {
+      const x = 508 + i * 136, y = 316;
+      const frame = O(bake(this, 'b_frame5', x - FW / 2, y - 90, FW, 180, (frame) => {
+        frame.fillStyle(0x2c3e50); frame.fillRoundedRect(x - FW / 2, y - 90, FW, 180, 16);
+        frame.fillStyle(0xfdfefe); frame.fillRoundedRect(x - IW / 2, y - 82, IW, 164, 12); }));
+      const glow = O(bake(this, 'b_glow5', x - FW / 2 - 8, y - 98, FW + 16, 196, (glow) => { glow.lineStyle(8, 0xf1c40f); glow.strokeRoundedRect(x - FW / 2 - 4, y - 94, FW + 8, 188, 18); }).setVisible(false));
       const img = O(this.add.image(x, y, 'smoke').setVisible(false));
       const q = O(this.add.text(x, y, '?', { fontFamily: FONT, fontSize: '90px', color: '#bdc3c7' }).setOrigin(0.5));
       // rullestrimlen: en container med delene under hinanden, klippet til vinduet
       const strip = O(this.add.container(x, y));
-      const maskG = this.make.graphics().fillStyle(0xffffff).fillRoundedRect(640 + (x - 92 + OX) * MS, 352 + (y - 82 + OY) * MS, 184 * MS, 164 * MS, 12 * MS);   // masken er i skærm-koordinater
+      const maskG = this.make.graphics().fillStyle(0xffffff).fillRoundedRect(640 + (x - IW / 2 + OX) * MS, 352 + (y - 82 + OY) * MS, IW * MS, 164 * MS, 12 * MS);   // masken er i skærm-koordinater
       strip.setMask(maskG.createGeometryMask());
-      O(bake(this, 'b_shade', x - 92, y - 82, 184, 164, null, (ctx) => { vGrad(ctx, x - 92, y - 82, 184, 40, 0, 0.35, 0, 0); vGrad(ctx, x - 92, y + 42, 184, 40, 0, 0, 0, 0.35); }));   // skygge i top og bund, så det ligner en valse
-      const zone = O(this.add.zone(x, y, 200, 180).setInteractive({ useHandCursor: true }));
+      O(bake(this, 'b_shade5', x - IW / 2, y - 82, IW, 164, null, (ctx) => { vGrad(ctx, x - IW / 2, y - 82, IW, 40, 0, 0.35, 0, 0); vGrad(ctx, x - IW / 2, y + 42, IW, 40, 0, 0, 0, 0.35); }));   // skygge i top og bund, så det ligner en valse
+      const zone = O(this.add.zone(x, y, FW, 180).setInteractive({ useHandCursor: true }));
       zone.on('pointerup', () => this.pick(i));
       return { x: x + OX, y: y + OY, frame, glow, img, q, strip, zone, part: null };
     });
@@ -1755,8 +1795,8 @@ class Build extends Phaser.Scene {
     addCornerButtons(this);
     makeButton(this, 90, 50, 150, 64, 'Menu', 0x34495e, () => this.scene.start('Title'), 26, 'ic_home').setScrollFactor(0);
     this.input.keyboard.on('keydown-SPACE', () => this.ready && this.goBtn.visible ? this.scene.start('Game') : this.pull());
-    ['ONE', 'TWO', 'THREE'].forEach((k, i) => this.input.keyboard.on('keydown-' + k, () => this.pick(i)));
-    this.showStep();
+    ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE'].forEach((k, i) => this.input.keyboard.on('keydown-' + k, () => this.pick(i)));
+    if (TRYCAR) { const t = TRYCAR; TRYCAR = null; this.autoBuild(t); } else this.showStep();
   }
 
   drawWorkshop() {
@@ -1805,7 +1845,7 @@ class Build extends Phaser.Scene {
     let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     c.list.forEach(o => { const k = o.texture && o.texture.key === 'blink' ? 0.5 : 1, hw = Math.abs(o.displayWidth) * k / 2, hh = Math.abs(o.displayHeight) * k / 2, r = Math.max(hw, hh) * (o.texture && o.texture.key.endsWith('_spin') ? 1 : 0);
       const ex = r || hw, ey = r || hh; x0 = Math.min(x0, o.x - ex); x1 = Math.max(x1, o.x + ex); y0 = Math.min(y0, o.y - ey); y1 = Math.max(y1, o.y + ey); });
-    if (x1 > x0) { const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, f = Math.min(1, 172 / (x1 - x0), 152 / (y1 - y0));
+    if (x1 > x0) { const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, f = Math.min(1, (this.fitW || 172) / (x1 - x0), 152 / (y1 - y0));
       c.list.forEach(o => { o.x -= mx; o.y -= my; }); c.setScale(f); }
     return c;
   }
@@ -1832,10 +1872,11 @@ class Build extends Phaser.Scene {
     SFX.init();
     this.tweens.add({ targets: this.arm, angle: 125, duration: 220, yoyo: true, hold: 200, ease: 'Quad.out' });
     const kind = STEPS[this.step].kind, list = PARTS[kind];
-    const picks = Phaser.Utils.Array.Shuffle(list.slice()).slice(0, 3);
+    const N = this.windows.length, picks = Phaser.Utils.Array.Shuffle(list.slice()).slice(0, N);
+    while (picks.length < N) picks.push(Phaser.Utils.Array.GetRandom(list));   // (hvis der er færre dele end vinduer)
     const STEP = 170;   // afstand mellem delene på strimlen
-    let left = 3;
-    const spin = SFX.loopLyd('enarmet_spin', 0.55, 4);   // hjulene snurrer, til sidste vindue er stoppet
+    let left = N;
+    const spin = SFX.loopLyd('enarmet_spin', 0.55, 5);   // hjulene snurrer, til sidste vindue er stoppet
     this.windows.forEach((w, i) => {
       w.q.setVisible(false); w.strip.removeAll(true); w.part = null;
       // strimlen: 8-12 tilfældige dele, og den valgte nederst – vi ruller nedad til den
@@ -1845,7 +1886,7 @@ class Build extends Phaser.Scene {
       seq.forEach((part, k) => w.strip.add(this.partIcon(kind, part, (seq.length - 1 - k) * STEP)));   // den valgte i 0, de andre nedenunder
       w.strip.y = w.y - (seq.length - 1) * STEP;   // start: første del i vinduet; strimlen ruller nedad
       let lastTick = 0;
-      this.tweens.add({ targets: w.strip, y: w.y + 18, duration: 1100 + i * 500, ease: 'Quad.easeOut',
+      this.tweens.add({ targets: w.strip, y: w.y + 18, duration: 1000 + i * 380, ease: 'Quad.easeOut',
         onUpdate: () => { const k = Math.floor(w.strip.y / STEP); if (k !== lastTick) { lastTick = k; if (!spin) SFX.tick(); } },
         onComplete: () => {
           if (!SFX.smp('enarmet_ding', 0.8)) SFX.stop(); w.part = picks[i];   // ding, når vinduet stopper
@@ -1874,13 +1915,27 @@ class Build extends Phaser.Scene {
         cam.pan(W / 2, H / 2, 650, 'Sine.easeInOut');
         this.time.delayedCall(650, () => { this.busy = false; this.showStep(); });
       } else {
-        BUILD.chassis = this.chosen.chassis; BUILD.wheels = this.chosen.wheels; BUILD.motor = this.chosen.motors; BUILD.tool = this.chosen.tools;
-        this.titleText.setText('Færdig!'); this.hintText.setText('');
-        this.windows.forEach(x => { x.strip.removeAll(true); x.q.setVisible(true); });
-        this.goBtn.setVisible(true).setScale(0); SFX.tada(); this.ready = true;
-        this.tweens.add({ targets: this.goBtn, scale: 1, duration: 400, ease: 'Back.out', onComplete: () => this.tweens.add({ targets: this.goBtn, scale: 1.06, duration: 400, yoyo: true, repeat: -1 }) });
+        this.finishBuild();
       }
     });
+  }
+
+  finishBuild() {   // bilen er færdig: fanfare, konfetti og KØR-knappen
+    BUILD.chassis = this.chosen.chassis; BUILD.wheels = this.chosen.wheels; BUILD.motor = this.chosen.motors; BUILD.tool = this.chosen.tools; BUILT = true;
+    this.titleText.setText('Færdig!'); this.hintText.setText('');
+    this.windows.forEach(x => { x.strip.removeAll(true); x.q.setVisible(true); });
+    this.goBtn.setVisible(true).setScale(0); SFX.tada(); confetti(this); this.ready = true;
+        this.tweens.add({ targets: this.goBtn, scale: 1, duration: 400, ease: 'Back.out', onComplete: () => this.tweens.add({ targets: this.goBtn, scale: 1.06, duration: 400, yoyo: true, repeat: -1 }) });
+  }
+  // "Prøv mig!" fra forsiden: ingen tyveknægt – bilen bygges direkte i værkstedet, del for del
+  autoBuild(t) {
+    this.busy = true; this.cameras.main.centerOn(W + 640, H / 2);
+    const steps = [['chassis', t.chassis], ['wheels', t.wheels], ['motors', t.motors], ['tools', t.tools]].filter(([, p]) => p);
+    steps.forEach(([kind, part], k) => this.time.delayedCall(300 + k * 1700, () => {
+      this.chosen[kind] = part; this.addToPreview(kind, part, null);
+      this.time.delayedCall(1420, () => { this.cameras.main.shake(220, 0.012); if (!SFX.smp(LYD_MONTERING[kind], 0.8)) SFX.clunk(); });
+    }));
+    this.time.delayedCall(300 + steps.length * 1700 + 300, () => { this.step = STEPS.length; this.busy = false; this.finishBuild(); });
   }
 
   addToPreview(kind, part, from) {
@@ -1910,7 +1965,7 @@ class Build extends Phaser.Scene {
         if (part.spring) { const sp = springImg(this, ch, ox, cy, cy + oy + 50 + wdy); p.add(sp); drop(sp); }
         const w = this.add.image(ox, cy + oy + (part.spring ? 50 : 0) + wdy, 'p_wheels_' + part.id + (part.belt ? '_one' : '')).setScale(wk / (ch.scale || 1)); p.add(w); drop(w, ox < 0 ? 'left' : 'right');
         if (!part.upright) this.tweens.add({ targets: w, angle: 360, duration: 2000, repeat: -1, delay: 1200 }); });
-      if (ch.susp) {   // monstertruckens affjedring ind til de nye hjul, når de er landet
+      if (suspFor(ch, part)) {   // monstertruckens affjedring ind til de nye hjul, når de er landet
         const sg = this.add.graphics(); p.addAt(sg, 0); const TW = ch.topW || ch.w, TH = ch.topH + (ch.full ? ch.h : 0), tx = ch.topOx || 0, ty = cy + topRel(ch);
         const wp = wxs.map((ox, wi) => [ox, cy + oy + (part.spring ? 50 : 0) - (wi === 0 ? (rs - 1) * part.r / (ch.scale || 1) : 0)]);
         this.time.delayedCall(1430, () => { drawSusp(sg, ch, (x, y) => [tx + x - TW / 2, ty + y - TH / 2], wp, 1); sg.setAlpha(0); this.tweens.add({ targets: sg, alpha: 1, duration: 200 }); });
@@ -1922,7 +1977,7 @@ class Build extends Phaser.Scene {
       }
     } else if (kind === 'motors') {
       const ms = ch.motorScale || 1;
-      if (part.rear) { const rp = rearMotorPos(ch, part); p.motor = this.add.image(rp.x, p.body.y + rp.y, 'rm_' + part.id).setScale(rmS(part)); p.addAt(p.motor, 0); drop(p.motor, 'left'); }   // jet/raket flyver ind bagfra
+      if (part.rear) { const rp = rearMotorPos(ch, part); p.motor = this.add.image(rp.x, p.body.y + rp.y, 'rm_' + part.id).setScale(rmS(part)); if (this.chosen.wheels && this.chosen.wheels.r >= 60) p.add(p.motor); else p.addAt(p.motor, 0); drop(p.motor, 'left'); }   // jet/raket flyver ind bagfra
       else { const mp = motorPlace(ch, part); p.motor = this.add.image(-ch.w / 2 + mp.x + 31 * mp.s, p.body.y - ch.h / 2 - ch.topH + mp.y + 11 * mp.s, 'p_motors_' + part.id).setScale(mp.s); p.add(p.motor); drop(p.motor, 'top'); }
     } else if (kind === 'tools') {
       const wh = this.chosen.wheels, mount = toolMount(ch, wh);
@@ -1944,7 +1999,7 @@ class Title extends Phaser.Scene {
   constructor() { super('Title'); }
   preload() { if (!this.textures.exists('logo')) this.load.image('logo', LOGO_SRC); }
   create() {
-    makeTextures(this); SFX.music('Menu');
+    makeTextures(this); SFX.music('Menu'); DEMO = false;
     // baggrunden er et tilfældigt af spillets landskaber
     const bio = BIOMES[Phaser.Utils.Array.GetRandom(Object.keys(BIOMES))];
     this.cameras.main.setBackgroundColor(bio.sky);
@@ -1966,7 +2021,11 @@ class Title extends Phaser.Scene {
     makePartTextures(this);
     const pick = (l) => Phaser.Utils.Array.GetRandom(l), ch = pick(PARTS.chassis), wh = pick(PARTS.wheels);
     const cy = H - 60, car = this.add.container(960, cy).setScale(0.75 * (ch.scale || 1));
-    const r = assembleCar(this, car, ch, wh, pick(PARTS.motors), Math.random() < 0.85 ? pick(PARTS.tools) : null);
+    const mo = pick(PARTS.motors), to = Math.random() < 0.85 ? pick(PARTS.tools) : null;
+    const r = assembleCar(this, car, ch, wh, mo, to);
+    // "Prøv mig!": byg netop denne bil i værkstedet
+    const tryBtn = makeButton(this, 1000, cy - 212, 190, 58, 'Prøv mig!', 0x8e44ad, () => { TRYCAR = { chassis: ch, wheels: wh, motors: mo, tools: to }; this.scene.start('Build'); }, 28).setDepth(5);
+    this.tweens.add({ targets: tryBtn, y: cy - 222, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
     this.tweens.add({ targets: car, y: cy - 6, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
     if (!r.upright) this.tweens.add({ targets: r.wheels, angle: 360, duration: 1500, repeat: -1 });
 
@@ -1986,7 +2045,10 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    this.add.text(W - 10, H - 8, 'v0.13.1', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
+    const ver = this.add.text(W - 14, H - 10, 'v0.14.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
+    ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
+      if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => startDemo(this)); } });
 
     this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Build'));
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Build'));
@@ -2015,7 +2077,7 @@ class Game extends Phaser.Scene {
   constructor() { super('Game'); }
 
   create() {
-    makeTextures(this); makePartTextures(this); SFX.gameMusic(); SFX.hentMotor(BUILD.motor && BUILD.motor.id); this.events.once('shutdown', () => SFX.stopEngine());   // motorlyden følger bilen: stoppes, når scenen forlades
+    makeTextures(this); makePartTextures(this); SFX.gameMusic(); SFX.hentMotor(BUILD.motor && BUILD.motor.id); this.events.once('shutdown', () => { SFX.stopEngine(); if (this.sawSnd) this.sawSnd.stop(); });   // motorlyden følger bilen: stoppes, når scenen forlades
     this.matter.world.autoUpdate = false; this.physAcc = 0;   // vi tager fysik-skridtene selv i update()
     this.auto = SETTINGS.auto;
     this.over = false;
@@ -2026,7 +2088,9 @@ class Game extends Phaser.Scene {
     this.matter.world.setGravity(0, 1.0);
 
     // landskaber: eng først, derefter tilfældig rækkefølge, nyt hver 250 m med glidende overgang
-    this.biomeSeq = ['eng']; this.extendBiomes();
+    // prøvebanen: korte landskaber i fast rækkefølge, og hver forhindring kommer én efter én
+    this.bLen = DEMO ? 60 : BIOME_LEN; this.bFade = DEMO ? 12 : BIOME_FADE;
+    this.biomeSeq = DEMO ? DEMO_ORDER.slice() : [Phaser.Utils.Array.GetRandom(Object.keys(BIOMES))]; this.extendBiomes();   // hver tur starter i et tilfældigt landskab
     this.biomeCols = { dirt: BIOMES.eng.dirt, grass: BIOMES.eng.grass }; this.night = 0;
 
     // baggrund: to lag, der tones over i hinanden ved landskabsskift
@@ -2074,8 +2138,9 @@ class Game extends Phaser.Scene {
     this.obstacles = [];
     this.actors = [];
     this.deferred = [];
-    this.nextObsX = 1500;
-    this.wrenches = []; this._box = null; this.carH = 0; this.carHTick = 0; this.jumpLift = 110; this.jumpWatch = null; this.nextWrenchX = (this.startX || 220) + (150 + Math.random() * 100) * PX_PER_M;   // første svensknøgle efter 150–250 m
+    this.nextObsX = 1500; this.demoQ = null;
+    if (DEMO) this.add.text(20, 96, 'PRØVEBANE', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#8e44ad', strokeThickness: 6 }).setScrollFactor(0).setDepth(60);
+    this.rollers = this.rollers || []; this.wrenches = []; this._box = null; this.sawSnd = null; this.sawingAt = 0; this.lastGroundDmg = 0; this.carH = 0; this.carHTick = 0; this.jumpLift = 110; this.jumpWatch = null; this.nextWrenchX = (this.startX || 220) + (150 + Math.random() * 100) * PX_PER_M;   // første svensknøgle efter 150–250 m
     this.spawnObstacles(this.chassis.x + 1150);
 
     cam.startFollow(this.chassis, true, 0.08, 0.08);
@@ -2100,7 +2165,7 @@ class Game extends Phaser.Scene {
         this.sawingAt = this.time.now;
         this.deferred.push(() => { Bd.setVelocity(o, { x: 0, y: Math.max(0, o.velocity.y) }); Bd.setAngularVelocity(o, 0); Bd.setAngularVelocity(this.bladeBody, 0.1); });
         const cx = p.collision.supports[0] ? p.collision.supports[0].x : o.position.x, cy = p.collision.supports[0] ? p.collision.supports[0].y : o.position.y;
-        if (o.sawDust > 70) { o.sawDust = 0; this.deferred.push(() => { this.spawnPieces(cx, cy, 0xe8c58f, 2, 4, 4); if (Math.random() < 0.3) SFX.saw(); }); }
+        if (o.sawDust > 70) { o.sawDust = 0; this.deferred.push(() => { this.spawnPieces(cx, cy, 0xe8c58f, 2, 4, 4); if (!SFX.buf.saw_loop && Math.random() < 0.3) SFX.saw(); }); }   // (gammel lyd kun hvis savelyden ikke kunne hentes)
         if (o.sawT > 1000) { o.sawDone = true; const obs = o.obs; this.deferred.push(() => obs.saw(o)); }
       }
     });
@@ -2164,18 +2229,18 @@ class Game extends Phaser.Scene {
     this.lite = on; SETTINGS.lite = on; this.wxCur = undefined; this.biomeKey = null;
     this.fg.setVisible(!on); this.clouds.setVisible(!on);
   }
-  extendBiomes() {   // eng først, så de otte andre i tilfældig rækkefølge – derefter alle ni blandet, uden at to ens støder sammen
+  extendBiomes() {   // startlandskabet først, så de andre i tilfældig rækkefølge – derefter alle ni blandet, uden at to ens støder sammen
     while (this.biomeSeq.length < 40) {
-      const all = Object.keys(BIOMES), block = Phaser.Utils.Array.Shuffle(this.biomeSeq.length === 1 ? all.filter(k => k !== 'eng') : all.slice());
+      const all = Object.keys(BIOMES), block = Phaser.Utils.Array.Shuffle(this.biomeSeq.length === 1 ? all.filter(k => k !== this.biomeSeq[0]) : all.slice());
       if (block[0] === this.biomeSeq[this.biomeSeq.length - 1]) block.push(block.shift());
       this.biomeSeq.push(...block);
     }
   }
   // landskabet ved verdens-x: {a, b, t} – t er hvor langt overgangen fra a til b er nået
   biomeAt(x) {
-    const d = Math.max(0, (x - (this.startX || 220)) / PX_PER_M), i = Math.floor(d / BIOME_LEN);
+    const d = Math.max(0, (x - (this.startX || 220)) / PX_PER_M), i = Math.floor(d / this.bLen);
     if (i >= this.biomeSeq.length - 2) this.extendBiomes();
-    const b = BIOMES[this.biomeSeq[i]], a = BIOMES[this.biomeSeq[Math.max(0, i - 1)]], t = i === 0 ? 1 : Phaser.Math.Clamp((d - i * BIOME_LEN) / BIOME_FADE, 0, 1);
+    const b = BIOMES[this.biomeSeq[i]], a = BIOMES[this.biomeSeq[Math.max(0, i - 1)]], t = i === 0 ? 1 : Phaser.Math.Clamp((d - i * this.bLen) / this.bFade, 0, 1);
     return { a, b, t, farA: a.far, farB: b.far, nameA: this.biomeSeq[Math.max(0, i - 1)], nameB: this.biomeSeq[i] };
   }
   updateBiome(x) {
@@ -2285,7 +2350,7 @@ class Game extends Phaser.Scene {
     this.top = this.add.image(x + this.topOx, y + this.topOy, 'v_top').setDepth(9).setScale(V.chassis.scale);
     this.rearMotor = null;
     if (BUILD.motor && BUILD.motor.rear) { const mo = BUILD.motor, rp = rearMotorPos(BUILD.chassis, mo), sc = V.chassis.scale, S = rmS(mo);
-      this.rearMotor = { img: this.add.image(0, 0, 'rm_' + mo.id).setDepth(8).setScale(S * sc), lx: rp.x * sc, ly: rp.y * sc,
+      this.rearMotor = { img: this.add.image(0, 0, 'rm_' + mo.id).setDepth(BUILD.wheels.r >= 60 ? 14.5 : 8).setScale(S * sc), lx: rp.x * sc, ly: rp.y * sc,
         nozzles: mo.nozzles.map(ny => ({ lx: (rp.x - 33 * S) * sc, ly: (rp.y + (ny - 21) * S) * sc })) }; }
     this.blinks = blinkOffsets(BUILD.chassis).map((b, i) => { const img = this.add.image(0, 0, 'blink').setTint(b.c).setDepth(9.5).setScale(V.chassis.scale * 1.1); this.tweens.add({ targets: img, alpha: 0.1, duration: 240, yoyo: true, repeat: -1, delay: i * 240 }); return { img, lx: this.topOx + b.dx * V.chassis.scale, ly: this.topOy + (b.dy + 12) * V.chassis.scale }; });
 
@@ -2299,13 +2364,13 @@ class Game extends Phaser.Scene {
       shape: wshapeR(V.wheel.r),   // setScale(k) nedenfor skalerer også fysik-kroppen
       density: V.wheel.density, friction: V.wheel.grip, frictionStatic: 1, restitution: BUILD.wheels.bouncy ? 0.8 : 0.15, frictionAir: 0.005,
       collisionFilter: filter, label: 'wheel'
-    }).setDepth(11).setScale(k);
+    }).setDepth(11).setScale(k).setOrigin(0.5);   // billedet drejer om sin midte (Phaser lægger ellers midten efter kassen om trekant/stjerne, ikke deres centrum)
     this.wheels = [mk(V.wheel.back, this.rearScale), mk(V.wheel.front, 1)];
     this.wheels[0].rk = this.rearScale; this.wheels[1].rk = 1;   // det store baghjul drejer langsommere, så begge hjul kører lige hurtigt
     this.wheels.forEach(w => w.setDepth(14));   // hjul i forreste lag, foran værktøjet
     this.wheelSkins = [];
     this.belt = BUILD.wheels.belt ? this.add.graphics().setDepth(13) : null;
-    this.susp = BUILD.chassis.susp ? this.add.graphics().setDepth(8.9) : null;   // monstertruckens affjedring (bag karrosseriet)   // larvefødder: bælte rundt om hjulene, tegnes hvert billede
+    this.susp = suspFor(BUILD.chassis, BUILD.wheels) ? this.add.graphics().setDepth(8.9) : null;   // monstertruckens affjedring (bag karrosseriet)   // larvefødder: bælte rundt om hjulene, tegnes hvert billede
     if (BUILD.wheels.upright) this.wheels.forEach(w => { w.setAlpha(0); this.wheelSkins.push(this.add.image(w.x, w.y, 'v_wheel').setDepth(14)); });   // rulleskøjter: billedet står op, hjulet ruller
 
     // hjulophæng: ét punktled pr. hjul (lidt blødt, så det giver sig en smule) – eller rigtige fjedre
@@ -2320,6 +2385,17 @@ class Game extends Phaser.Scene {
         this.springs.push({ img: this.add.image(w.x, w.y, 'spring').setDepth(9), ox, oy: vb === null ? V.wheel.oy - 6 + wy : vb - 2, wheel: w });   // fast på den tegnede bils underkant
       } else this.constraints.push(this.matter.add.constraint(this.chassis.body, w.body, 0, 0.85, { pointA: { x: ox, y: V.wheel.oy + wy }, damping: 0.05 }));
     });
+    // larvefødder: tre små usynlige støttehjul mellem de store, på bløde fjedre – bæltet lægger sig om bump og sten
+    this.rollers = [];
+    if (BUILD.wheels.belt) {
+      const R = V.wheel.r, rr = Math.round(R * 0.62), up = 26;
+      [0.25, 0.5, 0.75].forEach(f => {
+        const ox = V.wheel.back + (V.wheel.front - V.wheel.back) * f, oy = V.wheel.oy + R - rr;   // bunden flugter med de store hjuls bund
+        const b = this.matter.add.circle(x + ox, y + oy, rr, { density: V.wheel.density * 0.5, friction: V.wheel.grip, frictionStatic: 1, restitution: 0.05, collisionFilter: filter, label: 'wheel' });
+        [-12, 12].forEach(dx => this.constraints.push(this.matter.add.constraint(this.chassis.body, b, Math.hypot(12, up), 0.25, { pointA: { x: ox + dx, y: oy - up }, damping: 0.08 })));
+        this.rollers.push({ b, rr });
+      });
+    }
 
     // dinglende del (gravkoens skovl)
     this.dangle = null; this.prop = null;
@@ -2399,7 +2475,7 @@ class Game extends Phaser.Scene {
       if (part.label === 'wheel') {       // hjul mod jord: kun lyd, aldrig skade
         if (imp > 3.5 && now - this.lastLandSnd > 150) { this.lastLandSnd = now; SFX.land(imp / 3); }
       } else if (part.label === 'tool') { if (imp > 4) this.deferred.push(() => this.damage((imp - 4) * 0.6)); }
-      else if (imp > 3) this.deferred.push(() => this.damage((imp - 3) * 1.6));
+      else if (imp > 3 && now - this.lastGroundDmg > 1000) { this.lastGroundDmg = now; this.deferred.push(() => this.damage(Math.min(15, (imp - 3) * 1.6))); }   // landinger i høj fart: højst én skade i sekundet og højst 15 %
       return;
     }
     const obs = other.obs;
@@ -2423,7 +2499,7 @@ class Game extends Phaser.Scene {
   }
 
   damage(amount) {
-    if (this.broken || this.over) return;
+    if (this.broken || this.over || DEMO) return;   // på prøvebanen går bilen ikke i stykker
     amount = Math.min(25, amount);
     this.health = Math.max(0, this.health - amount);
     if (amount > 2) { SFX.hit(Math.min(1, amount / 30)); this.cameras.main.shake(120 + amount * 6, 0.002 + amount * 0.0003); }
@@ -2459,6 +2535,17 @@ class Game extends Phaser.Scene {
   slopeAt(x) { return Math.atan2(this.groundY(x + 40) - this.groundY(x - 40), 80); }
 
   spawnObstacles(untilX) {
+    if (DEMO && !this.demoQ) {   // prøvebanen: hvert landskabs egne forhindringer, fyldt op med de almindelige
+      const seg = this.bLen * PX_PER_M, x0 = this.startX || 220, general = OBSTACLES.filter(o => !o.biome && !o.biomes); let gi = 0; this.demoQ = [];
+      DEMO_ORDER.forEach((b, k) => { const own = OBSTACLES.filter(o => o.biome === b || (o.biomes && o.biomes.includes(b)));
+        [0.28, 0.52, 0.76].forEach((f, si) => this.demoQ.push({ def: si < own.length ? own[si] : general[gi++ % general.length], x: Math.max(x0 + 1300, x0 + k * seg + f * seg) })); });
+      this.nextObsX = x0 + DEMO_ORDER.length * seg + 600;
+    }
+    while (DEMO && this.demoQ.length && this.demoQ[0].x < untilX) {
+      const { def, x } = this.demoQ.shift(), obs = def.make(this, x, this.groundY(x));
+      if (obs) { obs.x = x; obs.bodies.forEach(b => b.obs = obs); this.obstacles.push(obs); }
+    }
+    if (DEMO && this.demoQ.length) return;
     while (this.nextObsX < untilX) {
       let x = this.nextObsX;
       const d = Phaser.Math.Clamp((x - 1500) / 12000, 0, 1);
@@ -2541,7 +2628,23 @@ class Game extends Phaser.Scene {
   drawBelt() {
     const g = this.belt, [b, f] = this.wheels, R = VEHICLE.wheel.r;
     g.clear(); if (this.broken) return;
-    beltPath(g, b.x, b.y, f.x, f.y, R, b.rotation * R);
+    if (!this.rollers.length) { beltPath(g, b.x, b.y, f.x, f.y, R, b.rotation * R); return; }
+    // bæltet: lige over toppen, rundt om forhjulet, under alle støttehjul og rundt om baghjulet
+    const dx = f.x - b.x, dy = f.y - b.y, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, px = uy, py = -ux, a0 = Math.atan2(py, px), pts = [];
+    pts.push([b.x + px * R, b.y + py * R], [f.x + px * R, f.y + py * R]);
+    for (let k = 1; k < 12; k++) { const a = a0 + Math.PI * k / 12; pts.push([f.x + Math.cos(a) * R, f.y + Math.sin(a) * R]); }
+    pts.push([f.x - px * R, f.y - py * R]);
+    this.rollers.slice().reverse().forEach(({ b: rb, rr }) => { const lx = rb.position.x - px * rr, ly = rb.position.y - py * rr;   // støttehjulets bund
+      const t = ((lx - b.x) * ux + (ly - b.y) * uy) / L, bx0 = b.x - px * R + dx * t, by0 = b.y - py * R + dy * t;   // hvor den lige linje ville gå
+      pts.push(((lx - bx0) * -px + (ly - by0) * -py) > 0 ? [lx, ly] : [bx0, by0]); });   // bæltet bøjer kun ned under et støttehjul, aldrig op i bilen
+    pts.push([b.x - px * R, b.y - py * R]);
+    for (let k = 1; k < 12; k++) { const a = a0 + Math.PI + Math.PI * k / 12; pts.push([b.x + Math.cos(a) * R, b.y + Math.sin(a) * R]); }
+    g.lineStyle(13, 0x2c3e50); g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); pts.slice(1).forEach(q => g.lineTo(q[0], q[1])); g.closePath(); g.strokePath();
+    g.lineStyle(3, 0x7f8c8d); g.strokePath();
+    // trædeklodser med jævn afstand langs bæltet
+    const seg = pts.map((q, i) => { const n = pts[(i + 1) % pts.length]; return [q, n, Math.hypot(n[0] - q[0], n[1] - q[1])]; }), per = seg.reduce((a, z) => a + z[2], 0), step = 16;
+    let d = (((b.rotation * R) % step) + step) % step, acc = 0; g.fillStyle(0x95a5a6);
+    for (const [q, n, l] of seg) { while (d < acc + l) { const t = (d - acc) / l; g.fillRect(q[0] + (n[0] - q[0]) * t - 3, q[1] + (n[1] - q[1]) * t - 3, 6, 6); d += step; } acc += l; if (acc > per) break; }
   }
 
   popFx(x, y, color) {   // ballonen sprænger: tynde streger ud fra midten og buede gummistumper, der flyver ud
@@ -2879,6 +2982,10 @@ class Game extends Phaser.Scene {
     this.spawnDecor(c.x + W * 1.2);
     this.spawnObstacles(c.x + 1150);        // lige uden for højre skærmkant
     this.updateWrenches(time, c);
+    // saven: lyden kører, så længe den skærer i noget, og stopper, når den slipper
+    const sawNow = this.sawingAt && time - this.sawingAt < 150 && !this.over;
+    if (sawNow && !this.sawSnd) this.sawSnd = SFX.loopLyd('saw_loop', 0.6, 30);
+    else if (!sawNow && this.sawSnd) { this.sawSnd.stop(); this.sawSnd = null; }
     this.trimObstacles(c.x - W * 1.5);
     this.actors.forEach(a => a.tick && a.tick(this, time));
     this.drawTerrain();
@@ -2929,7 +3036,7 @@ class Game extends Phaser.Scene {
     const dist = Math.floor(this.maxDist);
     const record = dist > 0 && dist > Math.floor(SETTINGS.best);
     if (record) { SETTINGS.best = dist; saveSettings(); }
-    if (!quiet) { SFX.crash(); if (record) setTimeout(() => SFX.tada(), 500); }
+    if (!quiet) { SFX.crash(); if (record) setTimeout(() => { SFX.tada(); if (this.scene.isActive()) confetti(this); }, 500); }
 
     if (this.ui) this.ui.showGameOver(dist, record, reason);
     setTimeout(() => {
@@ -2940,8 +3047,8 @@ class Game extends Phaser.Scene {
   }
 
   restartRound() { this.scene.stop('UI'); this.scene.restart(); }
-  toBuild()      { this.scene.stop('UI'); this.scene.start('Build'); }
-  toMenu()       { this.scene.stop('UI'); this.scene.start('Title'); }
+  toBuild()      { DEMO = false; this.scene.stop('UI'); this.scene.start('Build'); }
+  toMenu()       { DEMO = false; this.scene.stop('UI'); this.scene.start('Title'); }
 }
 
 // =====================================================================

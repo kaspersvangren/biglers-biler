@@ -1,5 +1,5 @@
 // Biglers Biler – gemmer spillet, så det virker uden net.
-// Spillet selv hentes altid frisk når der er net (så nye versioner kommer med det samme); Phaser, skrift og ikoner tages fra gemmet.
+// Spillet selv hentes altid frisk når der er net, uden om browserens gemte kopi (så nye versioner kommer med det samme); Phaser, skrift og ikoner tages fra gemmet.
 const CACHE = 'biglers-biler-v1';
 const PHASER = 'https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', PHASER];
@@ -18,7 +18,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   const html = req.mode === 'navigate' || (url.origin === location.origin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html')));
   if (html) {   // net først, gemmet hvis vi er offline
-    e.respondWith(fetch(req).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return res; })
+    e.respondWith(fetch(req, { cache: 'no-store' }).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return res; })
       .catch(() => caches.match('./index.html')));
     return;
   }
