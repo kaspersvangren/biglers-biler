@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.12.0)
+//  Biglers Biler – etape 3  (v0.13.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -223,7 +223,9 @@ SFX.smp = function (k, vol, rate) {   // spil en optaget lyd; false hvis den ikk
 })();
 // ---------- Kaspers egne lyde og musik (filer i mappen lyd/, ved siden af spillet) ----------
 // korte lyde hentes ved første tryk; motoren hentes, når bilen er bygget; musikken hentes ét nummer ad gangen
-const LYD_KORT = ['pop1', 'pop2', 'pop3', 'pop4', 'strandbold', 'dyr_ko', 'dyr_pingvin', 'dyr_kamel', 'dyr_abe', 'dyr_ged', 'dyr_astronaut'];
+const LYD_KORT = ['pop1', 'pop2', 'pop3', 'pop4', 'strandbold', 'dyr_ko', 'dyr_pingvin', 'dyr_kamel', 'dyr_abe', 'dyr_ged', 'dyr_astronaut',
+  'm_chassis', 'm_hjul', 'm_motor', 'm_vaerktoej_B', 'enarmet_spin', 'enarmet_ding', 'tada', 'bonk', 'f_lander', 'f_bump', 'bounce_B', 'krak_bil', 'krak_ufo', 'hop', 'ufo_straale'];
+const LYD_MONTERING = { chassis: 'm_chassis', wheels: 'm_hjul', motors: 'm_motor', tools: 'm_vaerktoej_B' };   // lyden, når delen lander på bilen i værkstedet
 const LYD_SIG = { moo: 'dyr_ko', squawk: 'dyr_pingvin', grunt: 'dyr_kamel', ooh: 'dyr_abe', baa: 'dyr_ged', whee: 'dyr_astronaut' };
 const LYD_MOTOR = { standard: 'motor_standard', v8: 'motor_v8', electric: 'motor_electric', hamster: 'motor_hamster', rubber: 'motor_rubber', jet: 'motor_jet', rocket: 'motor_rocket' };
 const LYD_MOTOR_FART = { rubber: [0.55, 1.95] };   // afspilningshastighed fra stillestående til fuld fart (standard 0.85–1.95)
@@ -242,6 +244,18 @@ SFX.hent = function (k, decode = true) {
   const pop1 = SFX.pop; SFX.pop = function () { if (this.smp('pop' + (1 + Math.floor(Math.random() * 4)), 0.8)) return; pop1.call(this); };   // fire forskellige ballon-pop
   const pfft1 = SFX.pfft; SFX.pfft = function () { if (this.smp('strandbold', 0.8, 1.3)) return; pfft1.call(this); };   // 30 % lysere end optagelsen   // strandbolden punkterer
   const say1 = SFX.say; SFX.say = function (k) { const f = LYD_SIG[k]; if (f && this.smp(f, 0.8)) return; say1.call(this, k); };
+  // Kaspers effekter oven på de gamle (de gamle bruges kun, hvis filen ikke kan hentes)
+  [['tada', 'tada', 0.8], ['bonk', 'bonk', 0.8], ['clunk', 'f_lander', 0.8], ['pff', 'f_bump', 0.9], ['bounce', 'bounce_B', 0.8], ['crash', 'krak_bil', 0.85], ['jump', 'hop', 0.8]].forEach(([fn, k, v]) => {
+    const o = SFX[fn]; SFX[fn] = function (...a) { if (this.smp(k, v)) return; return o.apply(this, a); };
+  });
+  // lyd i ring (ufo-stråle, tyveknægtens hjul): svar er et håndtag med stop(); stopper selv efter maxSek
+  SFX.loopLyd = function (k, vol, maxSek) {
+    const b = this.buf[k]; if (!b || !this.ctx) return null;
+    const t = this.ctx.currentTime, src = this.ctx.createBufferSource(), g = this.ctx.createGain(); src.buffer = b; src.loop = true;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.08); src.connect(g); g.connect(this.master); src.start(t); src.stop(t + maxSek);
+    let done = false;
+    return { stop: () => { if (done) return; done = true; const n = this.ctx.currentTime; g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value, n); g.gain.linearRampToValueAtTime(0, n + 0.15); try { src.stop(n + 0.2); } catch (e) {} } };
+  };
   // motoren: hver motor har sin egen lyd; dampmaskinen afspilles som én optagelse, hvor browseren ændrer tempoet uden at ændre tonen
   SFX.hentMotor = function (id) { this.wantMotor = id; if (!this.ctx) return; if (id === 'steam') this.hent('damp_loop', false); else if (LYD_MOTOR[id]) this.hent(LYD_MOTOR[id]); };
   const se1 = SFX.startEngine, en1 = SFX.engine, st1 = SFX.stopEngine;
@@ -1815,6 +1829,7 @@ class Build extends Phaser.Scene {
     const picks = Phaser.Utils.Array.Shuffle(list.slice()).slice(0, 3);
     const STEP = 170;   // afstand mellem delene på strimlen
     let left = 3;
+    const spin = SFX.loopLyd('enarmet_spin', 0.55, 4);   // hjulene snurrer, til sidste vindue er stoppet
     this.windows.forEach((w, i) => {
       w.q.setVisible(false); w.strip.removeAll(true); w.part = null;
       // strimlen: 8-12 tilfældige dele, og den valgte nederst – vi ruller nedad til den
@@ -1825,9 +1840,10 @@ class Build extends Phaser.Scene {
       w.strip.y = w.y - (seq.length - 1) * STEP;   // start: første del i vinduet; strimlen ruller nedad
       let lastTick = 0;
       this.tweens.add({ targets: w.strip, y: w.y + 18, duration: 1100 + i * 500, ease: 'Quad.easeOut',
-        onUpdate: () => { const k = Math.floor(w.strip.y / STEP); if (k !== lastTick) { lastTick = k; SFX.tick(); } },
+        onUpdate: () => { const k = Math.floor(w.strip.y / STEP); if (k !== lastTick) { lastTick = k; if (!spin) SFX.tick(); } },
         onComplete: () => {
-          SFX.stop(); w.part = picks[i];
+          if (!SFX.smp('enarmet_ding', 0.8)) SFX.stop(); w.part = picks[i];   // ding, når vinduet stopper
+          if (left === 1 && spin) spin.stop();
           this.tweens.add({ targets: w.strip, y: w.y, duration: 220, ease: 'Bounce.easeOut' });
           if (--left === 0) { this.spinning = false; this.ready = true; this.hintText.setText('Tryk på den, du vil have!'); this.windows.forEach(x => { x.glow.setVisible(true); this.tweens.add({ targets: x.glow, alpha: 0.3, duration: 400, yoyo: true, repeat: -1 }); }); }
         } });
@@ -1846,7 +1862,7 @@ class Build extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.pan(W + 640, H / 2, 650, 'Sine.easeInOut');
     this.addToPreview(kind, part, { x: w.x, y: w.y });
-    this.time.delayedCall(1420, () => { cam.shake(220, 0.012); SFX.clunk(); });
+    this.time.delayedCall(1420, () => { cam.shake(220, 0.012); if (!SFX.smp(LYD_MONTERING[kind], 0.8)) SFX.clunk(); });   // hver slags del har sin egen lyd
     this.time.delayedCall(2050, () => {
       if (this.step < STEPS.length) {
         cam.pan(W / 2, H / 2, 650, 'Sine.easeInOut');
@@ -1964,7 +1980,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    this.add.text(W - 10, H - 8, 'v0.12.0', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
+    this.add.text(W - 10, H - 8, 'v0.13.0', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
 
     this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Build'));
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Build'));
@@ -2474,14 +2490,16 @@ class Game extends Phaser.Scene {
     s.tweens.add({ targets: ufo, y: hoverY, duration: 1200, ease: 'Sine.easeOut' });
     const t0 = s.time.now; let lifting = false, liftTween = null;
     const B = Phaser.Physics.Matter.Matter.Body;
-    const end = () => { obs.done = true; ufo.tick = null; beam.clear(); s.matter.world.remove(body); obs.bodies = []; };
+    let beamSnd = null;
+    const end = () => { obs.done = true; ufo.tick = null; beam.clear(); s.matter.world.remove(body); obs.bodies = []; if (beamSnd) beamSnd.stop(); };
+    ufo.once('destroy', () => { if (beamSnd) beamSnd.stop(); });   // ryddes ufoen væk, slukkes lyden også
     ufo.tick = (sc, time) => {
       if (obs.done) return;
       const bob = Math.sin((time - t0) / 300) * 6;
       if (time - t0 > 1200) ufo.y = hoverY + bob;
       B.setPosition(body, { x: ufo.x, y: ufo.y + 6 });
       if (time - t0 > 1400 && !lifting) {   // lysstrålen tændes og koen løftes langsomt
-        lifting = true; SFX.zap();
+        lifting = true; beamSnd = SFX.loopLyd('ufo_straale', 0.5, 5); if (!beamSnd) SFX.zap();   // strålens lyd kører, så længe strålen er tændt
         liftTween = s.tweens.add({ targets: cow, y: ufo.y + 30, angle: 25, duration: 4200, ease: 'Sine.easeIn', onComplete: () => {   // for sent: koen er væk
           end(); SFX.whoosh();
           s.tweens.add({ targets: cow, scale: 0, duration: 250, onComplete: () => cow.destroy() });
@@ -2502,11 +2520,10 @@ class Game extends Phaser.Scene {
       end(); if (liftTween) liftTween.stop(); s.tweens.killTweensOf(cow); s.tweens.killTweensOf(ufo);
       SFX.bigCrash(); s.cameras.main.shake(300, 0.01); s.spawnPieces(ufo.x, ufo.y, 0x95a5a6, 8, 10, 7);
       const gy = s.groundY(ufo.x + 220) - 24;
-      s.tweens.add({ targets: ufo, x: ufo.x + 220, y: gy, angle: 400, duration: 800, ease: 'Quad.easeIn', onComplete: () => { SFX.crash(); s.cameras.main.shake(200, 0.008); s.spawnPieces(ufo.x, ufo.y, 0x7f8c8d, 10, 12, 8); for (let i = 0; i < 6; i++) s.time.delayedCall(i * 200, () => s.puffAt(ufo.x + Phaser.Math.Between(-30, 30), ufo.y - 10)); } });
+      s.tweens.add({ targets: ufo, x: ufo.x + 220, y: gy, angle: 400, duration: 800, ease: 'Quad.easeIn', onComplete: () => { if (!SFX.smp('krak_ufo', 0.85)) SFX.crash(); s.cameras.main.shake(200, 0.008); s.spawnPieces(ufo.x, ufo.y, 0x7f8c8d, 10, 12, 8); for (let i = 0; i < 6; i++) s.time.delayedCall(i * 200, () => s.puffAt(ufo.x + Phaser.Math.Between(-30, 30), ufo.y - 10)); } });
       s.tweens.add({ targets: cow, y: y - cr.h / 2, angle: 0, duration: 500, ease: 'Bounce.easeOut', onComplete: () => { SFX.say(cr.snd); s.tweens.add({ targets: cow, y: y - cr.h / 2 - 64, duration: 300, yoyo: true, repeat: 2, ease: 'Quad.out' }); } });
       const txt = s.add.text(cow.x, y - 150, cr.name + ' er reddet!', { fontFamily: FONT, fontSize: '44px', color: '#fff', stroke: '#27ae60', strokeThickness: 8 }).setOrigin(0.5).setDepth(30).setScale(0.3);
-      s.tweens.add({ targets: txt, scale: 1, duration: 350, ease: 'Back.out' }); s.tweens.add({ targets: txt, alpha: 0, y: y - 230, delay: 1500, duration: 600, onComplete: () => txt.destroy() });
-      SFX.tada();
+      s.tweens.add({ targets: txt, scale: 1, duration: 350, ease: 'Back.out' }); s.tweens.add({ targets: txt, alpha: 0, y: y - 230, delay: 1500, duration: 600, onComplete: () => txt.destroy() });   // dyret siger selv sin lyd – ingen fanfare
     };
   }
 
@@ -2718,7 +2735,7 @@ class Game extends Phaser.Scene {
   collectWrench(wr) {
     const x = wr.img.x, y = wr.img.y; wr.img.destroy();
     this.health = Math.min(100, this.health + 15);
-    SFX.pop(); SFX.blip(880, 1320, 0.18, 'triangle', 0.22); setTimeout(() => SFX.blip(1320, 1760, 0.2, 'triangle', 0.18), 110);
+    if (!SFX.smp('m_hjul', 0.8)) { SFX.pop(); SFX.blip(880, 1320, 0.18, 'triangle', 0.22); }   // skraldenøglen: bilen bliver repareret
     this.popFx(x, y, 0xaee3ff); this.spawnPieces(x, y, 0xf1c40f, 8, 7, 6);
     const t = this.add.text(x, y - 20, '+15 %', { fontFamily: FONT, fontSize: '44px', color: '#2ecc71', stroke: '#ffffff', strokeThickness: 8 }).setOrigin(0.5).setDepth(20);
     this.tweens.add({ targets: t, y: y - 120, alpha: 0, duration: 1100, ease: 'Quad.out', onComplete: () => t.destroy() });
