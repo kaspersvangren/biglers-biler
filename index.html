@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.13.0)
+//  Biglers Biler – etape 3  (v0.13.1)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -309,6 +309,12 @@ SFX.hent = function (k, decode = true) {
 })();
 document.addEventListener('pointerdown', () => SFX.init(), { passive: true });
 SFX.init();   // prøv at starte lyden med det samme: lykkes i den installerede app, ellers starter den ved første tryk
+// slukkes skærmen eller lægges spillet i baggrunden, holder al lyd pause (musik, motor, effekter) og fortsætter, hvor den slap
+document.addEventListener('visibilitychange', () => {
+  const c = SFX.ctx; if (!c) return; const el = SFX.engF && SFX.engF.el;
+  if (document.hidden) { c.suspend().catch(() => {}); if (el) el.pause(); }
+  else { c.resume().catch(() => {}); if (el) el.play().catch(() => {}); }
+});
 document.addEventListener('keydown', () => SFX.init());
 
 // ---------- teksturer tegnet i kode ----------
@@ -1980,7 +1986,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    this.add.text(W - 10, H - 8, 'v0.13.0', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
+    this.add.text(W - 10, H - 8, 'v0.13.1', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
 
     this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Build'));
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Build'));
