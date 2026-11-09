@@ -14,10 +14,9 @@
   html, body { margin: 0; padding: 0; background: var(--bg); overflow: hidden; height: 100%;
     touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   canvas { display: block; }
-  #rot { display: none; position: fixed; inset: 0; background: #1b1f3a; color: #fff; z-index: 10;
-    align-items: center; justify-content: center; text-align: center;
-    font: bold 28px Arial, sans-serif; padding: 40px; box-sizing: border-box; }
-  @media (orientation: portrait) and (pointer: coarse) { #rot { display: flex; } }
+  /* spillet ligger altid ned: står tabletten op, drejes hele spillet 90 grader (størrelsen sættes fra JS) */
+  #wrap { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  body.rot #wrap { transform-origin: 0 0; transform: rotate(90deg); }
 </style>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&display=swap">
@@ -25,11 +24,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
 </head>
 <body>
-<div id="rot">🔄<br><br>Vend tabletten, så den ligger ned</div>
+<div id="wrap"></div>
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.8.2)
+//  Biglers Biler – etape 3  (v0.8.3)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -206,7 +205,7 @@ function makeTextures(s) {
   g.generateTexture('smoke', 24, 24); g.clear();
   g.fillStyle(0xffffff); g.beginPath(); g.arc(22, 30, 22, -2.2, -0.9, false); g.arc(22, 30, 12, -0.9, -2.2, true); g.closePath(); g.fillPath();   // ballonstump
   g.generateTexture('shard', 44, 36); g.clear();
-  C(g, 10, 10, 9, 0xffffff, 0.55); C(g, 10, 10, 5, 0xffffff); g.generateTexture('blink', 20, 20); g.clear();   // udrykningsblink (tones i farven)
+  C(g, 24, 24, 23, 0xffffff, 0.16); C(g, 24, 24, 17, 0xffffff, 0.3); C(g, 24, 24, 11, 0xffffff, 0.75); C(g, 24, 24, 6.5, 0xffffff); g.generateTexture('blink', 48, 48); g.clear();   // udrykningsblink med lysskær (tones i farven)   // udrykningsblink (tones i farven)
   // knap-ikoner (64 x 64)
   const icon = (key, fn) => { g.clear(); fn(); g.generateTexture(key, 64, 64); g.clear(); };
   icon('ic_car', () => { R(g, 4, 26, 56, 22, 8, 0xffffff); R(g, 16, 12, 30, 20, { tl: 10, tr: 12, bl: 0, br: 0 }, 0xffffff); R(g, 22, 16, 18, 12, 4, 0x3498db); C(g, 17, 50, 9, 0x2c3e50); C(g, 47, 50, 9, 0x2c3e50); C(g, 17, 50, 3, 0xffffff); C(g, 47, 50, 3, 0xffffff); });
@@ -1172,16 +1171,31 @@ function addBlinks(scene, container, ch, topX, topY, sc) {   // lægger blinkend
 }
 
 // tegner en samlet bil (statisk) ind i en container ud fra valgte dele – bruges på hovedmenuen
+// hjul og værktøj i menu, tyveknægt og værksted – samme regler som i spillet, omregnet til bilens uskalerede enheder
+// (hjulenes radius er i spil-pixels, bilen er tegnet uskaleret, så alt deles med bilens skala)
+function wheelGeom(ch, wh) {
+  const sc = ch.scale || 1, hs = ch.h * sc, r = wh.r;
+  const oy = (wh.upright ? hs / 2 + r - 5 : Math.max(hs / 2 - 2, hs / 2 - r + 14)) / sc;   // skøjterne går lidt op under bunden, så de tydeligt sidder fast
+  const cy = -r / sc - oy - (wh.spring ? 50 : 0);
+  const xs = r >= 60 ? [-giantHalf(ch, r) / sc, giantHalf(ch, r) / sc] : [ch.back, ch.front];
+  return { oy, cy, xs };
+}
+// værktøjet sidder foran forhjulet / bæltet / kæmpehjulet, på en bjælke ud fra bilen hvis det er nødvendigt
+function toolMount(ch, wh) {
+  const sc = ch.scale || 1, base = ch.w / 2 - 6 + (ch.toolOffset || 0);
+  if (!wh) return base;
+  const front = wh.r >= 60 ? giantHalf(ch, wh.r) : ch.front * sc, rr = wh.belt ? wh.r + 7 : wh.r;
+  return Math.max(base, (front + rr + 2) / sc);
+}
 function assembleCar(scene, p, ch, wh, mo, to) {
   const sc0 = ch.scale || 1;
-  const oy = wh.upright ? ch.h / 2 + wh.r : Math.max(ch.h / 2 - 2, ch.h / 2 - wh.r + 14);
-  const cy = -wh.r - oy - (wh.spring ? 50 : 0);
+  const { oy, cy } = wheelGeom(ch, wh);
   const body = scene.add.image(0, cy, 'p_chassis_' + ch.id + '_body'); p.add(body);
   p.add(scene.add.image(ch.topOx || 0, cy + topRel(ch), 'p_chassis_' + ch.id + '_top'));
   addBlinks(scene, p, ch, ch.topOx || 0, cy + topRel(ch), 1);
   if (ch.dangle) { const d = scene.add.image(ch.dangle.ox, cy + ch.dangle.oy + ch.dangle.h / 2, 'p_chassis_' + ch.id + '_dangle'); p.add(d);
     if (ch.dangle.prop) p.add(scene.add.image(ch.dangle.ox + ch.dangle.prop.ox, d.y + ch.dangle.prop.oy, 'p_chassis_' + ch.id + '_prop')); }
-  const xs = wh.r >= 60 ? [-giantHalf(ch, wh.r) / sc0, giantHalf(ch, wh.r) / sc0] : [ch.back, ch.front], wheels = [];
+  const xs = wheelGeom(ch, wh).xs, wheels = [];
   if (wh.belt) { const bg = scene.add.graphics(); beltPath(bg, xs[0], cy + oy, xs[1], cy + oy, (wh.r + 7) / sc0, 0); p.add(bg); }
   const rs = rearScaleFor(ch, wh);
   xs.forEach((ox, i) => { const k = i === 0 ? rs : 1, dy = -(k - 1) * wh.r / sc0;
@@ -1192,7 +1206,7 @@ function assembleCar(scene, p, ch, wh, mo, to) {
   if (mo.rear) { const rp = rearMotorPos(ch, mo); p.addAt(scene.add.image(rp.x, cy + rp.y, 'rm_' + mo.id).setScale(rmS(mo)), 0); }
   else { const mp = motorPlace(ch, mo); p.add(scene.add.image(-ch.w / 2 + mp.x + 31 * mp.s, cy - ch.h / 2 - ch.topH + mp.y + 11 * mp.s, 'p_motors_' + mo.id).setScale(mp.s)); }
   if (to) {
-    const mount = Math.max(ch.w / 2 - 6 + (ch.toolOffset || 0), wh.r >= 60 ? (giantHalf(ch, wh.r) + wh.r + 2) / sc0 : 0);
+    const mount = toolMount(ch, wh);
     if (mount > ch.w / 2) p.addAt(scene.add.image((ch.w / 2 + mount) / 2, cy + to.oy, 'slab').setDisplaySize(mount - ch.w / 2 + 12, 10).setTint(0x7f8c8d), 0);
     const tool = scene.add.image(mount + to.w / 2, cy + to.oy, 'p_tools_' + to.id); p.add(tool);
     if (to.drawSpin) { const sp = scene.add.image(tool.x + to.spinAt.x, tool.y + to.spinAt.y, 'p_tools_' + to.id + '_spin'); p.add(sp); scene.tweens.add({ targets: sp, angle: 360, duration: 800, repeat: -1 }); }
@@ -1439,7 +1453,7 @@ function vehicleFromBuild() {
   const mass = chMass + 2 * Math.PI * wr * wr * wd + (to ? to.w * to.h * 0.002 : 0);
   return {
     chassis: { w, h, density: ch.density, topH: (ch.topH + 24) * sc, scale: sc, topOx: (ch.topOx || 0) * sc, toolOffset: (ch.toolOffset || 0) * sc, dangle: ch.dangle ? { ox: ch.dangle.ox * sc, oy: ch.dangle.oy * sc, w: ch.dangle.w, h: ch.dangle.h, prop: ch.dangle.prop ? { ox: ch.dangle.prop.ox * sc, oy: ch.dangle.prop.oy * sc } : null } : null },
-    wheel: { r: wr, back: wh.r >= 60 ? -giantHalf(ch, wh.r) : ch.back * sc, front: wh.r >= 60 ? giantHalf(ch, wh.r) : ch.front * sc, oy: wh.upright ? h / 2 + wh.r : Math.max(h / 2 - 2, h / 2 - wh.r + 14), density: wd, grip: wh.grip, shape: wh.shape || 'circle' },   // kæmpehjul sidder under bilens ender
+    wheel: { r: wr, back: wh.r >= 60 ? -giantHalf(ch, wh.r) : ch.back * sc, front: wh.r >= 60 ? giantHalf(ch, wh.r) : ch.front * sc, oy: wh.upright ? h / 2 + wh.r - 5 : Math.max(h / 2 - 2, h / 2 - wh.r + 14), density: wd, grip: wh.grip, shape: wh.shape || 'circle' },   // kæmpehjul sidder under bilens ender
     motor: { power: mo.power * Math.pow(30 / wr, 0.8), pitch: mo.pitch, thrust: mo.thrust || 0, frames: mo.rear ? 0 : (mo.frames || 0), accel: Phaser.Math.Clamp(0.15 * (mo.power / 0.33) / (mass / 45), 0.04, 0.4) },
     tool: to,
     smoke: mo.rear ? { ox: (rearMotorPos(ch, mo).x - 32 * rmS(mo)) * sc, oy: rearMotorPos(ch, mo).y * sc } : { ox: (motorPlace(ch, mo).x + (mo.smokeAt ? mo.smokeAt.x : 10) * motorPlace(ch, mo).s - ch.w / 2) * sc, oy: (-(ch.h / 2 + ch.topH) + motorPlace(ch, mo).y + (mo.smokeAt ? mo.smokeAt.y : -10) * motorPlace(ch, mo).s) * sc },   // udstødningens plads = motorens
@@ -1671,17 +1685,16 @@ class Build extends Phaser.Scene {
       drop(p.body, 'left'); drop(p.top, 'left');   // karrosseriet kommer ind fra venstre uden for værkstedet
       this.time.delayedCall(1450, () => { if (p.active) addBlinks(this, p, part, part.topOx || 0, p.top.y, 1); });
     } else if (kind === 'wheels') {
-      const oy = part.upright ? ch.h / 2 + part.r : Math.max(ch.h / 2 - 2, ch.h / 2 - part.r + 14);
-      const cy = -part.r - oy - (part.spring ? 50 : 0);   // chassis-center så hjulene rører jorden
-      p.body.y = cy; p.top.y = cy + topRel(ch); if (p.dangle) p.dangle.y = cy + ch.dangle.oy + ch.dangle.h / 2; if (p.prop) p.prop.y = p.dangle.y + ch.dangle.prop.oy; if (p.tool) p.tool.y = cy + p.tool.toolOy; if (p.motor) p.motor.y = cy - ch.h / 2 - ch.topH + ch.motorY + 11 * (ch.motorScale || 1);
+      const { oy, cy, xs: wxs } = wheelGeom(ch, part);   // chassis-center så hjulene rører jorden
+      p.body.y = cy; p.top.y = cy + topRel(ch); if (p.dangle) p.dangle.y = cy + ch.dangle.oy + ch.dangle.h / 2; if (p.prop) p.prop.y = p.dangle.y + ch.dangle.prop.oy; if (p.tool) p.tool.y = cy + p.tool.toolOy;
       const rs = rearScaleFor(ch, part);
-      (part.r >= 60 ? [-giantHalf(ch, part.r) / (ch.scale || 1), giantHalf(ch, part.r) / (ch.scale || 1)] : [ch.back, ch.front]).forEach((ox, wi) => { const wk = wi === 0 ? rs : 1, wdy = -(wk - 1) * part.r / (ch.scale || 1);
+      wxs.forEach((ox, wi) => { const wk = wi === 0 ? rs : 1, wdy = -(wk - 1) * part.r / (ch.scale || 1);
         if (part.spring) { const sp = this.add.image(ox, cy + oy + 22 + wdy, 'spring').setScale(1 / (ch.scale || 1), 56 / 44 / (ch.scale || 1)); p.add(sp); drop(sp); }
         const w = this.add.image(ox, cy + oy + (part.spring ? 50 : 0) + wdy, 'p_wheels_' + part.id + (part.belt ? '_one' : '')).setScale(wk / (ch.scale || 1)); p.add(w); drop(w, ox < 0 ? 'left' : 'right');
         if (!part.upright) this.tweens.add({ targets: w, angle: 360, duration: 2000, repeat: -1, delay: 1200 }); });
       if (part.belt) {   // bæltet tegnes om de to hjul, når de er landet
         const bg = this.add.graphics(); p.addAt(bg, p.list.length - 2);
-        const xs = part.r >= 60 ? [] : [ch.back, ch.front], R = (part.r + 7) / (ch.scale || 1), yy = cy + oy;
+        const xs = wxs, R = (part.r + 7) / (ch.scale || 1), yy = cy + oy;
         this.time.delayedCall(1430, () => { beltPath(bg, xs[0], yy, xs[1], yy, R, 0); bg.setAlpha(0); this.tweens.add({ targets: bg, alpha: 1, duration: 200 }); });
       }
     } else if (kind === 'motors') {
@@ -1689,7 +1702,7 @@ class Build extends Phaser.Scene {
       if (part.rear) { const rp = rearMotorPos(ch, part); p.motor = this.add.image(rp.x, p.body.y + rp.y, 'rm_' + part.id).setScale(rmS(part)); p.addAt(p.motor, 0); drop(p.motor, 'left'); }   // jet/raket flyver ind bagfra
       else { const mp = motorPlace(ch, part); p.motor = this.add.image(-ch.w / 2 + mp.x + 31 * mp.s, p.body.y - ch.h / 2 - ch.topH + mp.y + 11 * mp.s, 'p_motors_' + part.id).setScale(mp.s); p.add(p.motor); drop(p.motor, 'top'); }
     } else if (kind === 'tools') {
-      const wh = this.chosen.wheels, sc0 = ch.scale || 1, mount = Math.max(ch.w / 2 - 6 + (ch.toolOffset || 0), wh && wh.r >= 60 ? (giantHalf(ch, wh.r) + wh.r + 2) / sc0 : 0);
+      const wh = this.chosen.wheels, mount = toolMount(ch, wh);
       if (mount > ch.w / 2) { const beam = this.add.image((ch.w / 2 + mount) / 2, p.body.y + part.oy, 'slab').setDisplaySize(mount - ch.w / 2 + 12, 10).setTint(0x7f8c8d); p.addAt(beam, 0); drop(beam, 'right'); }
       p.tool = this.add.image(mount + part.w / 2, p.body.y + part.oy, 'p_tools_' + part.id); p.tool.toolOy = part.oy; p.add(p.tool);
       if (part.drawSpin) { const sp = this.add.image(p.tool.x + part.spinAt.x, p.tool.y + part.spinAt.y, 'p_tools_' + part.id + '_spin'); p.add(sp); drop(sp, 'right'); this.tweens.add({ targets: sp, angle: 360, duration: 800, repeat: -1, delay: 1200 }); }
@@ -1750,7 +1763,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    this.add.text(W - 10, H - 8, 'v0.8.2', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
+    this.add.text(W - 10, H - 8, 'v0.8.3', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
 
     this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Build'));
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Build'));
@@ -1801,7 +1814,7 @@ class Game extends Phaser.Scene {
     this.wx = []; this.wxCur = null; this.wxType = null; this.wxFade = 1; this.wxLastX = 0;   // vejr: små ting, der falder eller fyger hen over skærmen
     for (let i = 0; i < 36; i++) { const p = this.add.image(0, 0, 'wx_snow').setScrollFactor(0).setDepth(15).setVisible(false); this.wx.push(p); }
     this.fg = this.add.tileSprite(0, H - 140, W, 90, 'fg_grass').setOrigin(0).setScrollFactor(0).setDepth(16).setAlpha(0.6).setScale(1.55);   // forgrund, der suser forbi foran bilen
-    this.lite = false; if (SETTINGS.lite) this.setLite(true);
+    this.lite = false; this.liteOffs = 0; this.liteAt = 0; this.fastSince = 0; this.slowSince = 0; if (SETTINGS.lite) this.setLite(true);
 
     // terræn
     this.t = { pts: [], bodies: [], gfx: this.add.graphics(), x: -800, y: GROUND_Y, slope: 0, nextRamp: 2200, rampLeft: 0 };
@@ -1932,16 +1945,18 @@ class Game extends Phaser.Scene {
     this.biomeCols = { dirt: lerpColor(m.a.dirt, m.b.dirt, t), grass: lerpColor(m.a.grass, m.b.grass, t) };
     this.cameras.main.setBackgroundColor(lerpColor(m.a.sky, m.b.sky, t));
     const hc = lerpColor(m.a.hills, m.b.hills, t); this.hills.setTint(hc); this.hillsB.setTint(hc); this.groundBg.setFillStyle(lerpColor(m.a.ground, m.b.ground, t));
-    if (this.hills.texture.key !== m.farA) this.hills.setTexture(m.farA); if (this.hillsB.texture.key !== m.farB) this.hillsB.setTexture(m.farB);
+    // tileSprites laver deres eget internt billede, så texture.key passer aldrig – vi husker selv, hvad der er lagt på (ellers lægges det på igen hvert billede: ~15 ms)
+    const setTex = (o, k) => { if (o.texKey !== k) { o.texKey = k; o.setTexture(k); } };
+    setTex(this.hills, m.farA); setTex(this.hillsB, m.farB);
     this.hills.setAlpha(1 - t).setVisible(t < 1); this.hillsB.setAlpha(t).setVisible(t > 0);
     this.matter.world.setGravity(0, (m.a.gravity || 1) * (1 - t) + (m.b.gravity || 1) * t);   // månen: lav tyngdekraft
     const sa = m.a.skyDeco, sb = m.b.skyDeco;
-    if (sa && this.skyA.texture.key !== sa) this.skyA.setTexture(sa); if (sb && this.skyB.texture.key !== sb) this.skyB.setTexture(sb);
+    if (sa) setTex(this.skyA, sa); if (sb) setTex(this.skyB, sb);
     this.skyA.setAlpha(1 - t).setVisible(!!sa && t < 1); this.skyB.setAlpha(t).setVisible(!!sb && t > 0);
     this.sun.setAlpha((m.a.sun ? 1 - t : 0) + (m.b.sun ? t : 0)).setVisible(!!(m.a.sun || m.b.sun));
     this.night = (m.a.night ? 1 - t : 0) + (m.b.night ? t : 0);
     const cl = (m.a.clouds ?? 1) * (1 - t) + (m.b.clouds ?? 1) * t; this.clouds.setAlpha((1 - this.night * 0.6) * cl);   // ingen skyer på månen
-    const fb = t < 0.5 ? m.a : m.b, fk = fb.fg || 'fg_grass'; if (this.fg.texture.key !== fk) this.fg.setTexture(fk);   // forgrund efter landskab
+    const fb = t < 0.5 ? m.a : m.b, fk = fb.fg || 'fg_grass'; setTex(this.fg, fk);   // forgrund efter landskab
     if (fk === 'fg_grass') this.fg.setTint(this.biomeCols.grass); else this.fg.clearTint();
     this.wxType = fb.weather || null; this.wxTints = fb.wxTints || null; this.wxFade = Math.abs(t * 2 - 1);
   }
@@ -2031,7 +2046,7 @@ class Game extends Phaser.Scene {
     if (BUILD.motor && BUILD.motor.rear) { const mo = BUILD.motor, rp = rearMotorPos(BUILD.chassis, mo), sc = V.chassis.scale, S = rmS(mo);
       this.rearMotor = { img: this.add.image(0, 0, 'rm_' + mo.id).setDepth(8).setScale(S * sc), lx: rp.x * sc, ly: rp.y * sc,
         nozzles: mo.nozzles.map(ny => ({ lx: (rp.x - 33 * S) * sc, ly: (rp.y + (ny - 21) * S) * sc })) }; }
-    this.blinks = blinkOffsets(BUILD.chassis).map((b, i) => { const img = this.add.image(0, 0, 'blink').setTint(b.c).setDepth(9).setScale(V.chassis.scale * 1.1); this.tweens.add({ targets: img, alpha: 0.1, duration: 240, yoyo: true, repeat: -1, delay: i * 240 }); return { img, lx: this.topOx + b.dx * V.chassis.scale, ly: this.topOy + (b.dy + 12) * V.chassis.scale }; });
+    this.blinks = blinkOffsets(BUILD.chassis).map((b, i) => { const img = this.add.image(0, 0, 'blink').setTint(b.c).setDepth(9.5).setScale(V.chassis.scale * 1.1); this.tweens.add({ targets: img, alpha: 0.1, duration: 240, yoyo: true, repeat: -1, delay: i * 240 }); return { img, lx: this.topOx + b.dx * V.chassis.scale, ly: this.topOy + (b.dy + 12) * V.chassis.scale }; });
 
     const wshapeR = (r) => V.wheel.shape === 'square' ? { type: 'rectangle', width: r * 2 * 0.9, height: r * 2 * 0.9 }
       : V.wheel.shape === 'triangle' ? { type: 'polygon', sides: 3, radius: r * 1.4 }
@@ -2407,7 +2422,7 @@ class Game extends Phaser.Scene {
       const px = bw / 2 - 2, py = h.pivot.y;
       lx = px + Math.sin(ang) * h.len * -1 + h.w / 2 - 8; ly = py + Math.cos(ang) * h.len; la = ang;
     } else if (h.anim === 'scrub') {
-      lx = bw / 2 + h.w / 2 - 6 + (moving ? Math.sin(time / 60) * 10 : 0); ly = 0;
+      lx = bw / 2 + h.w / 2 - 16 + (moving ? Math.sin(time / 60) * 7 : 0); ly = 0;   // skaftet bliver altid inde i holderen
     }
     const pos = world(lx, ly), old = { x: this.head.x, y: this.head.y };
     this.head.setPosition(pos.x, pos.y); this.head.setRotation(a + la);
@@ -2447,7 +2462,7 @@ class Game extends Phaser.Scene {
   update(time, delta) {
     this.stepPhysics(delta);
     if (this.deferred.length) { const q = this.deferred; this.deferred = []; q.forEach(f => f()); }
-    if (this.over) return;
+    if (this.over) { this.drawTerrain(); return; }
     const c = this.chassis, V = VEHICLE;
 
     // styring
@@ -2535,7 +2550,9 @@ class Game extends Phaser.Scene {
     // terræn og forhindringer
     // måler billedtiden: hakker det i flere sekunder, går vi i let tilstand (færre lag og mindre pynt)
     this.frameAvg = (this.frameAvg || 16.7) * 0.95 + Math.min(delta, 100) * 0.05;
-    if (!this.lite && this.frameAvg > 24 && time - this.startTime > 4000) { this.slowSince = this.slowSince || time; if (time - this.slowSince > 2500) this.setLite(true); } else if (this.frameAvg < 20) this.slowSince = 0;
+    if (!this.lite && this.frameAvg > 24 && time - this.startTime > 4000) { this.slowSince = this.slowSince || time; if (time - this.slowSince > 2500) { this.setLite(true); this.liteAt = time; } } else if (this.frameAvg < 20) this.slowSince = 0;
+    // og tilbage igen: kører det stabilt hurtigt i 6 sekunder, slås spare-tilstanden fra (højst to gange pr. tur, så den ikke blinker frem og tilbage)
+    if (this.lite && (this.liteOffs || 0) < 2 && this.frameAvg < 17.5 && time - (this.liteAt || 0) > 3000) { this.fastSince = this.fastSince || time; if (time - this.fastSince > 6000) { this.setLite(false); this.liteOffs = (this.liteOffs || 0) + 1; this.fastSince = 0; this.slowSince = 0; } } else this.fastSince = 0;
     if (this.ui && this.ui.fpsText && (time | 0) % 10 === 0) this.ui.fpsText.setText((1000 / this.frameAvg | 0) + ' fps' + (this.lite ? ' (let)' : ''));
     this.extendTerrain(c.x + W * 1.5);
     this.trimTerrain(c.x - W * 1.5);
@@ -2587,6 +2604,7 @@ class Game extends Phaser.Scene {
     if (this.over) return;
     this.over = true;
     this.matter.world.pause();
+    this.cameras.main.stopFollow();   // kameraet står stille, så man ikke ser ud over den tegnede jord
     SFX.stopEngine();
     const dist = Math.floor(this.maxDist);
     const record = dist > 0 && dist > Math.floor(SETTINGS.best);
@@ -2669,16 +2687,44 @@ class UI extends Phaser.Scene {
 }
 
 // =====================================================================
+// ---------- altid liggende ----------
+// Nyere Android ignorerer appens ønske om at ligge ned på tablets. Står skærmen op (berøringsskærm), drejer vi selv spillet 90 grader.
+let ROTATED = false;
+function applyRotation() {
+  const wrap = document.getElementById('wrap'), iw = window.innerWidth, ih = window.innerHeight;
+  ROTATED = ih > iw && window.matchMedia('(pointer: coarse)').matches;
+  document.body.classList.toggle('rot', ROTATED);
+  wrap.style.width = (ROTATED ? ih : iw) + 'px'; wrap.style.height = (ROTATED ? iw : ih) + 'px'; wrap.style.left = (ROTATED ? iw : 0) + 'px';
+  if (window.game && game.isBooted && game.canvas) game.scale.refresh();
+}
+window.addEventListener('resize', applyRotation); window.addEventListener('orientationchange', () => setTimeout(applyRotation, 200));
+applyRotation();
+function patchRotation(game) {
+  // Phaser måler forælderens størrelse på skærmen (drejet = forkert vej) – vi bruger layout-størrelsen i stedet
+  const sm = game.scale;
+  sm.getParentBounds = function () { const w = this.parent.offsetWidth, h = this.parent.offsetHeight;
+    if (this.parentSize.width !== w || this.parentSize.height !== h) { this.parentSize.setSize(w, h); return true; }
+    const r = this.canvas && this.canvas.getBoundingClientRect(); return !!r && (r.x !== this.canvasBounds.x || r.y !== this.canvasBounds.y); };
+  // berøringer: skærmens punkt regnes om til et punkt i det udrejede spil
+  const im = game.input, orig = im.transformPointer.bind(im);
+  im.transformPointer = function (pointer, pageX, pageY, wasMove) {
+    if (!ROTATED) return orig(pointer, pageX, pageY, wasMove);
+    const cv = game.canvas, cb = sm.canvasBounds, u = pageY - window.scrollY, v = window.innerWidth - (pageX - window.scrollX);
+    const gx = (u - cv.offsetLeft) * (W / cv.offsetWidth), gy = (v - cv.offsetTop) * (H / cv.offsetHeight);   // spillets egne koordinater
+    return orig(pointer, cb.left + gx / sm.displayScale.x, cb.top + gy / sm.displayScale.y, wasMove);   // Phaser regner dem tilbage med sin egen skala
+  };
+  sm.refresh();
+}
 function startGame() { window.game = new Phaser.Game({
   type: Phaser.AUTO,
   width: W, height: H,
-  parent: document.body,
+  parent: 'wrap',
   backgroundColor: '#7ec8e3',
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER, fullscreenTarget: document.documentElement },   // centreres af #wrap (flex), som også virker drejet
   physics: { default: 'matter', matter: { gravity: { y: 1.0 }, runner: { isFixed: true, fps: 60 }, enableSleeping: true, positionIterations: 12, velocityIterations: 8, constraintIterations: 4, debug: false } },
   audio: { noAudio: true },
   scene: [Title, Build, Game, UI]
-}); }
+}); window.game.events.once('ready', () => patchRotation(window.game)); }
 (document.fonts && document.fonts.load ? Promise.race([document.fonts.load("700 20px 'Fredoka'"), new Promise(r => setTimeout(r, 1500))]) : Promise.resolve()).then(startGame, startGame);
 </script>
 <script>
