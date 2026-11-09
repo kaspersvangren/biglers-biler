@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.16.0)
+//  Biglers Biler – etape 3  (v0.17.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -690,6 +690,42 @@ function makeTextures(s) {
     g.fillStyle(0x6c7a7b); g.fillRect(31, 24, 8, 40); g.fillRect(21, 34, 28, 8);
     g.lineStyle(2, 0x5d6d6e); g.beginPath(); g.moveTo(14, 54); g.lineTo(22, 62); g.lineTo(18, 72); g.strokePath();
     g.fillStyle(0x27ae60); g.fillEllipse(16, 90, 20, 8); g.fillEllipse(54, 91, 16, 6); g.fillStyle(0x1e8449); [12, 18, 24, 50, 56].forEach(x => g.fillTriangle(x - 3, 92, x, 82, x + 3, 92)); });
+  // ---- Jul (v0.17) ----
+  const gift = (box, rib, w, h) => { g.fillStyle(box); g.fillRect(0, 10, w, h - 10); g.fillStyle(0x000000, 0.12); g.fillRect(w * 0.62, 10, w * 0.38, h - 10);
+    g.fillStyle(box); g.fillRect(-2 + 2, 6, w, 10); g.fillStyle(rib); g.fillRect(w / 2 - 5, 6, 10, h - 6); g.fillRect(0, 8, w, 7);
+    g.fillEllipse(w / 2 - 10, 5, 18, 10); g.fillEllipse(w / 2 + 10, 5, 18, 10); g.fillCircle(w / 2, 6, 5); };
+  cre('gift_r', 60, 56, () => gift(0xe74c3c, 0xf1c40f, 60, 56)); cre('gift_g', 52, 48, () => gift(0x27ae60, 0xe74c3c, 52, 48)); cre('gift_b', 56, 60, () => gift(0x3498db, 0xffffff, 56, 60));
+  cre('gift_p', 48, 44, () => gift(0x9b59b6, 0xf1c40f, 48, 44));
+  cre('bow', 34, 18, () => { g.fillStyle(0xffffff); g.fillEllipse(8, 9, 16, 12); g.fillEllipse(26, 9, 16, 12); g.fillCircle(17, 9, 5); });
+  cre('xtree', 170, 250, () => {   // pyntet juletræ (stjernen er sit eget billede)
+    g.fillStyle(0x6e4b1f); g.fillRect(74, 210, 22, 40);
+    const G = [0x1e8449, 0x229954, 0x27ae60];
+    [[85, 20, 50, 80], [85, 60, 66, 140], [85, 110, 82, 200], [85, 150, 84, 222]].forEach(([cx, top, hw, bot], i) => { g.fillStyle(G[i % 3]); g.fillTriangle(cx, top, cx - hw, bot, cx + hw, bot); });
+    g.lineStyle(4, 0xf1c40f); [[48, 92, 118, 70], [30, 150, 140, 118], [16, 202, 156, 168]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.strokePath(); });   // guirlande
+    [[70, 70, 0xe74c3c], [100, 96, 0x3498db], [60, 120, 0xf1c40f], [112, 140, 0xe74c3c], [44, 176, 0x9b59b6], [84, 160, 0x3498db], [128, 190, 0xf1c40f], [70, 206, 0xe74c3c], [140, 212, 0x9b59b6], [30, 214, 0x3498db]].forEach(([bx, by, c]) => { g.fillStyle(c); g.fillCircle(bx, by, 7); g.fillStyle(0xffffff, 0.6); g.fillCircle(bx - 2, by - 2, 2); }); });
+  cre('xstar', 44, 44, () => { g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, r = i % 2 ? 9 : 21; g.lineTo(22 + Math.cos(a) * r, 22 + Math.sin(a) * r); } g.closePath(); g.fillPath(); g.fillStyle(0xfff3b0); g.fillCircle(19, 18, 4); });
+  cre('bauble', 18, 18, () => { g.fillStyle(0xffffff); g.fillCircle(9, 10, 8); g.fillStyle(0xbbbbbb); g.fillRect(7, 0, 4, 4); g.fillStyle(0xffffff, 0.8); g.fillCircle(6, 7, 2.5); });
+  cre('bigsnow', 120, 120, () => { g.fillStyle(0xffffff); g.fillCircle(60, 60, 58); g.fillStyle(0xeaf2f8); g.fillCircle(70, 72, 40); g.fillStyle(0xffffff); g.fillCircle(52, 50, 34); g.fillStyle(0xd6eaf8); [[30, 80, 6], [88, 40, 5], [80, 96, 7], [40, 30, 4]].forEach(([a, b, r]) => g.fillCircle(a, b, r)); g.lineStyle(3, 0xaed6f1); g.strokeCircle(60, 60, 57); });
+  const cane = (y0, y1) => { const R = 0xe74c3c;   // slikstok (30 x 120): krog øverst; y0..y1 er den del, der tegnes
+    if (y0 < 40) { g.lineStyle(12, 0xffffff); g.beginPath(); g.arc(16, 22, 12, Math.PI, 0, false); g.strokePath(); g.lineStyle(12, R); g.beginPath(); g.arc(16, 22, 12, Math.PI * 1.15, Math.PI * 1.4, false); g.strokePath(); g.beginPath(); g.arc(16, 22, 12, Math.PI * 1.6, Math.PI * 1.85, false); g.strokePath(); }
+    const a = Math.max(y0, 22), b = y1; g.fillStyle(0xffffff); g.fillRect(22, a, 12, b - a); g.fillStyle(R);
+    for (let y = a - ((a - 22) % 16); y < b; y += 16) { g.beginPath(); g.moveTo(22, Math.max(a, y)); g.lineTo(34, Math.max(a, y - 6)); g.lineTo(34, Math.min(b, y + 2)); g.lineTo(22, Math.min(b, y + 8)); g.closePath(); g.fillPath(); }
+    if (y0 < 40) { g.fillStyle(0xffffff); g.fillRect(-2 + 2, 22, 12, 10); g.fillStyle(R); g.fillRect(0, 26, 12, 4); } };
+  cre('cane', 36, 120, () => cane(0, 120)); cre('cane_top', 36, 60, () => cane(0, 60));
+  cre('cane_bot', 36, 60, () => { g.save(); g.translateCanvas(0, -60); cane(60, 120); g.restore(); });
+  const gb = (part) => {   // honningkagemand (130 x 160) – eller én af hans dele
+    const C1 = 0xb9770e, IC = 0xffffff;
+    const head = (cx, cy) => { g.fillStyle(C1); g.fillCircle(cx, cy, 26); g.fillStyle(0x3b1d10); g.fillCircle(cx - 9, cy - 4, 4); g.fillCircle(cx + 9, cy - 4, 4); g.lineStyle(3, IC); g.beginPath(); g.arc(cx, cy + 4, 11, 0.3, Math.PI - 0.3, false); g.strokePath(); g.fillStyle(0xf1948a); g.fillCircle(cx - 16, cy + 6, 4); g.fillCircle(cx + 16, cy + 6, 4); };
+    const body = (cx, cy) => { g.fillStyle(C1); g.fillRoundedRect(cx - 28, cy - 32, 56, 64, 18); [0xe74c3c, 0x27ae60, 0xe74c3c].forEach((c, i) => { g.fillStyle(c); g.fillCircle(cx, cy - 14 + i * 16, 5); });
+      g.lineStyle(3, IC); g.beginPath(); for (let k = 0; k <= 8; k++) g.lineTo(cx - 22 + k * 5.5, cy + 24 + (k % 2 ? 4 : 0)); g.strokePath(); };
+    const limb = (x0, y0, x1, y1) => { g.lineStyle(26, C1); g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.strokePath(); g.fillStyle(C1); g.fillCircle(x1, y1, 13); g.fillCircle(x0, y0, 13);
+      g.lineStyle(3, IC); const mx = x0 + (x1 - x0) * 0.75, my = y0 + (y1 - y0) * 0.75, nx = -(y1 - y0), ny = x1 - x0, nl = Math.hypot(nx, ny); g.beginPath(); g.moveTo(mx + nx / nl * 9, my + ny / nl * 9); g.lineTo(mx - nx / nl * 9, my - ny / nl * 9); g.strokePath(); };
+    if (part === 'all') { limb(46, 76, 14, 56); limb(84, 76, 116, 56); limb(54, 112, 40, 146); limb(76, 112, 90, 146); body(65, 92); head(65, 34); }
+    if (part === 'head') head(30, 30);
+    if (part === 'body') body(32, 36);
+    if (part === 'arm') limb(14, 16, 46, 16);
+    if (part === 'leg') limb(16, 14, 16, 48); };
+  cre('gingerbread', 130, 162, () => gb('all')); cre('gb_head', 60, 60, () => gb('head')); cre('gb_body', 64, 72, () => gb('body')); cre('gb_arm', 60, 32, () => gb('arm')); cre('gb_leg', 32, 64, () => gb('leg'));
   g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, rr = i % 2 ? 5 : 11; g.lineTo(12 + Math.cos(a) * rr, 12 + Math.sin(a) * rr); } g.closePath(); g.fillPath(); g.generateTexture('star_s', 24, 24); g.clear();
   g.fillStyle(0xffffff); g.fillRect(0, 0, 30, 36); g.fillStyle(0xe8eef2); for (let yy = 6; yy < 36; yy += 8) g.fillRect(4, yy, 22, 2); g.generateTexture('tp_sheet', 30, 36); g.clear();
   // strandbold
@@ -913,7 +949,7 @@ const OBSTACLES = [
         [s.chassis, ...s.wheels].forEach(o => o.setVelocityY(Math.min(o.body.velocity.y, -17)));
         s.tweens.add({ targets: img, scaleY: 0.6, duration: 80, yoyo: true }); };
       return obs; } },
-  { minD: 0.05, w: 2, flat: true, biomes: ['sne'], make(s, x, y) {   // snemand – kun i snelandskabet
+  { minD: 0, w: 3, flat: true, biomes: ['sne'], make(s, x, y) {   // snemand – kun i snelandskabet
       const gos = [], bodies = [], r = [36, 28, 20]; let py = y;
       r.forEach((rad) => { py -= rad; const b = s.obsImage('snow', x, py, { shape: { type: 'circle', radius: rad }, isStatic: true }, rad * 2, rad * 2); b.rad = rad; gos.push(b); bodies.push(b.body); py -= rad - 4; });
       const hat = s.obsImage('hat', x, py - 6, { shape: { type: 'rectangle', width: 56, height: 24 }, isStatic: true }); gos.push(hat); bodies.push(hat.body);
@@ -1063,6 +1099,74 @@ const OBSTACLES = [
         obs.done = true; s.matter.world.remove(body); obs.bodies = []; obs.hardness = 0;
         if (smash) { SFX.rockBreak(); s.spawnPieces(x, y - 40, 0x95a5a6, 8, 16, 7); s.spawnPieces(x, y - 40, 0x7f8c8d, 4, 10, 6); img.destroy(); return; }
         SFX.clunk(); s.spawnPieces(x, y - 6, 0x5d4a36, 4, 8, 4); s.tweens.add({ targets: img, angle: 82, duration: 650, ease: 'Bounce.out' }); };
+      return obs; } },
+  // ---------- Jul (sne) ----------
+  { minD: 0, w: 3, flat: true, biome: 'sne', make(s, x, y) {   // gavebunke: den ramte gave springer, resten tumler – sløjfer og papir flyver
+      const keys = ['gift_r', 'gift_g', 'gift_b', 'gift_p'], cols = { gift_r: [0xe74c3c, 0xf1c40f], gift_g: [0x27ae60, 0xe74c3c], gift_b: [0x3498db, 0xffffff], gift_p: [0x9b59b6, 0xf1c40f] };
+      const gos = [], bodies = [], obs = { gos, bodies, hardness: 0.05, broken: false, fragile: true };
+      const place = (k, px, by) => { const t = s.textures.get(k).getSourceImage(), b = s.obsImage(k, px, by - t.height / 2, { shape: { type: 'rectangle', width: t.width - 2, height: t.height - 4 }, isStatic: true }); b.gk = k; gos.push(b); bodies.push(b.body); return t.height; };
+      const ks = Phaser.Utils.Array.Shuffle(keys.slice());
+      const h0 = place(ks[0], x - 30, y + 2), h1 = place(ks[1], x + 30, y + 2); place(ks[2], x + Phaser.Math.Between(-6, 6), y + 2 - Math.max(h0, h1) + 6);
+      if (Math.random() < 0.5) place(ks[3], x + 70, y + 2);
+      obs.onHit = (imp, part, body) => { if (obs.broken || imp < 1.5) return; obs.broken = true; SFX.pop(); s.time.delayedCall(90, () => SFX.whoosh());
+        const hit = body && body.gameObject;
+        gos.forEach(gx => { const t = s.textures.get(gx.gk).getSourceImage();
+          if (gx === hit) { const [c1, c2] = cols[gx.gk]; s.spawnPieces(gx.x, gx.y, c1, 8, 12, 7); s.spawnPieces(gx.x, gx.y, c2, 5, 8, 6);
+            const bw = s.obsImage('bow', gx.x, gx.y - 20, { shape: { type: 'rectangle', width: 30, height: 14 }, density: 0.0004, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setTint(c2);
+            bw.setVelocity(Phaser.Math.FloatBetween(2, 6), -9); bw.setAngularVelocity(0.25); s.tweens.add({ targets: bw, alpha: 0, delay: 2500, duration: 600, onComplete: () => bw.destroy() }); gx.destroy(); }
+          else s.makeLoose(gx, { type: 'rectangle', width: t.width - 2, height: t.height - 4 }, 6); });
+        obs.gos = []; obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, biome: 'sne', make(s, x, y) {   // juletræ: vælter, kuglerne drysser, og stjernen flyver – saven kan save det over
+      const body = s.matter.add.rectangle(x, y - 105, 70, 210, { isStatic: true, label: 'obs' });
+      const img = s.add.image(x, y + 6, 'xtree').setOrigin(0.5, 1).setDepth(6), star = s.add.image(x, y + 6 - 236, 'xstar').setDepth(6.1);
+      s.tweens.add({ targets: star, scale: 1.12, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      const obs = { gos: [img, star], bodies: [body], hardness: 0.1, material: 'wood', sawable: true, done: false };
+      const fall = (sawn) => { if (obs.done) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.whoosh(); if (sawn) { SFX.wood(); s.spawnPieces(x, y - 20, 0xe8c58f, 10, 5, 4); }
+        s.tweens.killTweensOf(star);
+        const cols = [0xe74c3c, 0x3498db, 0xf1c40f, 0x9b59b6];
+        for (let i = 0; i < 9; i++) { const bb = s.matter.add.image(x + Phaser.Math.Between(-50, 50), y - 40 - Math.random() * 150, 'bauble', null, { shape: { type: 'circle', radius: 8 }, density: 0.0004, restitution: 0.6, friction: 0.3, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setTint(cols[i % 4]).setDepth(7);
+          bb.setVelocity(Phaser.Math.FloatBetween(-2, 6), Phaser.Math.FloatBetween(-5, 0)); s.tweens.add({ targets: bb, alpha: 0, delay: 3500, duration: 600, onComplete: () => bb.destroy() }); }
+        s.tweens.add({ targets: star, x: star.x + 420, y: star.y - 420, angle: 720, duration: 1500, ease: 'Quad.out', onComplete: () => star.setVisible(false) });
+        for (let i = 0; i < 6; i++) s.time.delayedCall(i * 120, () => { if (!star.visible) return; const sp = s.add.image(star.x, star.y, 'star_s').setDepth(8).setScale(0.6); s.tweens.add({ targets: sp, alpha: 0, scale: 0.2, y: sp.y + 30, duration: 600, onComplete: () => sp.destroy() }); });
+        s.tweens.add({ targets: img, angle: 82, duration: 800, ease: 'Quad.in', onComplete: () => { SFX.pff(); s.puffAt(x + 200, y - 10); s.cameras.main.shake(100, 0.003); } }); };
+      obs.onHit = (imp, part) => { if (part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.drawSpin) return;   // saven får lov at save
+        if (imp >= 1.5) fall(false); };
+      obs.saw = () => fall(true);
+      return obs; } },
+  { minD: 0, w: 3, biome: 'sne', make(s, x, y) {   // kæmpe snebold: triller videre, når man skubber – et hårdt slag eller et spidst værktøj sprænger den i sne
+      const b = s.obsImage('bigsnow', x, y - 58, { shape: { type: 'circle', radius: 56 }, density: 0.0005, friction: 0.6, frictionAir: 0.002, restitution: 0.1 });
+      const obs = { gos: [b], bodies: [b.body], hardness: 0.05, done: false };
+      obs.onHit = (imp, part) => { if (obs.done || !b.active) return;
+        const sharp = part && part.label === 'tool' && VEHICLE.tool && (VEHICLE.tool.sharp || VEHICLE.tool.breaks.includes('stone'));
+        if (!sharp && imp < 9) { if (imp > 3) SFX.pff(); return; }
+        obs.done = true; SFX.pff(); s.puffAt(b.x, b.y); s.spawnPieces(b.x, b.y, 0xffffff, 12, 14, 7); s.spawnPieces(b.x, b.y, 0xd6eaf8, 6, 10, 6); b.destroy(); obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, biome: 'sne', make(s, x, y) {   // slikstokke som hegn: knækker midt over
+      const gos = [], bodies = [], n = Phaser.Math.Between(3, 4);
+      for (let i = 0; i < n; i++) { const px = x + (i - (n - 1) / 2) * 34, c = s.obsImage('cane', px, s.groundY(px) - 52, { shape: { type: 'rectangle', width: 14, height: 110 }, isStatic: true }); c.setFlipX(i % 2 === 1); gos.push(c); bodies.push(c.body); }
+      const rib = s.add.rectangle(x, y - 70, (n - 1) * 34 + 12, 8, 0x27ae60).setDepth(6.1); gos.push(rib);
+      const obs = { gos, bodies, hardness: 0.2, broken: false, fragile: true };
+      obs.onHit = (imp) => { if (obs.broken || imp < 2.5) return; obs.broken = true; SFX.crunch(); s.spawnPieces(x, y - 60, 0xe74c3c, 5, 8, 5); s.spawnPieces(x, y - 60, 0xffffff, 5, 8, 5);
+        gos.forEach(c => { if (!c.body) { s.spawnPieces(c.x, c.y, 0x27ae60, 3, 8, 4); c.destroy(); return; }
+          [['cane_top', -30, 7], ['cane_bot', 30, 3]].forEach(([k, dy, sp]) => { const pc = s.obsImage(k, c.x, c.y + dy, { shape: { type: 'rectangle', width: 16, height: 56 }, density: 0.0006, friction: 0.3, label: 'piece', collisionFilter: { group: GRP_PIECE } });
+            pc.setFlipX(c.flipX); pc.setVelocity(Phaser.Math.FloatBetween(2, sp), Phaser.Math.FloatBetween(-sp * 1.3, -2)); pc.setAngularVelocity(Phaser.Math.FloatBetween(-0.3, 0.3)); s.tweens.add({ targets: pc, alpha: 0, delay: 2500, duration: 700, onComplete: () => pc.destroy() }); });
+          c.destroy(); });
+        obs.gos = []; obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'sne', make(s, x, y) {   // honningkagemand: går i stykker – arme, ben og hoved flyver i en sky af krummer
+      const body = s.matter.add.rectangle(x, y - 78, 74, 156, { isStatic: true, label: 'obs', chamfer: { radius: 20 } });
+      const img = s.add.image(x, y + 4, 'gingerbread').setOrigin(0.5, 1).setDepth(6);
+      s.tweens.add({ targets: img, angle: { from: -3, to: 3 }, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      const obs = { gos: [img], bodies: [body], hardness: 0.05, fragile: true, done: false };
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.crunch(); s.time.delayedCall(60, () => SFX.pop());
+        const by = y + 4 - 162, parts = [['gb_head', 65, 34, 26, 'c'], ['gb_body', 65, 92, 0, 'r'], ['gb_arm', 30, 66, 0, 'r'], ['gb_arm', 100, 66, 0, 'r'], ['gb_leg', 47, 128, 0, 'r'], ['gb_leg', 83, 128, 0, 'r']];
+        parts.forEach(([k, lx, ly, rad], i) => { const t = s.textures.get(k).getSourceImage();
+          const pc = s.obsImage(k, x - 65 + lx, by + ly, { shape: rad ? { type: 'circle', radius: rad } : { type: 'rectangle', width: t.width * 0.8, height: t.height * 0.8 }, density: 0.0006, friction: 0.4, restitution: 0.3, label: 'piece', collisionFilter: { group: GRP_PIECE } });
+          if (i === 3) pc.setFlipX(true);
+          pc.setVelocity(Phaser.Math.FloatBetween(i % 2 ? 3 : -1, i % 2 ? 9 : 5), Phaser.Math.FloatBetween(-12, -5)); pc.setAngularVelocity(Phaser.Math.FloatBetween(-0.35, 0.35));
+          s.tweens.add({ targets: pc, alpha: 0, delay: 3000, duration: 700, onComplete: () => pc.destroy() }); });
+        s.spawnPieces(x, y - 80, 0xb9770e, 10, 8, 6); s.spawnPieces(x, y - 80, 0x8d5a2b, 6, 6, 5); s.puffAt(x, y - 80); img.destroy(); obs.gos = []; };
       return obs; } },
   { minD: 0, w: 2, biomes: ['jungle'], make(s, x, y) {        // kæmpe strandbold
       const b = s.obsImage('ball', x, y - 45, { shape: { type: 'circle', radius: 44 }, density: 0.0003, friction: 0.2, restitution: 0.9 });
@@ -1642,7 +1746,7 @@ function startDemo(scene, biome) { if (!DEMO_SAVED) DEMO_SAVED = { chassis: BUIL
   BUILD.motor = PARTS.motors.find(m => m.id === 'standard') || PARTS.motors[0]; BUILD.tool = null;
   scene.scene.start('Game'); }
 function endDemo() { DEMO = false; DEMO_BIOME = null; if (DEMO_SAVED) { BUILD.chassis = DEMO_SAVED.chassis; BUILD.wheels = DEMO_SAVED.wheels; BUILD.motor = DEMO_SAVED.motor; BUILD.tool = DEMO_SAVED.tool; DEMO_SAVED = null; } }
-const DEMO_NAMES = { eng: 'Eng', sne: 'Sne', orken: 'Ørken', jungle: 'Jungle', by: 'By', nat: 'Halloween', bjerg: 'Bjerg', maane: 'Måne', fantasy: 'Fantasy' };
+const DEMO_NAMES = { eng: 'Eng', sne: 'Jul', orken: 'Ørken', jungle: 'Jungle', by: 'By', nat: 'Halloween', bjerg: 'Bjerg', maane: 'Måne', fantasy: 'Fantasy' };
 
 function partTextureKey(kind, part) { return 'p_' + kind + '_' + part.id; }
 // overdelens midte i forhold til undervognens midte (uskaleret). 'full'-biler tegner hele bilen i overdelen, som så dækker undervognen
@@ -1735,8 +1839,8 @@ function assembleCar(scene, p, ch, wh, mo, to) {
 const BIOMES = {
   eng:    { sky: 0x7ec8e3, dirt: 0x8d5a2b, grass: 0x5cb85c, hills: 0x6fcf97, ground: 0x6fcf97, far: 'far_hills',     creature: { key: 'cow', name: 'Koen', say: 'Muh!', snd: 'moo', h: 90 }, decor: ['flower', 'flower', 'bush', 'tree'], fg: 'fg_grass', weather: 'leaves', wxTints: [0x27ae60, 0x7dcea0, 0xe67e22, 0xf1c40f],
             mid: [{ k: 'mid_tree' }, { k: 'mid_tree' }, { k: 'mid_bush' }, { k: 'mid_hill', tint: 0x5bb37f }] },
-  sne:    { sky: 0xcfe7f3, dirt: 0x9fb4c7, grass: 0xffffff, hills: 0xeaf2f8, ground: 0xeaf2f8, far: 'far_mountains', creature: { key: 'penguin', name: 'Pingvinen', say: 'Kvæk!', snd: 'squawk', h: 90 }, decor: ['fir', 'fir', 'snowrock', 'snowman_s'], fg: 'fg_snow', weather: 'snow',
-            mid: [{ k: 'mid_fir_snow' }, { k: 'mid_fir_snow' }, { k: 'mid_hill', tint: 0xffffff }, { k: 'mid_cabin', scale: [0.8, 1.1], smoke: [48, -166] }] },
+  sne:    { sky: 0xcfe7f3, dirt: 0x9fb4c7, grass: 0xffffff, hills: 0xeaf2f8, ground: 0xeaf2f8, far: 'far_mountains', creature: { key: 'penguin', name: 'Pingvinen', say: 'Kvæk!', snd: 'squawk', h: 90 }, decor: ['fir', 'fir', 'snowrock', 'snowman_s', 'gift_s'], fg: 'fg_snow', weather: 'snow',   // Jul
+            mid: [{ k: 'mid_fir_snow' }, { k: 'mid_xtree' }, { k: 'mid_hill', tint: 0xffffff }, { k: 'mid_cabin', scale: [0.8, 1.1], smoke: [48, -166] }] },
   orken:  { sky: 0xf9d7a8, dirt: 0xc9893c, grass: 0xf4d03f, hills: 0xe8c07a, ground: 0xe8c07a, far: 'far_dunes',     creature: { key: 'camel', name: 'Kamelen', say: 'Hrmpf!', snd: 'grunt', h: 100 }, decor: ['palm', 'vase', 'hiero', 'rock_s', 'vase'], fg: 'fg_sand', weather: 'sand',
             mid: [{ k: 'mid_dune' }, { k: 'mid_dune' }, { k: 'mid_pyramid' }, { k: 'mid_pyramid' }, { k: 'mid_sphinx', scale: [1.35, 1.55] }, { k: 'mid_obelisk', scale: [0.7, 1] }, { k: 'mid_palm' }], sun: true },
   jungle: { sky: 0xa8ddd0, dirt: 0x5b3a1e, grass: 0x1e8449, hills: 0x2e8b57, ground: 0x2e8b57, far: 'far_forest',    creature: { key: 'monkey', name: 'Aben', say: 'Uh-uh-ah!', snd: 'ooh', h: 100 }, decor: ['palm', 'palm', 'leaf', 'flower'], fg: 'fg_grass', weather: 'leaves', wxTints: [0x1e8449, 0x27ae60, 0x52be80, 0x145a32],
@@ -1817,7 +1921,9 @@ function makeBiomeTextures(g) {
     g.lineStyle(18, 0xffffff); g.beginPath(); g.moveTo(0, 104); g.lineTo(110, 28); g.lineTo(220, 104); g.strokePath();
     [12, 34, 58, 162, 186, 208].forEach((x, i) => C(g, x, (x < 110 ? 104 - x * 0.69 : 104 - (220 - x) * 0.69) + 9, 5 + (i % 2) * 2, 0xffffff));
     [[40, 116], [144, 116]].forEach(([x, y]) => { Q(g, x - 3, y - 3, 42, 40, 0xffffff); Q(g, x, y, 36, 34, 0xf9e79f); Q(g, x + 17, y, 2, 34, 0xffffff); Q(g, x, y + 16, 36, 2, 0xffffff); g.fillStyle(0xffffff); g.fillEllipse(x + 18, y - 3, 46, 8); });
-    Q(g, 94, 138, 32, 52, 0x6e2c00); C(g, 119, 166, 2.5, 0xf1c40f); });
+    Q(g, 94, 138, 32, 52, 0x6e2c00); C(g, 119, 166, 2.5, 0xf1c40f);
+    g.fillStyle(0x1e8449); g.fillCircle(110, 152, 10); g.fillStyle(0x6e2c00); g.fillCircle(110, 152, 5); C(g, 110, 144, 3.5, 0xe74c3c);   // krans på døren
+    const jl = [0xe74c3c, 0xf1c40f, 0x2ecc71, 0x3498db]; for (let i = 1; i < 16; i++) { const lx = i * 220 / 16; C(g, lx, (lx < 110 ? 104 - lx * 0.69 : 104 - (220 - lx) * 0.69) + 15, 4, jl[i % 4]); } });   // julelys under tagskægget
   // månen: landingsfartøj, månebil, parabol, månebase og krystaller
   mid('mid_lander', 170, 150, () => { g.lineStyle(5, 0xbdc3c7); [[60, 96, 24, 146], [110, 96, 146, 146], [74, 100, 66, 146], [96, 100, 104, 146]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.strokePath(); });
     g.fillStyle(0x95a5a6); [24, 66, 104, 146].forEach(x => g.fillEllipse(x, 146, 22, 8));
@@ -1889,6 +1995,12 @@ function makeBiomeTextures(g) {
   dec('pumpkin_s', 46, 40, () => { g.fillStyle(0x6e4b1f); g.fillRect(21, 0, 4, 8); g.fillStyle(0xca6f1e); g.fillEllipse(13, 24, 22, 30); g.fillEllipse(33, 24, 22, 30); g.fillStyle(0xe67e22); g.fillEllipse(23, 24, 26, 32);
     g.fillStyle(0xf9e04b); g.fillTriangle(13, 22, 17, 15, 21, 22); g.fillTriangle(25, 22, 29, 15, 33, 22); g.fillRect(14, 28, 18, 4); });
   dec('deadbush', 70, 50, () => { g.lineStyle(4, 0x3d2b1f); [[35, 50, 10, 14], [35, 50, 22, 6], [35, 50, 40, 2], [35, 50, 56, 10], [35, 50, 64, 26], [22, 30, 8, 28], [50, 28, 60, 20]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.strokePath(); }); });
+  // Jul: juletræ med lys i baggrunden og små gaver langs vejen
+  mid('mid_xtree', 110, 230, () => { Q(g, 48, 196, 14, 34, 0x5d4037); g.fillStyle(0x2e7d5b); g.fillTriangle(55, 10, 14, 90, 96, 90); g.fillTriangle(55, 50, 6, 140, 104, 140); g.fillTriangle(55, 100, 0, 200, 110, 200);
+    g.fillStyle(0xffffff); g.fillTriangle(55, 10, 36, 48, 74, 48); g.fillTriangle(55, 50, 30, 98, 80, 98);
+    const cols = [0xe74c3c, 0xf1c40f, 0x3498db, 0x2ecc71, 0xff79c6]; [[40, 80], [70, 74], [30, 128], [58, 120], [84, 132], [22, 186], [50, 176], [78, 182], [96, 190]].forEach(([x, y], i) => C(g, x, y, 5, cols[i % 5]));
+    g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, r = i % 2 ? 6 : 14; g.lineTo(55 + Math.cos(a) * r, 12 + Math.sin(a) * r); } g.closePath(); g.fillPath(); });
+  dec('gift_s', 44, 40, () => { Q(g, 4, 14, 36, 26, 0xe74c3c); Q(g, 19, 10, 6, 30, 0xf1c40f); Q(g, 4, 20, 36, 5, 0xf1c40f); g.fillStyle(0xf1c40f); g.fillEllipse(15, 9, 14, 8); g.fillEllipse(29, 9, 14, 8); });
   dec('mushroom', 70, 80, () => { R(g, 26, 36, 18, 44, 6, 0xf5e6c8); g.fillStyle(0xe74c3c); g.fillEllipse(35, 30, 70, 44); g.fillStyle(0xffffff); [[18, 24], [40, 16], [54, 32], [30, 38]].forEach(([x, y]) => g.fillCircle(x, y, 5)); });
   dec('mushroom_b', 50, 60, () => { R(g, 20, 28, 10, 32, 4, 0xd7bde2); g.fillStyle(0x5dade2); g.fillEllipse(25, 24, 48, 30); g.fillStyle(0xaed6f1, 0.8); g.fillEllipse(25, 20, 30, 14); });
   dec('fairytree', 110, 150, () => { g.fillStyle(0x6c3483); g.beginPath(); g.moveTo(48, 150); g.lineTo(62, 150); g.lineTo(70, 90); g.lineTo(90, 60); g.lineTo(80, 58); g.lineTo(60, 84); g.lineTo(56, 40); g.lineTo(30, 20); g.lineTo(26, 28); g.lineTo(48, 50); g.closePath(); g.fillPath(); g.fillStyle(0xaf7ac5); g.fillCircle(30, 20, 26); g.fillCircle(90, 56, 22); g.fillCircle(58, 36, 24); g.fillStyle(0xf9e79f); g.fillCircle(24, 14, 4); g.fillCircle(66, 30, 3); g.fillCircle(94, 50, 3); });
@@ -2374,7 +2486,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.16.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.17.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
