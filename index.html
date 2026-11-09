@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.14.0)
+//  Biglers Biler – etape 3  (v0.14.1)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -572,6 +572,7 @@ function confetti(scene) {
     rotate: { start: 0, end: 720 }, scaleX: { start: 1, end: 0.2, ease: 'Sine.inOut', yoyo: true }, quantity: 4, frequency: 30,
     tint: [0xe74c3c, 0xf1c40f, 0x2ecc71, 0x3498db, 0x9b59b6, 0xe67e22, 0xff79c6] }).setScrollFactor(0).setDepth(80);
   scene.time.delayedCall(1300, () => em.stop()); scene.time.delayedCall(6000, () => em.destroy());
+  SFX.pop();   // POP! (en tilfældig af ballon-lydene)
 }
 function bake(scene, key, x0, y0, w, h, draw, grad) { return scene.add.image(x0, y0, bakeTex(scene, key, x0, y0, w, h, draw, grad)).setOrigin(0); }
 // lodret farveovergang direkte på lærredet (Phasers egne overgange findes kun i WebGL-tegningen)
@@ -2045,7 +2046,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.14.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.14.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => startDemo(this)); } });
@@ -3066,6 +3067,14 @@ class UI extends Phaser.Scene {
     this.fpsText = this.add.text(8, H - 18, '', { fontFamily: 'Arial', fontSize: '12px', color: '#ffffff', stroke: '#000', strokeThickness: 2 }).setAlpha(0.7);
     this.add.text(22, 72, SETTINGS.best > 0 ? 'Rekord: ' + Math.floor(SETTINGS.best) + ' m' : '', { fontFamily: FONT, fontSize: '22px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 });
     addCornerButtons(this);
+    // hus-knap til menuen: skal holdes nede i et sekund (en ring fylder op), så små fingre ikke rammer den ved et uheld
+    { const home = makeButton(this, W - 330, 50, 80, 70, '🏠', 0x34495e, () => {}, 34).setDepth(60), ring = this.add.graphics().setDepth(61);
+      let t0 = null; const stop = () => { t0 = null; ring.clear(); };
+      home.on('pointerdown', () => { t0 = this.time.now; });
+      home.on('pointerup', stop); home.on('pointerout', stop);
+      this.events.on('update', () => { if (t0 === null) return; const f = Math.min(1, (this.time.now - t0) / 1000);
+        ring.clear(); ring.lineStyle(8, 0xf1c40f); ring.beginPath(); ring.arc(W - 330, 50, 46, -Math.PI / 2, -Math.PI / 2 + f * Math.PI * 2, false); ring.strokePath();
+        if (f >= 1) { stop(); SFX.click(); game.toMenu(); } }); }
     this.add.text(W / 2 - 232, 36, '🔧', { fontSize: '30px' }).setOrigin(0.5);
     { const x = W / 2 - 200, y = 22, w = 400, h = 28;   // sundhedsbjælken: ramme, fyld (beskæres) og kant er færdige billeder
       bake(this, 'hp_bg', x - 3, y - 3, w + 10, h + 10, (g) => { g.fillStyle(0x000000, 0.35); g.fillRoundedRect(x + 3, y + 4, w, h, 10); g.fillStyle(0x2c3e50); g.fillRoundedRect(x, y, w, h, 10); });
