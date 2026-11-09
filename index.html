@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.10.0)
+//  Biglers Biler – etape 3  (v0.11.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -215,6 +215,78 @@ SFX.smp = function (k, vol, rate) {   // spil en optaget lyd; false hvis den ikk
     if (!this.engS) return st0.call(this);
     const e = this.engS; this.engS = null; e.g.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
     setTimeout(() => { try { e.src.stop(); } catch (x) {} }, 500);
+  };
+})();
+// ---------- Kaspers egne lyde og musik (filer i mappen lyd/, ved siden af spillet) ----------
+// korte lyde hentes ved første tryk; motoren hentes, når bilen er bygget; musikken hentes ét nummer ad gangen
+const LYD_KORT = ['pop1', 'pop2', 'pop3', 'pop4', 'strandbold', 'dyr_ko', 'dyr_pingvin', 'dyr_kamel', 'dyr_abe', 'dyr_ged', 'dyr_astronaut'];
+const LYD_SIG = { moo: 'dyr_ko', squawk: 'dyr_pingvin', grunt: 'dyr_kamel', ooh: 'dyr_abe', baa: 'dyr_ged', whee: 'dyr_astronaut' };
+const LYD_MOTOR = { standard: 'motor_standard', v8: 'motor_v8', electric: 'motor_electric', hamster: 'motor_hamster', rubber: 'motor_rubber', jet: 'motor_jet', rocket: 'motor_rocket' };
+const LYD_MOTOR_FART = { rubber: [0.55, 1.95] };   // afspilningshastighed fra stillestående til fuld fart (standard 0.85–1.95)
+const MUSIK = { Menu: [23.499, 76.426], Game_1: [43.05, 104.026], Game2: [15.569, 81.4], Game3: [62.044, 112.621], Game4: [25.565, 54.138] };   // [løkken starter, løkken slutter] i sekunder
+const MUSIK_VOL = 0.32;
+SFX.fil = {};   // navn -> 'henter' | 'klar' | 'fejl'
+SFX.hent = function (k, decode = true) {
+  if (this.fil[k] || !this.ctx) return; this.fil[k] = 'henter';
+  fetch('lyd/' + k + '.ogg').then(r => { if (!r.ok) throw 0; return decode ? r.arrayBuffer() : r.blob(); })
+    .then(d => decode ? new Promise((ok, no) => this.ctx.decodeAudioData(d, ok, no)) : d)
+    .then(b => { this.buf[k] = b; this.fil[k] = 'klar'; if (k === this.musName) this.musStart(); })
+    .catch(() => { this.fil[k] = 'fejl'; });
+};
+(function () {
+  const init1 = SFX.init; SFX.init = function () { const first = !this.ctx; init1.call(this); if (first && this.ctx) { LYD_KORT.forEach(k => this.hent(k)); if (this.wantMusic) this.music(this.wantMusic); if (this.wantMotor) this.hentMotor(this.wantMotor); } };
+  const pop1 = SFX.pop; SFX.pop = function () { if (this.smp('pop' + (1 + Math.floor(Math.random() * 4)), 0.8)) return; pop1.call(this); };   // fire forskellige ballon-pop
+  const pfft1 = SFX.pfft; SFX.pfft = function () { if (this.smp('strandbold', 0.8)) return; pfft1.call(this); };   // strandbolden punkterer
+  const say1 = SFX.say; SFX.say = function (k) { const f = LYD_SIG[k]; if (f && this.smp(f, 0.8)) return; say1.call(this, k); };
+  // motoren: hver motor har sin egen lyd; dampmaskinen afspilles som én optagelse, hvor browseren ændrer tempoet uden at ændre tonen
+  SFX.hentMotor = function (id) { this.wantMotor = id; if (!this.ctx) return; if (id === 'steam') this.hent('damp_loop', false); else if (LYD_MOTOR[id]) this.hent(LYD_MOTOR[id]); };
+  const se1 = SFX.startEngine, en1 = SFX.engine, st1 = SFX.stopEngine;
+  SFX.startEngine = function () {
+    if (!this.ctx || this.eng || this.engS || this.engF) return;
+    const id = BUILD.motor && BUILD.motor.id, k = id === 'steam' ? 'damp_loop' : LYD_MOTOR[id];
+    if (!k || this.fil[k] === 'fejl') return se1.call(this);   // ingen fil (fx uden net): den gamle motorlyd
+    if (this.fil[k] !== 'klar') { this.hentMotor(id); return; }   // stille et øjeblik, mens filen hentes
+    const g = this.ctx.createGain(); g.gain.value = 0; g.connect(this.master);
+    if (id === 'steam') {
+      const el = new Audio(); el.src = this.engUrl || (this.engUrl = URL.createObjectURL(this.buf[k])); el.loop = true;
+      el.preservesPitch = true; el.mozPreservesPitch = true; el.webkitPreservesPitch = true;
+      const src = this.ctx.createMediaElementSource(el); src.connect(g); el.play().catch(() => {});
+      this.engF = { el, src, g, steam: true };
+    } else {
+      const src = this.ctx.createBufferSource(); src.buffer = this.buf[k]; src.loop = true; src.connect(g); src.start();
+      this.engF = { src, g, fart: LYD_MOTOR_FART[id] || [0.85, 1.95] };
+    }
+  };
+  SFX.engine = function (speed, on) {
+    const e = this.engF; if (!e) return en1.call(this, speed, on);
+    const t = this.ctx.currentTime;
+    if (e.steam) e.el.playbackRate = 0.9 + 0.88 * Math.pow(speed, 1.7);   // tomgang tæt på optagelsen, stiger langsomt og hurtigere til sidst
+    else e.src.playbackRate.setTargetAtTime(e.fart[0] + speed * (e.fart[1] - e.fart[0]) + (on ? 0.05 : 0), t, 0.08);
+    e.g.gain.setTargetAtTime(on ? 0.55 : 0.33, t, 0.1);
+  };
+  SFX.stopEngine = function () {
+    const e = this.engF; if (!e) return st1.call(this);
+    this.engF = null; e.g.gain.setTargetAtTime(0, this.ctx.currentTime, 0.1);
+    setTimeout(() => { try { if (e.steam) { e.el.pause(); e.src.disconnect(); } else e.src.stop(); } catch (x) {} }, 500);
+  };
+  // musik: ét nummer ad gangen; intro én gang, derefter løkken uden hak (overgangen er bagt ind i filen)
+  SFX.music = function (name) {
+    this.wantMusic = name; if (!this.ctx || this.musName === name) return;
+    const old = this.mus; this.mus = null; this.musName = name;
+    if (old) { old.g.gain.setTargetAtTime(0, this.ctx.currentTime, 0.25); setTimeout(() => { try { old.src.stop(); } catch (x) {} }, 1500); }
+    Object.keys(MUSIK).forEach(n => { if (n !== name && this.buf[n]) { delete this.buf[n]; delete this.fil[n]; } });   // kun ét afkodet nummer i hukommelsen ad gangen
+    if (this.fil[name] === 'klar') this.musStart(); else this.hent(name);
+  };
+  SFX.musStart = function () {
+    const name = this.musName, b = this.buf[name]; if (!b || this.mus) return;
+    const src = this.ctx.createBufferSource(), g = this.ctx.createGain(); src.buffer = b; src.loop = true; src.loopStart = MUSIK[name][0]; src.loopEnd = MUSIK[name][1];
+    g.gain.value = 0; g.gain.setTargetAtTime(MUSIK_VOL, this.ctx.currentTime, 0.3); src.connect(g); g.connect(this.master); src.start();
+    this.mus = { src, g };
+  };
+  SFX.gameMusic = function () {   // nyt nummer, når man kommer fra menuen; samme nummer ved "igen"
+    if (this.musName && this.musName !== 'Menu') return;
+    const all = ['Game_1', 'Game2', 'Game3', 'Game4'].filter(n => n !== this.lastGame);
+    this.lastGame = all[Math.floor(Math.random() * all.length)]; this.music(this.lastGame);
   };
 })();
 document.addEventListener('pointerdown', () => SFX.init(), { passive: true });
@@ -1557,7 +1629,7 @@ const STEPS = [
 class Build extends Phaser.Scene {
   constructor() { super('Build'); }
   create() {
-    makeTextures(this); makePartTextures(this);
+    makeTextures(this); makePartTextures(this); SFX.music('Menu');
     this.cameras.main.setBackgroundColor('#f6d365');
     bake(this, 'b_bg', 0, 0, W, H, null, (ctx) => vGrad(ctx, 0, 0, W, H, 0xf6d365, 1, 0xfda085, 1));
     this.step = 0; this.chosen = { chassis: null, wheels: null, motors: null, tools: null };
@@ -1812,7 +1884,7 @@ class Title extends Phaser.Scene {
   constructor() { super('Title'); }
   preload() { if (!this.textures.exists('logo')) this.load.image('logo', LOGO_SRC); }
   create() {
-    makeTextures(this);
+    makeTextures(this); SFX.music('Menu');
     // baggrunden er et tilfældigt af spillets landskaber
     const bio = BIOMES[Phaser.Utils.Array.GetRandom(Object.keys(BIOMES))];
     this.cameras.main.setBackgroundColor(bio.sky);
@@ -1854,7 +1926,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    this.add.text(W - 10, H - 8, 'v0.10.0', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
+    this.add.text(W - 10, H - 8, 'v0.11.0', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
 
     this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Build'));
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Build'));
@@ -1878,7 +1950,7 @@ class Game extends Phaser.Scene {
   constructor() { super('Game'); }
 
   create() {
-    makeTextures(this); makePartTextures(this);
+    makeTextures(this); makePartTextures(this); SFX.gameMusic(); SFX.hentMotor(BUILD.motor && BUILD.motor.id); this.events.once('shutdown', () => SFX.stopEngine());   // motorlyden følger bilen: stoppes, når scenen forlades
     this.matter.world.autoUpdate = false; this.physAcc = 0;   // vi tager fysik-skridtene selv i update()
     this.auto = SETTINGS.auto;
     this.over = false;
