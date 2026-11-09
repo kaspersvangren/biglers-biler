@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.9.1)
+//  Biglers Biler – etape 3  (v0.10.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -439,19 +439,34 @@ function makeTextures(s) {
   g.destroy();
 }
 
+// ---------- færdigtegnede billeder ----------
+// figurer, der aldrig ændrer sig, tegnes én gang til et billede; en Graphics regnes ellers om ved hvert eneste skærmbillede
+function bakeTex(scene, key, x0, y0, w, h, draw, grad) {
+  if (scene.textures.exists(key)) return key;
+  const t = scene.textures.createCanvas(key, Math.ceil(w), Math.ceil(h));
+  if (grad) { const ctx = t.getContext(); ctx.save(); ctx.translate(-x0, -y0); grad(ctx); ctx.restore(); }
+  const g = scene.make.graphics({ add: false }); g.translateCanvas(-x0, -y0); if (draw) draw(g); g.generateTexture(key, w, h); g.destroy();
+  return key;
+}
+function bake(scene, key, x0, y0, w, h, draw, grad) { return scene.add.image(x0, y0, bakeTex(scene, key, x0, y0, w, h, draw, grad)).setOrigin(0); }
+// lodret farveovergang direkte på lærredet (Phasers egne overgange findes kun i WebGL-tegningen)
+function vGrad(ctx, x, y, w, h, c1, a1, c2, a2) {
+  const css = (c, a) => 'rgba(' + (c >> 16 & 255) + ',' + (c >> 8 & 255) + ',' + (c & 255) + ',' + a + ')';
+  const gr = ctx.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, css(c1, a1)); gr.addColorStop(1, css(c2, a2)); ctx.fillStyle = gr; ctx.fillRect(x, y, w, h);
+}
+
 // ---------- knap-hjælper ----------
 function makeButton(scene, x, y, w, h, label, color, cb, fontSize, icon) {
   fontSize = fontSize || 36;
   const c = scene.add.container(x, y);
-  const g = scene.add.graphics();
-  const ic = icon ? scene.add.image(-w / 2 + h * 0.55, 0, icon).setDisplaySize(h * 0.72, h * 0.72) : null;
-  const draw = (col) => {
-    g.clear();
+  const tex = (col) => bakeTex(scene, 'btn_' + w + '_' + h + '_' + col, -w / 2 - 3, -h / 2 - 3, w + 10, h + 12, (g) => {
     g.fillStyle(0x000000, 0.25); g.fillRoundedRect(-w / 2 + 4, -h / 2 + 6, w, h, 18);
     g.fillStyle(col, 1); g.fillRoundedRect(-w / 2, -h / 2, w, h, 18);
     g.lineStyle(5, 0xffffff, 0.9); g.strokeRoundedRect(-w / 2, -h / 2, w, h, 18);
-  };
-  draw(color);
+  });
+  const g = scene.add.image(-w / 2 - 3, -h / 2 - 3, tex(color)).setOrigin(0);
+  const ic = icon ? scene.add.image(-w / 2 + h * 0.55, 0, icon).setDisplaySize(h * 0.72, h * 0.72) : null;
+  const draw = (col) => g.setTexture(tex(col));
   const t = scene.add.text(ic ? h * 0.3 : 0, 0, label, { fontFamily: FONT, fontSize: fontSize + 'px', color: '#fff', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5);
   c.add(ic ? [g, ic, t] : [g, t]);
   c.setInteractive(new Phaser.Geom.Rectangle(-w / 2, -h / 2, w, h), Phaser.Geom.Rectangle.Contains);
@@ -465,9 +480,9 @@ function makeButton(scene, x, y, w, h, label, color, cb, fontSize, icon) {
 // ---------- rund "hold-knap" til touch-styring ----------
 function makeHoldButton(scene, x, y, r, label, color) {
   const c = scene.add.container(x, y).setDepth(50);
-  const g = scene.add.graphics();
-  g.fillStyle(color, 0.55); g.fillCircle(0, 0, r);
-  g.lineStyle(6, 0xffffff, 0.8); g.strokeCircle(0, 0, r);
+  const g = bake(scene, 'hold_' + r + '_' + color, -r - 4, -r - 4, 2 * r + 8, 2 * r + 8, (g) => {
+    g.fillStyle(color, 0.55); g.fillCircle(0, 0, r);
+    g.lineStyle(6, 0xffffff, 0.8); g.strokeCircle(0, 0, r); });
   const t = scene.add.text(0, 0, label, { fontFamily: FONT, fontSize: '54px', color: '#fff' }).setOrigin(0.5);
   c.add([g, t]);
   c.setInteractive(new Phaser.Geom.Circle(0, 0, r), Phaser.Geom.Circle.Contains);
@@ -598,7 +613,7 @@ const OBSTACLES = [
       const wh = [-62, 62].map(ox => s.obsImage('pwheel', x + ox, y - 25, { shape: { type: 'circle', radius: 24 }, density: 0.003, friction: 0.3, collisionFilter: { group: grp } }));
       const cons = wh.map((w, i) => s.matter.add.constraint(car.body, w.body, 0, 0.9, { pointA: { x: [-62, 62][i], y: 37 } }));
       car.setDepth(7); wh.forEach(w => w.setDepth(8));
-      const obs = { gos: [car, ...wh], bodies: [car.body, ...wh.map(w => w.body)], hardness: 1.0, material: 'metal', hp: 3, glass: true, broken: false };
+      const obs = { gos: [car, ...wh], bodies: [car.body, ...wh.map(w => w.body)], cons, hardness: 1.0, material: 'metal', hp: 3, glass: true, broken: false };
       obs.onHit = (imp) => {
         if (imp < 4) return;
         if (obs.glass) { obs.glass = false; SFX.glass(); s.spawnPieces(car.x, car.y - 20, 0xbdefff, 8, 8, 6); car.setTexture('pcar_noglass'); return; }
@@ -1544,8 +1559,7 @@ class Build extends Phaser.Scene {
   create() {
     makeTextures(this); makePartTextures(this);
     this.cameras.main.setBackgroundColor('#f6d365');
-    const g = this.add.graphics();
-    g.fillGradientStyle(0xf6d365, 0xf6d365, 0xfda085, 0xfda085, 1); g.fillRect(0, 0, W, H);
+    bake(this, 'b_bg', 0, 0, W, H, null, (ctx) => vGrad(ctx, 0, 0, W, H, 0xf6d365, 1, 0xfda085, 1));
     this.step = 0; this.chosen = { chassis: null, wheels: null, motors: null, tools: null };
     this.spinning = false; this.ready = false; this.busy = false;
     this.drawWorkshop();   // samlescenen til højre for tyveknægten – kameraet panorerer derover, når en del er valgt
@@ -1554,7 +1568,7 @@ class Build extends Phaser.Scene {
     // alt tegnes i koordinater omkring (815, 360) og lægges i én container, der står midt på skærmen og er lidt forstørret
     const MS = 1.04, OX = -815, OY = -360, M = this.add.container(640, 352).setScale(MS), G = (g) => { g.setPosition(OX, OY); M.add(g); return g; }, O = (o) => { o.x += OX; o.y += OY; M.add(o); return o; };
     this.machine = M;
-    const cab = G(this.add.graphics());
+    O(bake(this, 'b_cab', 400, 40, 770, 662, (cab) => {
     cab.fillStyle(0x000000, 0.2); cab.fillRoundedRect(408, 48, 760, 630, 34);           // skygge
     cab.fillStyle(0x2c3e50); cab.fillRoundedRect(470, 630, 620, 50, 14); cab.fillRect(500, 670, 60, 30); cab.fillRect(1000, 670, 60, 30);   // sokkel og fødder
     cab.fillStyle(0xe74c3c); cab.fillRoundedRect(400, 40, 760, 600, 34);                 // kabinet
@@ -1565,7 +1579,8 @@ class Build extends Phaser.Scene {
     cab.fillStyle(0x2c3e50); cab.fillRoundedRect(560, 540, 440, 60, 18); cab.fillStyle(0x7f8c8d); cab.fillRoundedRect(572, 548, 416, 20, 10);   // udbetalingsskål
     cab.fillStyle(0x2c3e50); cab.fillRoundedRect(1040, 480, 70, 40, 10); cab.fillStyle(0xf1c40f); cab.fillRect(1064, 486, 22, 28);   // møntindkast
     [[0xf1c40f, 480], [0x27ae60, 560], [0x3498db, 640]].forEach(([c, x]) => { cab.fillStyle(0x2c3e50); cab.fillCircle(x, 500, 24); cab.fillStyle(c); cab.fillCircle(x, 498, 18); cab.fillStyle(0xffffff, 0.5); cab.fillCircle(x - 6, 490, 6); });   // pynteknapper
-    this.bulbs = [0, 1].map(k => { const bg = G(this.add.graphics()); for (let i = k; i < 22; i += 2) { const x = 428 + i * 33.5; bg.fillStyle(i % 4 < 2 ? 0xfff3b0 : 0xf1c40f); bg.fillCircle(x, 49, 7); bg.fillCircle(x, 141, 7); } return bg; });
+    }));
+    this.bulbs = [0, 1].map(k => O(bake(this, 'b_bulbs' + k, 418, 39, 724, 112, (bg) => { for (let i = k; i < 22; i += 2) { const x = 428 + i * 33.5; bg.fillStyle(i % 4 < 2 ? 0xfff3b0 : 0xf1c40f); bg.fillCircle(x, 49, 7); bg.fillCircle(x, 141, 7); } })));
     this.tweens.add({ targets: this.bulbs[0], alpha: 0.25, duration: 450, yoyo: true, repeat: -1 }); this.tweens.add({ targets: this.bulbs[1], alpha: 0.25, duration: 450, yoyo: true, repeat: -1, delay: 450 });
     O(this.add.text(780, 95, 'BIGLERS BILER', { fontFamily: FONT, fontSize: '44px', color: '#e74c3c', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(0.5));
     this.titleText = O(this.add.text(780, 194, '', { fontFamily: FONT, fontSize: '38px', color: '#fff', stroke: '#2c3e50', strokeThickness: 7 }).setOrigin(0.5));
@@ -1574,20 +1589,17 @@ class Build extends Phaser.Scene {
     // tre vinduer
     this.windows = [0, 1, 2].map(i => {
       const x = 560 + i * 220, y = 316;
-      const frame = G(this.add.graphics());
-      frame.fillStyle(0x2c3e50); frame.fillRoundedRect(x - 100, y - 90, 200, 180, 16);
-      frame.fillStyle(0xfdfefe); frame.fillRoundedRect(x - 92, y - 82, 184, 164, 12);
-      const glow = G(this.add.graphics().setVisible(false));
-      glow.lineStyle(8, 0xf1c40f); glow.strokeRoundedRect(x - 104, y - 94, 208, 188, 18);
+      const frame = O(bake(this, 'b_frame', x - 100, y - 90, 200, 180, (frame) => {
+        frame.fillStyle(0x2c3e50); frame.fillRoundedRect(x - 100, y - 90, 200, 180, 16);
+        frame.fillStyle(0xfdfefe); frame.fillRoundedRect(x - 92, y - 82, 184, 164, 12); }));
+      const glow = O(bake(this, 'b_glow', x - 108, y - 98, 216, 196, (glow) => { glow.lineStyle(8, 0xf1c40f); glow.strokeRoundedRect(x - 104, y - 94, 208, 188, 18); }).setVisible(false));
       const img = O(this.add.image(x, y, 'smoke').setVisible(false));
       const q = O(this.add.text(x, y, '?', { fontFamily: FONT, fontSize: '90px', color: '#bdc3c7' }).setOrigin(0.5));
       // rullestrimlen: en container med delene under hinanden, klippet til vinduet
       const strip = O(this.add.container(x, y));
       const maskG = this.make.graphics().fillStyle(0xffffff).fillRoundedRect(640 + (x - 92 + OX) * MS, 352 + (y - 82 + OY) * MS, 184 * MS, 164 * MS, 12 * MS);   // masken er i skærm-koordinater
       strip.setMask(maskG.createGeometryMask());
-      const shade = G(this.add.graphics());   // skygge i top og bund, så det ligner en valse
-      shade.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0.35, 0.35, 0, 0); shade.fillRect(x - 92, y - 82, 184, 40);
-      shade.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.35, 0.35); shade.fillRect(x - 92, y + 42, 184, 40);
+      O(bake(this, 'b_shade', x - 92, y - 82, 184, 164, null, (ctx) => { vGrad(ctx, x - 92, y - 82, 184, 40, 0, 0.35, 0, 0); vGrad(ctx, x - 92, y + 42, 184, 40, 0, 0, 0, 0.35); }));   // skygge i top og bund, så det ligner en valse
       const zone = O(this.add.zone(x, y, 200, 180).setInteractive({ useHandCursor: true }));
       zone.on('pointerup', () => this.pick(i));
       return { x: x + OX, y: y + OY, frame, glow, img, q, strip, zone, part: null };
@@ -1595,9 +1607,9 @@ class Build extends Phaser.Scene {
 
     // arm
     this.lever = O(this.add.container(1195, 320));
-    const bracket = this.add.graphics(); bracket.fillStyle(0xc0392b); bracket.fillRoundedRect(-50, -24, 60, 70, 10); this.lever.add(bracket);
-    const base = this.add.graphics(); base.fillStyle(0x2c3e50); base.fillRoundedRect(-16, -20, 32, 60, 8);
-    this.stick = this.add.graphics(); this.stick.fillStyle(0xbdc3c7); this.stick.fillRoundedRect(-7, -120, 14, 120, 6);
+    this.lever.add(bake(this, 'b_bracket', -50, -24, 60, 70, (g) => { g.fillStyle(0xc0392b); g.fillRoundedRect(-50, -24, 60, 70, 10); }));
+    const base = bake(this, 'b_base', -16, -20, 32, 60, (g) => { g.fillStyle(0x2c3e50); g.fillRoundedRect(-16, -20, 32, 60, 8); });
+    this.stick = bake(this, 'b_stick', -7, -120, 14, 120, (g) => { g.fillStyle(0xbdc3c7); g.fillRoundedRect(-7, -120, 14, 120, 6); });
     this.knob = this.add.circle(0, -124, 26, 0xe74c3c).setStrokeStyle(4, 0xffffff);
     this.arm = this.add.container(0, 10, [this.stick, this.knob]);   // drejer om bunden, så knoppen svinger i en bue
     this.lever.add([base, this.arm]); this.lever.add(this.add.circle(0, 10, 9, 0x7f8c8d));
@@ -1618,8 +1630,7 @@ class Build extends Phaser.Scene {
   }
 
   drawWorkshop() {
-    const g = this.add.graphics();
-    g.fillGradientStyle(0x85c1e9, 0x85c1e9, 0x5499c7, 0x5499c7, 1); g.fillRect(W, 0, W, 560);   // væg
+    bake(this, 'b_shop', W, 0, W, H, (g) => {
     g.fillStyle(0x8d5a2b); g.fillRect(W, 560, W, 160); g.fillStyle(0x7a4d22); for (let x = W; x < 2 * W; x += 160) g.fillRect(x, 560, 6, 160); g.fillStyle(0xa5683a); g.fillRect(W, 560, W, 8);   // plankegulv
     g.fillStyle(0x2c3e50); g.fillRect(W + 60, 60, 300, 200); g.fillStyle(0xaed6f1); g.fillRect(W + 72, 72, 276, 176); g.fillStyle(0xffffff, 0.8); g.fillCircle(W + 150, 120, 26); g.fillCircle(W + 185, 112, 32); g.fillCircle(W + 220, 124, 24);   // vindue med sky
     g.fillStyle(0x2c3e50); g.fillRect(W + 206, 72, 8, 176); g.fillRect(W + 72, 156, 276, 8);
@@ -1628,6 +1639,7 @@ class Build extends Phaser.Scene {
     [[0x9b59b6, 900], [0xe67e22, 980], [0x1abc9c, 1120]].forEach(([c, x]) => { R(g, W + x, 248, 60, 42, 10, c); C(g, W + x + 30, 268, 10, 0xffffff, 0.5); });
     for (let i = 0; i < 3; i++) { g.fillStyle(0x2c3e50); g.fillRoundedRect(W + 1130, 520 - i * 34, 130, 36, 12); g.fillStyle(0x7f8c8d); g.fillRoundedRect(W + 1158, 529 - i * 34, 74, 18, 8); }   // dækstak
     g.fillStyle(0xf1c40f); g.fillTriangle(W + 640, 0, W + 560, 70, W + 720, 70); g.fillStyle(0xfff6a0, 0.5); g.fillTriangle(W + 640, 60, W + 300, 600, W + 980, 600);   // loftslampe med lyskegle
+    }, (ctx) => vGrad(ctx, W, 0, W, 560, 0x85c1e9, 1, 0x5499c7, 1));   // væg
     this.add.text(W + 640, 110, 'Din bil', { fontFamily: FONT, fontSize: '54px', color: '#fff', stroke: '#2c3e50', strokeThickness: 8 }).setOrigin(0.5);
   }
 
@@ -1659,6 +1671,12 @@ class Build extends Phaser.Scene {
         c.add(sp); this.tweens.add({ targets: sp, angle: 360, duration: 900, repeat: -1 });
       }
     }
+    // sørg for at det hele kan ses i vinduet: mål alt, hvad der er lagt i (blink, arme, hængende ting), centrer og skaler ned efter behov
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    c.list.forEach(o => { const k = o.texture && o.texture.key === 'blink' ? 0.5 : 1, hw = Math.abs(o.displayWidth) * k / 2, hh = Math.abs(o.displayHeight) * k / 2, r = Math.max(hw, hh) * (o.texture && o.texture.key.endsWith('_spin') ? 1 : 0);
+      const ex = r || hw, ey = r || hh; x0 = Math.min(x0, o.x - ex); x1 = Math.max(x1, o.x + ex); y0 = Math.min(y0, o.y - ey); y1 = Math.max(y1, o.y + ey); });
+    if (x1 > x0) { const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, f = Math.min(1, 172 / (x1 - x0), 152 / (y1 - y0));
+      c.list.forEach(o => { o.x -= mx; o.y -= my; }); c.setScale(f); }
     return c;
   }
 
@@ -1836,7 +1854,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    this.add.text(W - 10, H - 8, 'v0.9.1', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
+    this.add.text(W - 10, H - 8, 'v0.10.0', { fontFamily: 'Arial', fontSize: '14px', color: '#2c3e50' }).setOrigin(1, 1);
 
     this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Build'));
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Build'));
@@ -1875,18 +1893,24 @@ class Game extends Phaser.Scene {
     this.biomeCols = { dirt: BIOMES.eng.dirt, grass: BIOMES.eng.grass }; this.night = 0;
 
     // baggrund: to lag, der tones over i hinanden ved landskabsskift
-    this.skyA = this.add.tileSprite(0, 0, W, 300, 'sky_nat').setOrigin(0).setScrollFactor(0).setDepth(-5).setVisible(false);   // stjerner/måne/Jorden – kun i nat-agtige landskaber
-    this.skyB = this.add.tileSprite(0, 0, W, 300, 'sky_nat').setOrigin(0).setScrollFactor(0).setDepth(-5).setVisible(false);
+    this.biomeKey = null; this.skyCol = null; this.setSky(BIOMES.eng.sky);
+    // glidende billeder: fysikken regner 60 gange i sekundet, men skærmen kan vise 90 eller 120. Lige før hvert billede tegnes,
+    // flyttes kroppene midlertidigt til en mellemstilling mellem de to seneste fysiktrin, og bagefter sættes de tilbage
+    const ipPre = () => this.ipApply(), ipPost = () => this.ipRestore();
+    this.game.events.on('prerender', ipPre); this.game.events.on('postrender', ipPost);
+    this.events.once('shutdown', () => { this.game.events.off('prerender', ipPre); this.game.events.off('postrender', ipPost); this.ipList = null; });
+    this.skyA = new Strip(this, 0, 'sky_nat', -5).setVisible(false);   // stjerner/måne/Jorden – kun i nat-agtige landskaber
+    this.skyB = new Strip(this, 0, 'sky_nat', -5).setVisible(false);
     this.sun = this.add.image(1000, 120, 'sun').setScrollFactor(0).setDepth(-5).setVisible(false);
     this.mids = []; this.nextMidX = 0;   // mellemlaget: enkeltstående ting med parallax, tilfældig størrelse og afstand
-    this.clouds = this.add.tileSprite(0, 0, W, 220, 'clouds').setOrigin(0).setScrollFactor(0).setDepth(-4);
-    this.hills = this.add.tileSprite(0, H - 500, W, 300, 'far_hills').setOrigin(0).setScrollFactor(0).setDepth(-2).setTint(BIOMES.eng.hills);
-    this.hillsB = this.add.tileSprite(0, H - 500, W, 300, 'far_hills').setOrigin(0).setScrollFactor(0).setDepth(-2).setTint(BIOMES.eng.hills).setAlpha(0);
+    this.clouds = new Strip(this, 0, 'clouds', -4);
+    this.hills = new Strip(this, H - 500, 'far_hills', -2).setTint(BIOMES.eng.hills);
+    this.hillsB = new Strip(this, H - 500, 'far_hills', -2).setTint(BIOMES.eng.hills).setAlpha(0);
     this.groundBg = this.add.rectangle(0, H - 200, W, 200, BIOMES.eng.ground).setOrigin(0).setScrollFactor(0).setDepth(-2);
     this.nextDecorX = 600;
     this.wx = []; this.wxCur = null; this.wxType = null; this.wxFade = 1; this.wxLastX = 0;   // vejr: små ting, der falder eller fyger hen over skærmen
     for (let i = 0; i < 36; i++) { const p = this.add.image(0, 0, 'wx_snow').setScrollFactor(0).setDepth(15).setVisible(false); this.wx.push(p); }
-    this.fg = this.add.tileSprite(0, H - 140, W, 90, 'fg_grass').setOrigin(0).setScrollFactor(0).setDepth(16).setAlpha(0.6).setScale(1.55);   // forgrund, der suser forbi foran bilen
+    this.fg = new Strip(this, H - 140, 'fg_grass', 16, 1.55).setAlpha(0.6);   // forgrund, der suser forbi foran bilen
     this.lite = false; this.liteOffs = 0; this.liteAt = 0; this.fastSince = 0; this.slowSince = 0; if (SETTINGS.lite) this.setLite(true);
 
     // terræn
@@ -1993,8 +2017,13 @@ class Game extends Phaser.Scene {
     return body;
   }
 
+  setSky(c) {   // himlen er skærmens ryddefarve, ikke et ekstra lag, der males ovenpå (sparer en hel skærmfuld maling pr. billede)
+    if (this.skyCol === c) return; this.skyCol = c;
+    const rgb = Phaser.Display.Color.IntegerToRGB(c), r = this.game.renderer;
+    if (r && r.config && r.config.backgroundColor) r.config.backgroundColor.setFromRGB(rgb);
+  }
   setLite(on) {   // let tilstand: forgrund og skyer væk, mindre pynt, ingen ildfluer
-    this.lite = on; SETTINGS.lite = on; this.wxCur = undefined;
+    this.lite = on; SETTINGS.lite = on; this.wxCur = undefined; this.biomeKey = null;
     this.fg.setVisible(!on); this.clouds.setVisible(!on);
   }
   extendBiomes() {   // eng først, så de otte andre i tilfældig rækkefølge – derefter alle ni blandet, uden at to ens støder sammen
@@ -2016,16 +2045,17 @@ class Game extends Phaser.Scene {
     const key = m.a === m.b ? 'same' + m.farA : (m.farA + m.farB + (t * 200 | 0));   // intet nyt at regne på mellem overgangene
     if (key === this.biomeKey) return; this.biomeKey = key;
     this.biomeCols = { dirt: lerpColor(m.a.dirt, m.b.dirt, t), grass: lerpColor(m.a.grass, m.b.grass, t) };
-    this.cameras.main.setBackgroundColor(lerpColor(m.a.sky, m.b.sky, t));
+    this.setSky(lerpColor(m.a.sky, m.b.sky, t));
     const hc = lerpColor(m.a.hills, m.b.hills, t); this.hills.setTint(hc); this.hillsB.setTint(hc); this.groundBg.setFillStyle(lerpColor(m.a.ground, m.b.ground, t));
     // tileSprites laver deres eget internt billede, så texture.key passer aldrig – vi husker selv, hvad der er lagt på (ellers lægges det på igen hvert billede: ~15 ms)
     const setTex = (o, k) => { if (o.texKey !== k) { o.texKey = k; o.setTexture(k); } };
     setTex(this.hills, m.farA); setTex(this.hillsB, m.farB);
-    this.hills.setAlpha(1 - t).setVisible(t < 1); this.hillsB.setAlpha(t).setVisible(t > 0);
+    const th = this.lite ? (t < 0.5 ? 0 : 1) : t;   // let tilstand: bakkerne skifter på én gang i stedet for at tone over (to lag oven i hinanden koster)
+    this.hills.setAlpha(1 - th).setVisible(th < 1); this.hillsB.setAlpha(th).setVisible(th > 0);
     this.matter.world.setGravity(0, (m.a.gravity || 1) * (1 - t) + (m.b.gravity || 1) * t);   // månen: lav tyngdekraft
     const sa = m.a.skyDeco, sb = m.b.skyDeco;
     if (sa) setTex(this.skyA, sa); if (sb) setTex(this.skyB, sb);
-    this.skyA.setAlpha(1 - t).setVisible(!!sa && t < 1); this.skyB.setAlpha(t).setVisible(!!sb && t > 0);
+    this.skyA.setAlpha(1 - t).setVisible(!this.lite && !!sa && t < 1); this.skyB.setAlpha(t).setVisible(!this.lite && !!sb && t > 0);   // himmelpynten (stjerner m.m.) springes over i let tilstand
     this.sun.setAlpha((m.a.sun ? 1 - t : 0) + (m.b.sun ? t : 0)).setVisible(!!(m.a.sun || m.b.sun));
     this.night = (m.a.night ? 1 - t : 0) + (m.b.night ? t : 0);
     const cl = (m.a.clouds ?? 1) * (1 - t) + (m.b.clouds ?? 1) * t; this.clouds.setAlpha((1 - this.night * 0.6) * cl);   // ingen skyer på månen
@@ -2311,8 +2341,9 @@ class Game extends Phaser.Scene {
   }
 
   trimObstacles(behindX) {
-    this.obstacles = this.obstacles.filter(o => { if (o.x < behindX) { o.gos.forEach(g => g.destroy()); o.bodies.forEach(b => { if (!b.gameObject) this.matter.world.remove(b); }); return false; } return true; });
-    this.actors = this.actors.filter(a => { if (a.x < behindX) { a.destroy(); return false; } return true; });
+    // ryd op bag bilen: stop animationer på tingene, fjern fysik-led og kroppe, og slet billederne
+    this.obstacles = this.obstacles.filter(o => { if (o.x < behindX) { o.done = true; if (o.cons) o.cons.forEach(c => this.matter.world.removeConstraint(c)); o.gos.forEach(g => { this.tweens.killTweensOf(g); g.destroy(); }); o.bodies.forEach(b => { if (!b.gameObject) this.matter.world.remove(b); }); return false; } return true; });
+    this.actors = this.actors.filter(a => { if (a.x < behindX) { this.tweens.killTweensOf(a); a.destroy(); return false; } return true; });
   }
 
   spawnUfo(cow, x, y, cr) {   // ufoen daler ned over væsenet og begynder at hive det op i en lysstråle – ram ufoen, så styrter den og væsenet er reddet
@@ -2481,7 +2512,7 @@ class Game extends Phaser.Scene {
       if (this.punchT <= 0 && time - this.lastPunchAt > 900) {
         const fx = tool.x + Math.cos(a) * (bw / 2 + h.reach * 0.7), fy = tool.y + Math.sin(a) * (bw / 2 + h.reach * 0.7);
         const near = this.obstacles.some(o => o.bodies.some(b => Math.abs(b.position.x - fx) < h.reach * 0.8 && Math.abs(b.position.y - fy) < 70));
-        if (near) { this.lastPunchAt = time; this.punchT = 0.001; SFX.whoosh(); SFX.boing(); }   // handsken springer ud på sin fjeder
+        if (near) { this.lastPunchAt = time; this.punchT = 0.001; SFX.init(); if (!SFX.smp('boing', 0.9)) SFX.boing(); }   // handsken springer ud på sin fjeder: kun boing
       }
       let ext = 0;
       if (this.punchT > 0) { this.punchT += delta / 420; if (this.punchT >= 1) this.punchT = 0; else ext = this.punchT < 0.3 ? Phaser.Math.Easing.Quadratic.Out(this.punchT / 0.3) : 1 - Phaser.Math.Easing.Quadratic.In((this.punchT - 0.3) / 0.7); }
@@ -2530,7 +2561,32 @@ class Game extends Phaser.Scene {
     const STEP = 1000 / 60, k = Math.round(delta / STEP);
     if (k >= 1 && Math.abs(delta - k * STEP) < STEP * 0.25) delta = k * STEP;   // små udsving i billedtiden rundes væk, så det ikke hakker
     this.physAcc = Math.min((this.physAcc || 0) + delta, STEP * 2);
-    while (this.physAcc >= STEP - 0.001) { this.matter.world.step(STEP); this.physAcc -= STEP; }
+    while (this.physAcc >= STEP - 0.001) {
+      const bs = this.matter.world.localWorld.bodies; for (let i = 0; i < bs.length; i++) { const b = bs[i]; if (!b.isStatic) { b.ipx = b.position.x; b.ipy = b.position.y; b.ipa = b.angle; } }
+      this.matter.world.step(STEP); this.physAcc -= STEP;
+    }
+    this.ipAlpha = Math.min(1, Math.max(0, this.physAcc / STEP));
+  }
+
+  ipFollowers() {   // ting, der tegnes efter bilen (og ikke er fysik-kroppe selv), flyttes med bilens mellemstilling
+    if (this.broken) return [];
+    return [this.top, this.rearMotor && this.rearMotor.img, ...this.blinks.map(b => b.img), ...this.wheelSkins, this.belt, this.susp, ...this.springs.map(sp => sp.img), this.toolBeam, this.blade, this.armG, this.beamImg].filter(Boolean);
+  }
+  ipApply() {
+    if (this.over || !this.chassis || !this.chassis.body || this.ipList) return;
+    const a = this.ipAlpha ?? 1, bs = this.matter.world.localWorld.bodies, list = [];
+    for (let i = 0; i < bs.length; i++) { const b = bs[i]; if (b.isStatic || b.ipx === undefined) continue;
+      b.ipcx = b.position.x; b.ipcy = b.position.y; b.ipca = b.angle;
+      b.position.x = b.ipx + (b.ipcx - b.ipx) * a; b.position.y = b.ipy + (b.ipcy - b.ipy) * a; b.angle = b.ipa + (b.ipca - b.ipa) * a; list.push(b); }
+    const cb = this.chassis.body, dx = cb.ipcx !== undefined ? cb.position.x - cb.ipcx : 0, dy = cb.ipcy !== undefined ? cb.position.y - cb.ipcy : 0;
+    const fol = this.ipFollowers(); fol.forEach(o => { o.x += dx; o.y += dy; });
+    this.ipList = list; this.ipFol = fol; this.ipD = [dx, dy];
+  }
+  ipRestore() {
+    if (!this.ipList) return;
+    this.ipList.forEach(b => { b.position.x = b.ipcx; b.position.y = b.ipcy; b.angle = b.ipca; });
+    const [dx, dy] = this.ipD; this.ipFol.forEach(o => { if (o.active !== false) { o.x -= dx; o.y -= dy; } });
+    this.ipList = null; this.ipFol = null;
   }
 
   update(time, delta) {
@@ -2644,13 +2700,13 @@ class Game extends Phaser.Scene {
     const cam = this.cameras.main;
     // parallax: jo længere væk, jo langsommere – og lagene glider lidt lodret, når bilen flyver op
     const dy = cam.scrollY - (GROUND_Y - 480);   // 0 ved kørsel på flad jord, negativ når kameraet er oppe
-    this.hills.tilePositionX = this.hillsB.tilePositionX = cam.scrollX * 0.15; this.hills.y = this.hillsB.y = H - 500 - dy * 0.12;
-    this.skyA.tilePositionX = this.skyB.tilePositionX = cam.scrollX * 0.02; this.skyA.y = this.skyB.y = -dy * 0.05; this.sun.y = 120 - dy * 0.05;
+    [this.hills, this.hillsB].forEach(st => { if (st.visible) { st._x = cam.scrollX * 0.15; st.y = H - 500 - dy * 0.12; } });
+    [this.skyA, this.skyB].forEach(st => { if (st.visible) { st._x = cam.scrollX * 0.02; st.y = -dy * 0.05; } }); this.sun.y = 120 - dy * 0.05;
     this.spawnMid(cam.scrollX, c.x);
     this.groundBg.y = H - 200 - dy * 0.3;
-    this.clouds.tilePositionX = cam.scrollX * 0.04 + time * 0.01; this.clouds.y = -dy * 0.06;
+    if (this.clouds.visible) { this.clouds._x = cam.scrollX * 0.04 + time * 0.01; this.clouds.y = -dy * 0.06; }
     this.updateWeather(delta, cam.scrollX);
-    this.fg.tilePositionX = cam.scrollX * 0.9; this.fg.y = H - 140 - dy * 1.0;
+    if (this.fg.visible) { this.fg._x = cam.scrollX * 0.9; this.fg.y = H - 140 - dy * 1.0; }
     // forlygter om natten
     if (this.night > 0.02 && !this.broken) {
       if (!this.beamImg) this.beamImg = this.add.image(0, 0, 'headlight').setDepth(9).setOrigin(0, 0.5);
@@ -2719,7 +2775,10 @@ class UI extends Phaser.Scene {
     this.add.text(22, 72, SETTINGS.best > 0 ? 'Rekord: ' + Math.floor(SETTINGS.best) + ' m' : '', { fontFamily: FONT, fontSize: '22px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 });
     addCornerButtons(this);
     this.add.text(W / 2 - 232, 36, '🔧', { fontSize: '30px' }).setOrigin(0.5);
-    this.hpG = this.add.graphics();
+    { const x = W / 2 - 200, y = 22, w = 400, h = 28;   // sundhedsbjælken: ramme, fyld (beskæres) og kant er færdige billeder
+      bake(this, 'hp_bg', x - 3, y - 3, w + 10, h + 10, (g) => { g.fillStyle(0x000000, 0.35); g.fillRoundedRect(x + 3, y + 4, w, h, 10); g.fillStyle(0x2c3e50); g.fillRoundedRect(x, y, w, h, 10); });
+      this.hpFill = bake(this, 'hp_fill', x + 4, y + 4, w - 8, h - 8, (g) => { g.fillStyle(0xffffff); g.fillRoundedRect(x + 4, y + 4, w - 8, h - 8, 7); });
+      bake(this, 'hp_line', x - 3, y - 3, w + 6, h + 6, (g) => { g.lineStyle(4, 0xffffff, 0.9); g.strokeRoundedRect(x, y, w, h, 10); }); }
     this.hpShown = 100;
 
     this.btnL = { held: false }; this.btnR = { held: false };
@@ -2739,13 +2798,8 @@ class UI extends Phaser.Scene {
     const game = this.scene.get('Game');
     if (!game.chassis) return;
     this.hpShown = Phaser.Math.Linear(this.hpShown, game.health, 0.15);
-    const g = this.hpG, x = W / 2 - 200, y = 22, w = 400, h = 28, f = this.hpShown / 100;
-    g.clear();
-    g.fillStyle(0x000000, 0.35); g.fillRoundedRect(x + 3, y + 4, w, h, 10);
-    g.fillStyle(0x2c3e50); g.fillRoundedRect(x, y, w, h, 10);
-    const col = f > 0.5 ? 0x2ecc71 : (f > 0.25 ? 0xf1c40f : 0xe74c3c);
-    if (f > 0.02) { g.fillStyle(col); g.fillRoundedRect(x + 4, y + 4, (w - 8) * f, h - 8, 7); }
-    g.lineStyle(4, 0xffffff, 0.9); g.strokeRoundedRect(x, y, w, h, 10);
+    const f = this.hpShown / 100, col = f > 0.5 ? 0x2ecc71 : (f > 0.25 ? 0xf1c40f : 0xe74c3c);
+    this.hpFill.setVisible(f > 0.02).setTint(col).setCrop(0, 0, Math.round(392 * f), 20);
   }
 
   showGameOver(dist, record, reason) {
@@ -2766,6 +2820,26 @@ class UI extends Phaser.Scene {
 }
 
 // =====================================================================
+// ---------- baggrundsstrimmel: to billeder side om side i stedet for en tileSprite ----------
+// En tileSprite kopierer sit billede til et stort lærred og sender det til grafikkortet, hver gang billedet skiftes (8-17 MB ved hvert baneskift).
+// To almindelige billeder kan skifte billede gratis, og der er ingen kant, der kan smitte af.
+class Strip {
+  constructor(scene, y, key, depth, scale) {
+    this.sc = scale || 1; this._x = 0; this._y = y; this.texKey = key; this.visible = true;
+    this.imgs = [0, 1].map(() => scene.add.image(0, y, key).setOrigin(0).setScrollFactor(0).setDepth(depth).setScale(this.sc));
+    this.place();
+  }
+  get tw() { return this.imgs[0].width * this.sc; }
+  place() { const w = this.tw, x = -Math.round((((this._x * this.sc) % w) + w) % w); this.imgs[0].setPosition(x, this._y); this.imgs[1].setPosition(x + w, this._y); }
+  set tilePositionX(v) { this._x = v; this.place(); } get tilePositionX() { return this._x; }
+  set y(v) { this._y = v; this.place(); } get y() { return this._y; }
+  setTexture(k) { this.imgs.forEach(i => i.setTexture(k)); this.place(); return this; }
+  setTint(c) { this.imgs.forEach(i => i.setTint(c)); return this; }
+  clearTint() { this.imgs.forEach(i => i.clearTint()); return this; }
+  setAlpha(a) { this.imgs.forEach(i => i.setAlpha(a)); return this; }
+  setVisible(v) { this.visible = v; this.imgs.forEach(i => i.setVisible(v)); return this; }
+}
+
 // ---------- altid liggende ----------
 // Nyere Android ignorerer appens ønske om at ligge ned på tablets. Står skærmen op (berøringsskærm), drejer vi selv spillet 90 grader.
 let ROTATED = false;
@@ -2794,6 +2868,15 @@ function patchRotation(game) {
   };
   sm.refresh();
 }
+// ---------- fysik: ingen læk af berøringspar ----------
+// Matter lægger også faste kroppe (jorden) i dvale, og et par med en sovende krop fjernes aldrig. Så voksede listen over berøringer hele runden,
+// og fysikken blev langsommere og langsommere (10x efter 3 minutter). Faste kroppe må ikke sove, og en krop vækkes, før den fjernes.
+(function () {
+  const M = Phaser.Physics.Matter.Matter, Sl = M.Sleeping, set = Sl.set;
+  Sl.set = function (b, z) { if (z && b.isStatic) return; return set.call(this, b, z); };
+  const WP = Phaser.Physics.Matter.World.prototype, rm = WP.remove;
+  WP.remove = function (o, d) { (Array.isArray(o) ? o : [o]).forEach(x => { const b = x && (x.body || x); if (b && b.isSleeping) set.call(Sl, b, false); }); return rm.call(this, o, d); };
+})();
 function startGame() { window.game = new Phaser.Game({
   type: Phaser.AUTO,
   width: W, height: H,
@@ -2802,6 +2885,7 @@ function startGame() { window.game = new Phaser.Game({
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.NO_CENTER, fullscreenTarget: document.documentElement },   // centreres af #wrap (flex), som også virker drejet
   physics: { default: 'matter', matter: { gravity: { y: 1.0 }, runner: { isFixed: true, fps: 60 }, enableSleeping: true, positionIterations: 12, velocityIterations: 8, constraintIterations: 4, debug: false } },
   audio: { noAudio: true },
+  disablePreFX: true, disablePostFX: true,   // spillet bruger ingen effekter: sparer ~60 MB grafikhukommelse
   scene: [Title, Build, Game, UI]
 }); window.game.events.once('ready', () => patchRotation(window.game)); }
 (document.fonts && document.fonts.load ? Promise.race([document.fonts.load("700 20px 'Fredoka'"), new Promise(r => setTimeout(r, 1500))]) : Promise.resolve()).then(startGame, startGame);
