@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.15.1)
+//  Biglers Biler – etape 3  (v0.16.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -630,6 +630,66 @@ function makeTextures(s) {
   cre('cake_slice', 56, 48, () => { g.fillStyle(0xf78fb3); g.beginPath(); g.moveTo(2, 46); g.lineTo(54, 46); g.lineTo(54, 10); g.closePath(); g.fillPath();   // et stykke lagkage (til gaflen)
     g.fillStyle(0xfff0f5); g.beginPath(); g.moveTo(22, 32); g.lineTo(54, 32); g.lineTo(54, 27); g.lineTo(29, 27); g.closePath(); g.fillPath(); g.lineStyle(5, 0xfff0f5); g.beginPath(); g.moveTo(3, 45); g.lineTo(54, 10); g.strokePath();
     g.fillStyle(0xe74c3c); g.fillCircle(48, 8, 6); g.lineStyle(2, 0x27ae60); g.beginPath(); g.moveTo(48, 3); g.lineTo(52, 0); g.strokePath(); });
+  // ---- Halloween (v0.16) ----
+  const jack = (cx, by, s) => {   // lygtegræskar med glødende ansigt; by = bunden
+    const O = 0xe67e22, OD = 0xca6f1e, Y = 0xf9e04b, cy = by - 30 * s;
+    g.fillStyle(0x6e4b1f); g.fillRoundedRect(cx - 4 * s, cy - 36 * s, 8 * s, 14 * s, 3 * s);
+    g.fillStyle(OD); g.fillEllipse(cx - 18 * s, cy, 36 * s, 58 * s); g.fillEllipse(cx + 18 * s, cy, 36 * s, 58 * s);
+    g.fillStyle(O); g.fillEllipse(cx - 9 * s, cy, 34 * s, 60 * s); g.fillEllipse(cx + 9 * s, cy, 34 * s, 60 * s); g.fillEllipse(cx, cy, 30 * s, 60 * s);
+    g.lineStyle(2 * s, OD); g.strokeEllipse(cx - 9 * s, cy, 34 * s, 60 * s); g.strokeEllipse(cx + 9 * s, cy, 34 * s, 60 * s);
+    g.fillStyle(Y); g.fillTriangle(cx - 22 * s, cy - 2 * s, cx - 14 * s, cy - 16 * s, cx - 6 * s, cy - 2 * s); g.fillTriangle(cx + 6 * s, cy - 2 * s, cx + 14 * s, cy - 16 * s, cx + 22 * s, cy - 2 * s);
+    g.fillTriangle(cx - 4 * s, cy + 6 * s, cx, cy, cx + 4 * s, cy + 6 * s);
+    g.beginPath(); g.moveTo(cx - 22 * s, cy + 10 * s); [[-16, 16], [-12, 12], [-6, 20], [0, 14], [6, 20], [12, 12], [16, 16], [22, 10], [16, 24], [0, 28], [-16, 24]].forEach(([dx, dy]) => g.lineTo(cx + dx * s, cy + dy * s)); g.closePath(); g.fillPath(); };
+  cre('pumpkin', 84, 72, () => jack(42, 71, 1));
+  cre('lamppost', 54, 224, () => {   // gammeldags lygtepæl (bunden i nederste kant), lygten øverst
+    const K = 0x2c3e50, K2 = 0x1c2833;
+    g.fillStyle(K2); g.fillRoundedRect(12, 206, 30, 18, 4); g.fillStyle(K); g.fillRect(16, 196, 22, 12); g.fillRect(22, 56, 10, 142); g.fillRect(18, 120, 18, 6);
+    g.lineStyle(4, K); g.beginPath(); g.moveTo(27, 70); g.lineTo(8, 62); g.strokePath(); g.beginPath(); g.moveTo(27, 70); g.lineTo(46, 62); g.strokePath();
+    g.fillStyle(K); g.fillRect(14, 50, 26, 8); g.fillStyle(0xfff3b0); g.beginPath(); g.moveTo(12, 50); g.lineTo(42, 50); g.lineTo(46, 20); g.lineTo(8, 20); g.closePath(); g.fillPath();
+    g.fillStyle(0xf9e04b); g.fillEllipse(27, 36, 12, 18); g.lineStyle(3, K); g.strokeRect(10, 20, 34, 30); g.beginPath(); g.moveTo(27, 20); g.lineTo(27, 50); g.strokePath();
+    g.fillStyle(K); g.fillTriangle(4, 22, 50, 22, 27, 6); g.fillCircle(27, 5, 4); });
+  cre('cauldron', 120, 104, () => {   // heksekedel fuld af grønt bryg og slik
+    const K = 0x2b2b2b, K2 = 0x444444;
+    g.fillStyle(K); g.fillRect(24, 80, 8, 24); g.fillRect(88, 80, 8, 24);
+    g.fillStyle(0xe74c3c); g.fillRect(70, 6, 5, 28); g.fillCircle(72, 8, 11); g.fillStyle(0xffffff); g.fillCircle(72, 8, 6); g.fillStyle(0xe74c3c); g.fillCircle(72, 8, 3);   // slikkepind
+    g.fillStyle(0xf1c40f); g.fillEllipse(44, 24, 22, 12); g.fillTriangle(30, 24, 26, 18, 26, 30); g.fillTriangle(58, 24, 62, 18, 62, 30);   // bolsje
+    g.fillStyle(K); g.fillEllipse(60, 64, 112, 76); g.fillStyle(K2); g.fillEllipse(44, 56, 30, 40);
+    g.fillStyle(0x58d68d); g.fillEllipse(60, 34, 100, 22); g.fillStyle(0x82e0aa); [[38, 32, 7], [62, 36, 9], [84, 31, 6]].forEach(([bx, by, r]) => g.fillCircle(bx, by, r));
+    g.fillStyle(0x9b59b6); g.fillEllipse(92, 30, 18, 10); g.fillStyle(0x58d68d); g.fillEllipse(30, 46, 10, 18); g.fillEllipse(96, 50, 8, 14);   // dryp
+    g.lineStyle(8, K2); g.strokeEllipse(60, 34, 104, 24); });
+  cre('cfire', 90, 34, () => { g.fillStyle(0x6e4b1f); g.fillRoundedRect(10, 24, 70, 9, 4); g.fillRoundedRect(18, 18, 54, 8, 4);
+    g.fillStyle(0xe67e22); g.fillTriangle(20, 22, 32, 0, 42, 22); g.fillTriangle(38, 22, 48, 2, 60, 22); g.fillTriangle(54, 22, 64, 6, 72, 22);
+    g.fillStyle(0xf9e04b); g.fillTriangle(28, 22, 34, 8, 40, 22); g.fillTriangle(44, 22, 49, 10, 54, 22); g.fillTriangle(58, 22, 63, 12, 68, 22); });
+  cre('candy', 30, 16, () => { g.fillStyle(0xffffff); g.fillEllipse(15, 8, 18, 14); g.fillTriangle(6, 8, 0, 1, 0, 15); g.fillTriangle(24, 8, 30, 1, 30, 15); g.fillStyle(0xbbbbbb); g.fillRect(12, 2, 3, 12); g.fillRect(18, 2, 2, 12); });
+  const stump = (part) => {   // gammel træstub (100 x 62): 'all', 'low' (efter saven) eller 'top' (det afsavede stykke)
+    const B = 0x6e4b1f, BD = 0x4e3416, RG = 0xd9b77e;
+    if (part !== 'top') { g.fillStyle(B); g.beginPath(); g.moveTo(4, 62); g.lineTo(22, 50); g.lineTo(78, 50); g.lineTo(96, 62); g.closePath(); g.fillPath(); }
+    if (part === 'all') { g.fillStyle(B); g.fillRect(18, 14, 64, 42); g.fillStyle(BD); [26, 46, 66].forEach(x => g.fillRect(x, 18, 4, 36));
+      g.fillStyle(0x2b1d0e); g.fillEllipse(50, 32, 18, 14); g.fillStyle(0xf9e04b); g.fillCircle(46, 32, 2.5); g.fillCircle(54, 32, 2.5);   // knasthul med øjne
+      g.fillStyle(RG); g.fillEllipse(50, 14, 64, 16); g.lineStyle(2, 0xb7955f); g.strokeEllipse(50, 14, 44, 10); g.strokeEllipse(50, 14, 24, 6);
+      g.fillStyle(0xe74c3c); g.fillEllipse(80, 44, 14, 8); g.fillStyle(0xf5e6c8); g.fillRect(78, 44, 4, 8); }
+    if (part === 'low') { g.fillStyle(B); g.fillRect(18, 40, 64, 16); g.fillStyle(RG); g.fillEllipse(50, 40, 64, 14); g.lineStyle(2, 0xb7955f); g.strokeEllipse(50, 40, 40, 8); }
+    if (part === 'top') { g.fillStyle(B); g.fillRect(4, 8, 64, 26); g.fillStyle(BD); [12, 32, 52].forEach(x => g.fillRect(x, 10, 4, 22)); g.fillStyle(0x2b1d0e); g.fillEllipse(36, 22, 18, 12); g.fillStyle(RG); g.fillEllipse(36, 8, 64, 14); } };
+  cre('stump', 100, 62, () => stump('all')); cre('stump_low', 100, 62, () => stump('low')); cre('stump_top', 72, 40, () => stump('top'));
+  cre('deadtree', 250, 300, () => {   // krogede, bare træ med en lang gren ud over vejen (stammen ved x = 50)
+    const T = 0x5d4330;
+    g.fillStyle(T); g.beginPath(); g.moveTo(30, 300); g.lineTo(70, 300); g.lineTo(62, 200); g.lineTo(70, 120); g.lineTo(54, 60); g.lineTo(40, 64); g.lineTo(48, 120); g.lineTo(38, 200); g.closePath(); g.fillPath();
+    g.fillTriangle(16, 300, 40, 280, 40, 300); g.fillTriangle(84, 300, 60, 280, 60, 300);   // rødder
+    g.lineStyle(12, T); g.beginPath(); g.moveTo(60, 130); g.lineTo(120, 104); g.lineTo(180, 96); g.lineTo(244, 80); g.strokePath();   // grenen bats hænger i
+    g.lineStyle(7, T); [[120, 104, 132, 76], [180, 96, 196, 70], [52, 80, 20, 40], [20, 40, 8, 44], [54, 64, 70, 24], [70, 24, 84, 20], [40, 160, 10, 128]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.strokePath(); });
+    g.fillStyle(0x1c120a); g.fillEllipse(54, 170, 16, 22); });
+  cre('bat_hang', 26, 40, () => { const P = 0x6c5a8c; g.fillStyle(0x1c1530); g.fillRect(9, 0, 3, 6); g.fillRect(14, 0, 3, 6);
+    g.fillStyle(P); g.fillEllipse(13, 20, 22, 30); g.fillStyle(0x1b1b22); g.fillTriangle(5, 30, 8, 40, 12, 32); g.fillTriangle(21, 30, 18, 40, 14, 32); g.fillCircle(13, 31, 7);
+    g.fillStyle(0xf9e04b); g.fillCircle(10, 31, 1.8); g.fillCircle(16, 31, 1.8); });
+  cre('bat', 70, 34, () => { const P = 0x6c5a8c; g.fillStyle(P); g.beginPath(); g.moveTo(35, 14); g.lineTo(18, 2); g.lineTo(0, 10); g.lineTo(8, 16); g.lineTo(4, 26); g.lineTo(16, 22); g.lineTo(22, 30); g.lineTo(35, 22);
+    g.lineTo(48, 30); g.lineTo(54, 22); g.lineTo(66, 26); g.lineTo(62, 16); g.lineTo(70, 10); g.lineTo(52, 2); g.closePath(); g.fillPath();
+    g.fillStyle(0x1b1b22); g.fillEllipse(35, 18, 14, 18); g.fillTriangle(30, 10, 31, 2, 34, 9); g.fillTriangle(40, 10, 39, 2, 36, 9); g.fillStyle(0xf9e04b); g.fillCircle(32, 14, 1.8); g.fillCircle(38, 14, 1.8); });
+  cre('grave', 72, 98, () => {   // gravsten med kors og mos
+    g.fillStyle(0x5d4a36); g.fillEllipse(36, 94, 72, 12);
+    g.fillStyle(0x95a5a6); g.fillRoundedRect(8, 8, 56, 86, { tl: 26, tr: 26, bl: 2, br: 2 }); g.fillStyle(0x7f8c8d); g.fillRoundedRect(52, 14, 12, 80, { tl: 0, tr: 20, bl: 0, br: 2 });
+    g.fillStyle(0x6c7a7b); g.fillRect(31, 24, 8, 40); g.fillRect(21, 34, 28, 8);
+    g.lineStyle(2, 0x5d6d6e); g.beginPath(); g.moveTo(14, 54); g.lineTo(22, 62); g.lineTo(18, 72); g.strokePath();
+    g.fillStyle(0x27ae60); g.fillEllipse(16, 90, 20, 8); g.fillEllipse(54, 91, 16, 6); g.fillStyle(0x1e8449); [12, 18, 24, 50, 56].forEach(x => g.fillTriangle(x - 3, 92, x, 82, x + 3, 92)); });
   g.fillStyle(0xf1c40f); g.beginPath(); for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5 - Math.PI / 2, rr = i % 2 ? 5 : 11; g.lineTo(12 + Math.cos(a) * rr, 12 + Math.sin(a) * rr); } g.closePath(); g.fillPath(); g.generateTexture('star_s', 24, 24); g.clear();
   g.fillStyle(0xffffff); g.fillRect(0, 0, 30, 36); g.fillStyle(0xe8eef2); for (let yy = 6; yy < 36; yy += 8) g.fillRect(4, yy, 22, 2); g.generateTexture('tp_sheet', 30, 36); g.clear();
   // strandbold
@@ -819,8 +879,9 @@ const OBSTACLES = [
           s.spawnPieces(b.x, b.y, 0xf78fb3, 4, 14, 5); s.spawnPieces(b.x, b.y, 0xfff0f5, 3, 10, 5); b.destroy(); obs.bodies = []; return; }
         s.spawnPieces(b.x, b.y, 0xf78fb3, 7, 16, 6); s.spawnPieces(b.x, b.y, 0xfff0f5, 6, 12, 7); s.spawnPieces(b.x, b.y - 30, 0xe74c3c, 1, 14, 5); b.destroy(); obs.bodies = []; };
       return obs; } },
-  { minD: 0, w: 3, make(s, x, y) {        // balloner – hver sin snor: ram ballonen = pop, ram snoren = den flyver væk
-      const colors = [0xe74c3c, 0xf1c40f, 0x3498db, 0x2ecc71, 0x9b59b6], gos = [], bodies = [];
+  { minD: 0, w: 3, biomes: ['eng', 'by', 'fantasy', 'nat'], make(s, x, y) {        // balloner – hver sin snor: ram ballonen = pop, ram snoren = den flyver væk
+      const bm = s.biomeAt(x), spooky = (bm.t < 0.5 ? bm.nameA : bm.nameB) === 'nat';
+      const colors = spooky ? [0xe67e22, 0x8e44ad, 0x2c2c2c, 0xd35400, 0x9b59b6] : [0xe74c3c, 0xf1c40f, 0x3498db, 0x2ecc71, 0x9b59b6], gos = [], bodies = [];
       const obs = { gos, bodies, hardness: 0, fragile: true };
       const ax = x, peg = s.add.image(x, y - 6, 'slab').setDisplaySize(10, 16).setTint(0x8a5a25).setDepth(6); gos.push(peg);   // én pløk, alle snore bindes her
       colors.forEach((c, i) => {
@@ -927,6 +988,82 @@ const OBSTACLES = [
   { minD: 0, w: 3, biome: 'nat', make(s, x, y) { return surpriseObstacle(s, x, y, 'ghost', 120, 160, { fly: true }); } },   // spøgelse
   { minD: 0, w: 3, biome: 'bjerg', make(s, x, y) { return surpriseObstacle(s, x, y, 'yeti', 150, 160); } },        // yeti
   { minD: 0, w: 3, biome: 'maane', make(s, x, y) { return surpriseObstacle(s, x, y, 'alien', 130, 160); } },       // rumvæsen
+  // ---------- Halloween (nat) ----------
+  { minD: 0, w: 3, flat: true, biome: 'nat', make(s, x, y) {   // lygtegræskar (1-3 stk): splatter, når de rammes
+      const n = Phaser.Math.Between(1, 3), gos = [], bodies = [];
+      const obs = { gos, bodies, hardness: 0, fragile: true };
+      for (let i = 0; i < n; i++) {
+        const sc = 0.75 + Math.random() * 0.45, px = x + i * 74, py = s.groundY(px);
+        const glow = s.add.image(px, py - 34 * sc, 'smoke').setTint(0xf39c12).setAlpha(0.3).setScale(2.4 * sc).setDepth(5.9); gos.push(glow);
+        s.tweens.add({ targets: glow, alpha: 0.12, duration: 160 + Math.random() * 200, yoyo: true, repeat: -1 });
+        const p = s.obsImage('pumpkin', px, py - 36 * sc + 3, { shape: { type: 'rectangle', width: 74, height: 60 }, isStatic: true }); p.setScale(sc); p.glow = glow; gos.push(p); bodies.push(p.body);
+      }
+      obs.onHit = (imp, part, body) => { const p = body && body.gameObject; if (!p || !p.active || p.splat) return; p.splat = true; SFX.splat();
+        s.spawnPieces(p.x, p.y, 0xe67e22, 7, 16 * p.scaleX, 6); s.spawnPieces(p.x, p.y, 0xf9e04b, 3, 8, 5); s.spawnPieces(p.x, p.y - 30, 0x6e4b1f, 1, 10, 4); s.puffAt(p.x, p.y);
+        if (p.glow) p.glow.destroy(); obs.bodies = obs.bodies.filter(b => b !== p.body); p.destroy(); };
+      return obs; } },
+  { minD: 0, w: 3, biome: 'nat', make(s, x, y) {   // gammeldags lygtepæl: vælter, mens lyset blinker – så knuses glasset
+      const body = s.matter.add.rectangle(x, y - 100, 18, 200, { isStatic: true, label: 'obs' });
+      const img = s.add.image(x, y + 6, 'lamppost').setOrigin(0.5, 1).setDepth(6);
+      const glow = s.add.image(x, y + 6 - 189, 'smoke').setTint(0xfff3b0).setAlpha(0.45).setScale(3.2).setDepth(5.9);
+      s.tweens.add({ targets: glow, alpha: 0.32, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      const obs = { gos: [img, glow], bodies: [body], hardness: 0.15, material: 'metal', done: false };
+      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.clunk(); s.tweens.killTweensOf(glow);
+        s.tweens.add({ targets: img, angle: 84, duration: 750, ease: 'Quad.in',
+          onUpdate: () => { const a = img.rotation; glow.setPosition(x + Math.sin(a) * 189, y + 6 - Math.cos(a) * 189).setAlpha(Math.random() < 0.5 ? 0.05 : 0.5); },
+          onComplete: () => { const lx = glow.x, ly = glow.y; glow.destroy(); SFX.glass(); s.spawnPieces(lx, ly, 0xfff3b0, 6, 7, 5); s.cameras.main.shake(120, 0.004); } }); };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'nat', make(s, x, y) {   // heksekedel med slik: vælter, og slikket flyver ud over vejen
+      const fire = s.add.image(x, y + 3, 'cfire').setOrigin(0.5, 1).setDepth(5.8);
+      s.tweens.add({ targets: fire, scaleY: 1.18, duration: 140, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      const pot = s.obsImage('cauldron', x, y - 52, { shape: { type: 'rectangle', width: 104, height: 88 }, isStatic: true });
+      const bub = [0, 1, 2].map(i => { const b = s.add.image(x - 28 + i * 28, y - 82, 'piece').setTint(0x82e0aa).setDisplaySize(10, 10).setDepth(6.1);
+        s.tweens.add({ targets: b, y: b.y - 26, alpha: 0, scale: 0.4, duration: 900, delay: i * 300, repeat: -1 }); return b; });
+      const obs = { gos: [fire, pot, ...bub], bodies: [pot.body], hardness: 0.1, fragile: true, done: false, material: 'metal' };
+      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; SFX.clunk(); bub.forEach(b => b.destroy());
+        const cols = [0xe74c3c, 0xf1c40f, 0x9b59b6, 0x2ecc71, 0x3498db, 0xe67e22, 0xff79c6];
+        for (let i = 0; i < 16; i++) { const c = s.matter.add.image(x + Phaser.Math.Between(-30, 30), y - 90, 'candy', null, { shape: { type: 'rectangle', width: 26, height: 14 }, density: 0.0005, friction: 0.5, restitution: 0.45, label: 'piece', collisionFilter: { group: GRP_PIECE } })
+            .setTint(Phaser.Utils.Array.GetRandom(cols)).setDepth(7);
+          c.setVelocity(Phaser.Math.FloatBetween(-3, 10), Phaser.Math.FloatBetween(-13, -5)); c.setAngularVelocity(Phaser.Math.FloatBetween(-0.3, 0.3));
+          s.tweens.add({ targets: c, alpha: 0, delay: 4000 + i * 60, duration: 700, onComplete: () => c.destroy() }); }
+        s.spawnPieces(x, y - 80, 0x58d68d, 6, 12, 6);
+        [0, 90, 180, 300].forEach(d => s.time.delayedCall(d, () => SFX.pop()));
+        s.makeLoose(pot, { type: 'rectangle', width: 104, height: 88 }, 5); obs.gos = [fire]; obs.bodies = []; };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'nat', make(s, x, y) {   // gammel træstub: saven skærer toppen af
+      const st = s.obsImage('stump', x, y - 26, { shape: { type: 'trapezoid', width: 96, height: 40, slope: 0.5 }, isStatic: true });   // skrå sider, så hjulene kan kravle op
+      st.setDepth(6);
+      const obs = { gos: [st], bodies: [st.body], hardness: 0.4, material: 'wood', sawable: true, done: false, onHit: (imp) => { if (imp > 4) SFX.wood(); } };
+      obs.saw = () => { if (obs.done) return; obs.done = true; SFX.wood(); s.spawnPieces(st.x, st.y, 0xe8c58f, 10, 5, 4);
+        const top = s.obsImage('stump_top', st.x - 6, st.y - 12, { shape: { type: 'rectangle', width: 64, height: 26 }, density: 0.001, friction: 0.4, restitution: 0.2, label: 'piece', collisionFilter: { group: GRP_PIECE } });
+        top.setVelocity(4, -6); top.setAngularVelocity(0.12); s.tweens.add({ targets: top, alpha: 0, delay: 4000, duration: 700, onComplete: () => top.destroy() });
+        s.matter.world.remove(st.body); st.setTexture('stump_low'); obs.bodies = []; obs.gos.push(top); };
+      return obs; } },
+  { minD: 0, w: 3, biome: 'nat', make(s, x, y) {   // flagermus hænger med hovedet nedad i et gammelt træ – og flyver væk, når bilen kommer
+      const tree = s.add.image(x - 70, y + 8, 'deadtree').setOrigin(50 / 250, 1).setDepth(5.5);
+      const top = y + 8 - 300, bats = [];
+      [[118, 106], [150, 101], [182, 96], [214, 88], [238, 83]].forEach(([lx, ly], i) => { if (i === 4 && Math.random() < 0.5) return;
+        const b = s.add.image(x - 70 - 50 + lx, top + ly + 2, 'bat_hang').setOrigin(0.5, 0).setDepth(5.6);
+        s.tweens.add({ targets: b, angle: { from: -5, to: 5 }, duration: 900 + i * 130, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); bats.push(b); });
+      const obs = { gos: [tree, ...bats], bodies: [], hardness: 0 };
+      const watch = s.add.zone(x, y, 1, 1); watch.flown = false; s.actors.push(watch);
+      watch.tick = (sc) => { if (watch.flown || !tree.active || sc.chassis.x < x - 520) return; watch.flown = true; SFX.whoosh();
+        bats.forEach((b, i) => sc.time.delayedCall(i * 140, () => { if (!b.active) return; sc.tweens.killTweensOf(b); b.setTexture('bat').setOrigin(0.5).setAngle(0).setY(b.y + 18);
+          sc.tweens.add({ targets: b, scaleY: 0.35, duration: 90, yoyo: true, repeat: 14 });
+          sc.tweens.add({ targets: b, x: b.x + 380 + Math.random() * 260, y: b.y - 360 - Math.random() * 200, duration: 1700 + Math.random() * 500, ease: 'Sine.in', onComplete: () => b.setVisible(false) });
+          if (i % 2) SFX.whoosh(); })); };
+      return obs; } },
+  { minD: 0, w: 3, flat: true, biome: 'nat', make(s, x, y) {   // gravsten: bor og kølle smadrer den, ellers vælter den bare
+      const body = s.matter.add.rectangle(x, y - 40, 54, 80, { isStatic: true, label: 'obs', chamfer: { radius: [22, 22, 0, 0] } });
+      const img = s.add.image(x, y + 6, 'grave').setOrigin(0.5, 1).setDepth(6);
+      const obs = { gos: [img], bodies: [body], hardness: 0.8, material: 'stone', done: false };
+      obs.onHit = (imp, part) => { if (obs.done) return;
+        const smash = part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.breaks.includes('stone') && imp >= 4;
+        if (!smash && imp < 2.5) return;
+        obs.done = true; s.matter.world.remove(body); obs.bodies = []; obs.hardness = 0;
+        if (smash) { SFX.rockBreak(); s.spawnPieces(x, y - 40, 0x95a5a6, 8, 16, 7); s.spawnPieces(x, y - 40, 0x7f8c8d, 4, 10, 6); img.destroy(); return; }
+        SFX.clunk(); s.spawnPieces(x, y - 6, 0x5d4a36, 4, 8, 4); s.tweens.add({ targets: img, angle: 82, duration: 650, ease: 'Bounce.out' }); };
+      return obs; } },
   { minD: 0, w: 2, biomes: ['jungle'], make(s, x, y) {        // kæmpe strandbold
       const b = s.obsImage('ball', x, y - 45, { shape: { type: 'circle', radius: 44 }, density: 0.0003, friction: 0.2, restitution: 0.9 });
       const obs = { gos: [b], bodies: [b.body], hardness: 0, popped: false };
@@ -1498,7 +1635,14 @@ let TRYCAR = null;   // bilen fra forsidens "Prøv mig!", som værkstedet skal b
 let DEMO = false;    // den hemmelige prøvebane
 let BUILT = false;   // er der bygget en bil i denne omgang?
 const DEMO_ORDER = ['eng', 'sne', 'orken', 'jungle', 'by', 'nat', 'bjerg', 'maane', 'fantasy'];
-function startDemo(scene) { DEMO = true; if (!BUILT) { BUILD.chassis = PARTS.chassis.find(c => c.id === 'racer') || PARTS.chassis[0]; BUILD.wheels = PARTS.wheels[0]; BUILD.motor = PARTS.motors[0]; BUILD.tool = null; } scene.scene.start('Game'); }
+let DEMO_BIOME = null, DEMO_SAVED = null;   // prøvebanen: valgt landskab (null = alle) og den byggede bil, der lægges tilbage bagefter
+function startDemo(scene, biome) { if (!DEMO_SAVED) DEMO_SAVED = { chassis: BUILD.chassis, wheels: BUILD.wheels, motor: BUILD.motor, tool: BUILD.tool };
+  DEMO = true; DEMO_BIOME = biome || null;
+  BUILD.chassis = PARTS.chassis.find(c => c.id === 'racer') || PARTS.chassis[0]; BUILD.wheels = PARTS.wheels.find(w => w.id === 'normal') || PARTS.wheels[0];
+  BUILD.motor = PARTS.motors.find(m => m.id === 'standard') || PARTS.motors[0]; BUILD.tool = null;
+  scene.scene.start('Game'); }
+function endDemo() { DEMO = false; DEMO_BIOME = null; if (DEMO_SAVED) { BUILD.chassis = DEMO_SAVED.chassis; BUILD.wheels = DEMO_SAVED.wheels; BUILD.motor = DEMO_SAVED.motor; BUILD.tool = DEMO_SAVED.tool; DEMO_SAVED = null; } }
+const DEMO_NAMES = { eng: 'Eng', sne: 'Sne', orken: 'Ørken', jungle: 'Jungle', by: 'By', nat: 'Halloween', bjerg: 'Bjerg', maane: 'Måne', fantasy: 'Fantasy' };
 
 function partTextureKey(kind, part) { return 'p_' + kind + '_' + part.id; }
 // overdelens midte i forhold til undervognens midte (uskaleret). 'full'-biler tegner hele bilen i overdelen, som så dækker undervognen
@@ -1599,8 +1743,8 @@ const BIOMES = {
             mid: [{ k: 'mid_palm' }, { k: 'mid_palm' }, { k: 'mid_tree', tint: 0x1e8449 }, { k: 'mid_bush', tint: 0x145a32 }] },
   by:     { sky: 0xb9d3e6, dirt: 0x4a4a4a, grass: 0x8e9aa3, hills: 0xa9b7c1, ground: 0xa9b7c1, far: 'far_city',      creature: { key: 'dog', name: 'Hunden', say: 'Vov!', snd: 'bark', h: 72 }, decor: ['lamp', 'sign', 'hydrant', 'lamp'], fg: 'fg_rocks',
             mid: [{ k: 'mid_house', tint: 0x7f8c8d }, { k: 'mid_house', tint: 0xd98880 }, { k: 'mid_house', tint: 0x85c1e9 }, { k: 'mid_tower' }, { k: 'mid_tree' }] },
-  nat:    { sky: 0x3b4d8a, dirt: 0x55402a, grass: 0x2f7a4f, hills: 0x3f6d8c, ground: 0x3f6d8c, far: 'far_hills',     creature: { key: 'owl', name: 'Uglen', say: 'Uhuu!', snd: 'hoot', h: 90, jump: 'fly' }, decor: ['bush', 'tree', 'firefly', 'firefly'], fg: 'fg_grass', weather: 'fireflies',
-            mid: [{ k: 'mid_tree', tint: 0x2f5d73 }, { k: 'mid_tree', tint: 0x2f5d73 }, { k: 'mid_bush', tint: 0x2a5566 }, { k: 'mid_house', tint: 0x4a5a6a, lit: true }], night: true, skyDeco: 'sky_nat' },
+  nat:    { sky: 0x2e2350, dirt: 0x4a3426, grass: 0x3e6b3a, hills: 0x4a3a6e, ground: 0x4a3a6e, far: 'far_hills',     creature: { key: 'owl', name: 'Uglen', say: 'Uhuu!', snd: 'hoot', h: 90, jump: 'fly' }, decor: ['pumpkin_s', 'pumpkin_s', 'deadbush', 'firefly', 'firefly'], fg: 'fg_grass', weather: 'leaves', wxTints: [0xe67e22, 0xd35400, 0xa04000, 0xf39c12],   // Halloween
+            mid: [{ k: 'mid_deadtree' }, { k: 'mid_deadtree' }, { k: 'mid_hhouse', scale: [0.8, 1.05] }, { k: 'mid_bush', tint: 0x2a2440 }], night: true, skyDeco: 'sky_halloween' },
   bjerg:  { sky: 0xa8c8e8, dirt: 0x7d6b5a, grass: 0x7fa650, hills: 0x8d9db0, ground: 0x8d9db0, far: 'far_mountains', creature: { key: 'goat', name: 'Geden', say: 'Mæh!', snd: 'baa', h: 90 }, decor: ['pine', 'pine', 'boulder', 'rock_s'], fg: 'fg_grass',
             mid: [{ k: 'mid_peak' }, { k: 'mid_peak' }, { k: 'mid_fir' }, { k: 'mid_fir' }] },
   maane:  { sky: 0x141a33, dirt: 0x6e6e78, grass: 0x9a9aa6, hills: 0x4a4a56, ground: 0x4a4a56, far: 'far_craters',   creature: { key: 'astronaut', name: 'Astronauten', say: 'Wiii!', snd: 'whee', h: 100, jump: 'slow' }, decor: ['crater', 'rock_m', 'flag', 'crater'], fg: 'fg_rocks', clouds: 0,
@@ -1723,6 +1867,28 @@ function makeBiomeTextures(g) {
   dec('crater', 90, 24, () => { g.fillStyle(0x4a4a56); g.fillEllipse(45, 14, 84, 18); g.fillStyle(0x8a8a96); g.fillEllipse(45, 10, 70, 10); g.fillStyle(0x5a5a66); g.fillEllipse(45, 13, 56, 8); });
   dec('rock_m', 50, 34, () => { C(g, 22, 20, 14, 0x8a8a96); C(g, 36, 24, 9, 0x74747f); });
   dec('flag', 40, 80, () => { Q(g, 6, 0, 4, 80, 0xbdc3c7); Q(g, 10, 2, 26, 18, 0xe74c3c); Q(g, 10, 2, 26, 6, 0xffffff); Q(g, 10, 14, 26, 6, 0xffffff); });
+  // Halloween: orange fuldmåne med flagermus og en heks på kost, krogede træer, spøgelseshus med græskar i vinduerne
+  bg('sky_halloween', () => { g.fillStyle(0xffffff); for (let i = 0; i < 60; i++) { const x = (i * 211) % 1280, y = (i * 97) % 260 + 6; g.fillCircle(x, y, i % 5 === 0 ? 2.4 : 1.3); }
+    g.fillStyle(0xf5a623, 0.25); g.fillCircle(300, 120, 96); g.fillStyle(0xf5a623); g.fillCircle(300, 120, 76); g.fillStyle(0xf8c471); g.fillCircle(286, 106, 50);
+    g.fillStyle(0xe59866); [[270, 140, 12], [330, 96, 9], [320, 150, 7], [262, 96, 6]].forEach(([x, y, r]) => g.fillCircle(x, y, r));
+    g.fillStyle(0x1a1030);
+    g.lineStyle(3, 0x1a1030); g.beginPath(); g.moveTo(236, 128); g.lineTo(336, 112); g.strokePath(); g.fillTriangle(226, 122, 240, 134, 222, 140);   // kost
+    g.fillTriangle(280, 120, 304, 116, 290, 92); g.fillTriangle(280, 96, 300, 96, 296, 74); g.fillRect(276, 94, 28, 4); g.fillCircle(292, 100, 6);   // heks
+    g.fillTriangle(282, 118, 262, 120, 274, 108);   // kappe
+    const bat = (x, y, s) => { g.fillTriangle(x, y, x - 12 * s, y - 6 * s, x - 6 * s, y + 4 * s); g.fillTriangle(x, y, x + 12 * s, y - 6 * s, x + 6 * s, y + 4 * s); g.fillCircle(x, y + 1, 3 * s); };
+    [[420, 70, 1.2], [450, 90, 0.9], [395, 100, 0.8], [880, 60, 1], [910, 80, 0.7], [1120, 140, 0.9]].forEach(([x, y, s]) => bat(x, y, s)); });
+  mid('mid_deadtree', 170, 230, () => { const T = 0x2b2140; g.fillStyle(T); g.beginPath(); g.moveTo(70, 230); g.lineTo(98, 230); g.lineTo(92, 150); g.lineTo(100, 90); g.lineTo(86, 40); g.lineTo(76, 44); g.lineTo(80, 90); g.lineTo(72, 150); g.closePath(); g.fillPath();
+    g.lineStyle(8, T); [[90, 110, 140, 80], [140, 80, 166, 84], [80, 120, 34, 92], [34, 92, 14, 98], [86, 70, 120, 30], [82, 66, 50, 22], [50, 22, 40, 26], [140, 80, 150, 54]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.strokePath(); }); });
+  mid('mid_hhouse', 220, 250, () => { const Wl = 0x3b3050, R = 0x241c33, L = 0xf39c12;
+    g.fillStyle(Wl); g.fillRect(20, 110, 150, 140); g.fillRect(150, 70, 50, 180); g.fillStyle(R); g.fillTriangle(8, 112, 95, 40, 182, 112); g.fillTriangle(142, 72, 175, 0, 208, 72);
+    g.lineStyle(3, R); g.beginPath(); g.moveTo(40, 112); g.lineTo(36, 100); g.lineTo(44, 96); g.strokePath();
+    const win = (x, y, w, h) => { g.fillStyle(L); g.fillRect(x, y, w, h); g.fillStyle(0xe67e22); g.fillCircle(x + w / 2, y + h - 10, 9); g.fillStyle(0xf9e04b); g.fillTriangle(x + w / 2 - 6, y + h - 12, x + w / 2 - 3, y + h - 16, x + w / 2 - 1, y + h - 12); g.fillTriangle(x + w / 2 + 1, y + h - 12, x + w / 2 + 3, y + h - 16, x + w / 2 + 6, y + h - 12); g.fillStyle(R); g.fillRect(x + w / 2 - 1, y, 2, h - 20); };
+    win(40, 130, 34, 40); win(110, 130, 34, 40); win(162, 100, 26, 34); win(162, 170, 26, 34); g.fillStyle(L); g.fillCircle(95, 84, 10); g.fillStyle(R); g.fillRect(94, 74, 2, 20);
+    g.fillStyle(0x1a1326); g.fillRoundedRect(76, 196, 36, 54, { tl: 18, tr: 18, bl: 0, br: 0 }); });
+  // Halloween-pynt langs vejen
+  dec('pumpkin_s', 46, 40, () => { g.fillStyle(0x6e4b1f); g.fillRect(21, 0, 4, 8); g.fillStyle(0xca6f1e); g.fillEllipse(13, 24, 22, 30); g.fillEllipse(33, 24, 22, 30); g.fillStyle(0xe67e22); g.fillEllipse(23, 24, 26, 32);
+    g.fillStyle(0xf9e04b); g.fillTriangle(13, 22, 17, 15, 21, 22); g.fillTriangle(25, 22, 29, 15, 33, 22); g.fillRect(14, 28, 18, 4); });
+  dec('deadbush', 70, 50, () => { g.lineStyle(4, 0x3d2b1f); [[35, 50, 10, 14], [35, 50, 22, 6], [35, 50, 40, 2], [35, 50, 56, 10], [35, 50, 64, 26], [22, 30, 8, 28], [50, 28, 60, 20]].forEach(([a, b, c, d]) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.strokePath(); }); });
   dec('mushroom', 70, 80, () => { R(g, 26, 36, 18, 44, 6, 0xf5e6c8); g.fillStyle(0xe74c3c); g.fillEllipse(35, 30, 70, 44); g.fillStyle(0xffffff); [[18, 24], [40, 16], [54, 32], [30, 38]].forEach(([x, y]) => g.fillCircle(x, y, 5)); });
   dec('mushroom_b', 50, 60, () => { R(g, 20, 28, 10, 32, 4, 0xd7bde2); g.fillStyle(0x5dade2); g.fillEllipse(25, 24, 48, 30); g.fillStyle(0xaed6f1, 0.8); g.fillEllipse(25, 20, 30, 14); });
   dec('fairytree', 110, 150, () => { g.fillStyle(0x6c3483); g.beginPath(); g.moveTo(48, 150); g.lineTo(62, 150); g.lineTo(70, 90); g.lineTo(90, 60); g.lineTo(80, 58); g.lineTo(60, 84); g.lineTo(56, 40); g.lineTo(30, 20); g.lineTo(26, 28); g.lineTo(48, 50); g.closePath(); g.fillPath(); g.fillStyle(0xaf7ac5); g.fillCircle(30, 20, 26); g.fillCircle(90, 56, 22); g.fillCircle(58, 36, 24); g.fillStyle(0xf9e79f); g.fillCircle(24, 14, 4); g.fillCircle(66, 30, 3); g.fillCircle(94, 50, 3); });
@@ -1841,6 +2007,11 @@ function makeVehicleTextures(s) {
   const wr = wh.r;
   const wm = wh.shape === 'triangle' ? wr * 0.5 : (wh.upright ? 12 : 0);
   g.save(); g.translateCanvas(wm, wm); wh.draw(g, wr); g.restore(); g.generateTexture('v_wheel', wr * 2 + 4 + wm * 2, wr * 2 + 4 + wm * 2); g.clear();
+  g.destroy(); makeToolTextures(s, to); return topH;
+}
+function makeToolTextures(s, to) {   // værktøjets billeder (også når prøvebanen skifter værktøj undervejs)
+  ['v_tool', 'v_tool1', 'v_tool2', 'v_tool3', 'v_spin', 'v_head', 'v_head_open'].forEach(k => { if (s.textures.exists(k)) s.textures.remove(k); });
+  const g = s.add.graphics();
   if (to) {
     const bw = to.base ? to.base.w : to.w, bh = to.base ? to.base.h : to.h;
     (to.drawBase || to.draw).call(to, g, 0); g.generateTexture('v_tool', bw, bh); g.clear();
@@ -1849,7 +2020,6 @@ function makeVehicleTextures(s) {
     if (to.head) { to.drawHead(g); g.generateTexture('v_head', to.head.w, to.head.h); g.clear(); if (to.drawOpen) { to.drawOpen(g); g.generateTexture('v_head_open', to.head.w + 6, to.head.h + 6); g.clear(); } }
   }
   g.destroy();
-  return topH;
 }
 // fysikværdier ud fra delene
 function vehicleFromBuild() {
@@ -2158,7 +2328,7 @@ class Title extends Phaser.Scene {
   constructor() { super('Title'); }
   preload() { if (!this.textures.exists('logo')) this.load.image('logo', LOGO_SRC); }
   create() {
-    makeTextures(this); SFX.music('Menu'); DEMO = false;
+    makeTextures(this); SFX.music('Menu'); endDemo();
     // baggrunden er et tilfældigt af spillets landskaber
     const bio = BIOMES[Phaser.Utils.Array.GetRandom(Object.keys(BIOMES))];
     this.cameras.main.setBackgroundColor(bio.sky);
@@ -2204,13 +2374,22 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.15.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.16.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
-      if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => startDemo(this)); } });
+      if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
 
     this.input.keyboard.on('keydown-SPACE', () => this.scene.start('Build'));
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('Build'));
+  }
+  demoPicker() {   // den hemmelige prøvebane: vælg et landskab (eller alle i rækkefølge)
+    const items = [];
+    const bg = this.add.rectangle(0, 0, W, H, 0x1b1f3a, 0.92).setOrigin(0).setDepth(80).setInteractive(); items.push(bg);
+    items.push(this.add.text(W / 2, 70, 'Prøvebane – vælg landskab', { fontFamily: FONT, fontSize: '44px', color: '#fff', stroke: '#8e44ad', strokeThickness: 8 }).setOrigin(0.5).setDepth(81));
+    DEMO_ORDER.forEach((k, i) => { const col = i % 3, row = Math.floor(i / 3);
+      items.push(makeButton(this, W / 2 + (col - 1) * 300, 190 + row * 120, 270, 92, DEMO_NAMES[k], BIOMES[k].sky, () => startDemo(this, k), 34).setDepth(82)); });
+    items.push(makeButton(this, W / 2 - 160, 600, 280, 80, 'Alle', 0x8e44ad, () => startDemo(this, null), 32).setDepth(82));
+    items.push(makeButton(this, W / 2 + 160, 600, 280, 80, 'Luk', 0x7f8c8d, () => items.forEach(o => o.destroy()), 32).setDepth(82));
   }
 }
 
@@ -2243,13 +2422,13 @@ class Game extends Phaser.Scene {
     this.startTime = this.time.now;
 
     const cam = this.cameras.main;
-    cam.setBackgroundColor('#7ec8e3');
+    // ingen kamerabaggrund: himlen er skærmens ryddefarve (setSky) – en kamerafarve ville male ovenpå, så himlen altid var lyseblå
     this.matter.world.setGravity(0, 1.0);
 
     // landskaber: eng først, derefter tilfældig rækkefølge, nyt hver 250 m med glidende overgang
     // prøvebanen: korte landskaber i fast rækkefølge, og hver forhindring kommer én efter én
     this.bLen = DEMO ? 90 : BIOME_LEN; this.bFade = DEMO ? 12 : BIOME_FADE;
-    this.biomeSeq = DEMO ? DEMO_ORDER.slice() : [Phaser.Utils.Array.GetRandom(Object.keys(BIOMES))]; this.extendBiomes();   // hver tur starter i et tilfældigt landskab
+    this.biomeSeq = DEMO ? (DEMO_BIOME ? [DEMO_BIOME] : DEMO_ORDER.slice()) : [Phaser.Utils.Array.GetRandom(Object.keys(BIOMES))]; this.extendBiomes();   // hver tur starter i et tilfældigt landskab
     this.biomeCols = { dirt: BIOMES.eng.dirt, grass: BIOMES.eng.grass }; this.night = 0;
 
     // baggrund: to lag, der tones over i hinanden ved landskabsskift
@@ -2298,7 +2477,7 @@ class Game extends Phaser.Scene {
     this.actors = [];
     this.deferred = [];
     this.nextObsX = 1500; this.demoQ = null;
-    if (DEMO) this.add.text(20, 96, 'PRØVEBANE', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#8e44ad', strokeThickness: 6 }).setScrollFactor(0).setDepth(60);
+    if (DEMO) this.add.text(20, 96, DEMO_BIOME ? 'PRØVEBANE · ' + DEMO_NAMES[DEMO_BIOME].toUpperCase() : 'PRØVEBANE', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#8e44ad', strokeThickness: 6 }).setScrollFactor(0).setDepth(60);
     this.rollers = this.rollers || []; this.wrenches = []; this._box = null; this.sawSnd = null; this.sawingAt = 0; this.lastGroundDmg = 0; this.carH = 0; this.carHTick = 0; this.jumpLift = 110; this.jumpWatch = null; this.nextWrenchX = (this.startX || 220) + (150 + Math.random() * 100) * PX_PER_M;   // første svensknøgle efter 150–250 m
     this.spawnObstacles(this.chassis.x + 1150);
 
@@ -2389,6 +2568,7 @@ class Game extends Phaser.Scene {
     this.fg.setVisible(!on); this.clouds.setVisible(!on);
   }
   extendBiomes() {   // startlandskabet først, så de andre i tilfældig rækkefølge – derefter alle ni blandet, uden at to ens støder sammen
+    if (DEMO && DEMO_BIOME) { while (this.biomeSeq.length < 400) this.biomeSeq.push(DEMO_BIOME); return; }   // prøvebane med ét landskab
     while (this.biomeSeq.length < 40) {
       const all = Object.keys(BIOMES), block = Phaser.Utils.Array.Shuffle(this.biomeSeq.length === 1 ? all.filter(k => k !== this.biomeSeq[0]) : all.slice());
       if (block[0] === this.biomeSeq[this.biomeSeq.length - 1]) block.push(block.shift());
@@ -2569,44 +2749,66 @@ class Game extends Phaser.Scene {
       this.prop = V.chassis.dangle.prop ? this.add.image(0, 0, 'v_prop').setDepth(11).setScale(sc) : null;
     }
 
-    // værktøj foran
+    this.buildTool(x, y, 0);
+  }
+  // værktøj foran – (cx, cy, a) er bilens midte og vinkel, så prøvebanen kan skifte værktøj, mens bilen kører
+  buildTool(cx, cy, a) {
+    const V = VEHICLE, filter = { group: GRP_CAR }, ca = Math.cos(a), sa = Math.sin(a);
+    const rv = (px, py) => ({ x: px * ca - py * sa, y: px * sa + py * ca }), at = (px, py) => { const r = rv(px, py); return { x: cx + r.x, y: cy + r.y }; };
     this.tool = null; this.blade = null; this.bladeBody = null; this.toolBeam = null; this.forkSlice = null;
+    this.head = null; this.armG = null; this.toolT0 = 0; this.punchT = 0; this.lastPunchAt = 0; this.toolFrame = 0; this.toolFrameAcc = 0;
     if (V.tool) {
       const t = V.tool, bw = t.base ? t.base.w : t.w, bh = t.base ? t.base.h : t.h;
       const mountX = Math.max(V.chassis.w / 2 - 6 + V.chassis.toolOffset, V.wheel.front + V.wheel.r + 2);   // foran forhjulet (og foran gravkoens arm), også når det er et kæmpehjul
       const tx = mountX + bw / 2;
       const toolDensity = Math.min(0.002, this.chassis.body.mass * 0.08 / (bw * bh)) * Math.min(1, Math.pow(90 / mountX, 2));   // let i forhold til bilen og til armens længde – ellers eksploderer fysikken (racer + kæmpehjul)
-      this.tool = this.matter.add.image(x + tx, y + t.oy, 'v_tool', null, {
-        shape: { type: 'rectangle', width: bw, height: bh }, density: toolDensity, friction: 0.1, collisionFilter: filter, label: 'tool'
+      const tp = at(tx, t.oy);
+      this.tool = this.matter.add.image(tp.x, tp.y, 'v_tool', null, {
+        shape: { type: 'rectangle', width: bw, height: bh }, density: toolDensity, friction: 0.1, collisionFilter: filter, label: 'tool', angle: a
       }).setDepth(12);
-      [-6, 6].forEach(dy => this.constraints.push(this.matter.add.constraint(this.chassis.body, this.tool.body, 0, 1, { pointA: { x: mountX, y: t.oy + dy }, pointB: { x: -bw / 2, y: dy } })));
+      [-6, 6].forEach(dy => this.constraints.push(this.matter.add.constraint(this.chassis.body, this.tool.body, 0, 1, { pointA: rv(mountX, t.oy + dy), pointB: rv(-bw / 2, dy) })));
       if (mountX > V.chassis.w / 2) {   // en bjælke fra bilen ud til værktøjet
         this.toolBeam = this.add.image(0, 0, 'slab').setDisplaySize(mountX - V.chassis.w / 2 + 12, 10).setTint(0x7f8c8d).setDepth(9);
         this.toolBeamOff = { x: (V.chassis.w / 2 + mountX) / 2, y: t.oy };
       }
       if (t.drawSpin) {   // savklingen er en rigtig rund krop: den saver i det, den rører, og virker som et hjul mod jorden
-        this.blade = this.add.image(x + tx + t.spinAt.x, y + t.oy + t.spinAt.y, 'v_spin').setDepth(13);
-        this.bladeBody = this.matter.add.circle(x + tx + t.spinAt.x, y + t.oy + t.spinAt.y, 34, { density: 0.0004, friction: 0.6, frictionStatic: 1, restitution: 0.05, collisionFilter: filter, label: 'tool' });
-        this.constraints.push(this.matter.add.constraint(this.tool.body, this.bladeBody, 0, 1, { pointA: { x: t.spinAt.x, y: t.spinAt.y }, pointB: { x: 0, y: 0 } }));
+        const bp = at(tx + t.spinAt.x, t.oy + t.spinAt.y);
+        this.blade = this.add.image(bp.x, bp.y, 'v_spin').setDepth(13);
+        this.bladeBody = this.matter.add.circle(bp.x, bp.y, 34, { density: 0.0004, friction: 0.6, frictionStatic: 1, restitution: 0.05, collisionFilter: filter, label: 'tool' });
+        this.constraints.push(this.matter.add.constraint(this.tool.body, this.bladeBody, 0, 1, { pointA: rv(t.spinAt.x, t.spinAt.y), pointB: { x: 0, y: 0 } }));
       }
-      this.head = null; this.armG = null; this.toolT0 = 0; this.punchT = 0; this.lastPunchAt = 0; this.toolFrame = 0; this.toolFrameAcc = 0;
       if (t.head && t.head.anim === 'shark') {
-        const h = t.head;
-        this.head = this.matter.add.image(x + tx + h.rodLen * 0.8, y + t.oy - h.rodLen * 0.5 + h.lineLen, 'v_head', null, {
-          shape: { type: 'rectangle', width: h.w, height: h.h }, density: 0.0006, friction: 0.2, frictionAir: 0.04, collisionFilter: { group: GRP_CAR, category: 1, mask: 0xFFFFFFFD }, label: 'tool'
+        const h = t.head, hp = at(tx + h.rodLen * 0.8, t.oy - h.rodLen * 0.5 + h.lineLen);
+        this.head = this.matter.add.image(hp.x, hp.y, 'v_head', null, {
+          shape: { type: 'rectangle', width: h.w, height: h.h }, density: 0.0006, friction: 0.2, frictionAir: 0.04, collisionFilter: { group: GRP_CAR, category: 1, mask: 0xFFFFFFFD }, label: 'tool', angle: a
         }).setDepth(15);
         // snoren: fra stangens spids (fast punkt på selve bilen, så stangen ikke vrides rundt) til hajens ryg
         this.rodTip = { x: mountX + h.rodLen * 0.8, y: t.oy - h.rodLen * 0.5 };
-        this.constraints.push(this.matter.add.constraint(this.chassis.body, this.head.body, h.lineLen, 0.9, { pointA: { x: this.rodTip.x, y: this.rodTip.y }, pointB: { x: 0, y: -h.h / 2 } }));   // kopi: motoren roterer punktet med bilen
+        this.constraints.push(this.matter.add.constraint(this.chassis.body, this.head.body, h.lineLen, 0.9, { pointA: rv(this.rodTip.x, this.rodTip.y), pointB: rv(0, -h.h / 2) }));   // kopi: motoren roterer punktet med bilen
         this.armG = this.add.graphics().setDepth(12);
         this.biteT = 0;
       } else if (t.head) {
-        this.head = this.matter.add.image(x + tx + bw / 2, y + t.oy, 'v_head', null, {
-          shape: { type: 'rectangle', width: t.head.w, height: t.head.h }, density: 0.001, friction: 0.1, collisionFilter: { group: GRP_CAR, category: 1, mask: 0xFFFFFFFD }, label: 'tool', isSensor: !!t.head.sensor   // rammer alt undtagen jorden
+        const hp = at(tx + bw / 2, t.oy);
+        this.head = this.matter.add.image(hp.x, hp.y, 'v_head', null, {
+          shape: { type: 'rectangle', width: t.head.w, height: t.head.h }, density: 0.001, friction: 0.1, collisionFilter: { group: GRP_CAR, category: 1, mask: 0xFFFFFFFD }, label: 'tool', isSensor: !!t.head.sensor, angle: a   // rammer alt undtagen jorden
         }).setDepth(t.head.anim === 'sway' || t.head.anim === 'scrub' ? 11 : 13);
         this.armG = this.add.graphics().setDepth(12);
       }
     }
+  }
+  setTool(to) {   // prøvebanen: skift værktøj undervejs – det gamle fjernes, det nye bygges på bilen, som den står
+    if (this.broken || this.over || !this.chassis || !this.chassis.body) return;
+    if (this.forkSlice) this.dropSlice();
+    if (this.sawSnd) { this.sawSnd.stop(); this.sawSnd = null; }
+    const old = [this.tool && this.tool.body, this.head && this.head.body, this.bladeBody].filter(Boolean);
+    this.constraints = this.constraints.filter(c => { if (old.includes(c.bodyA) || old.includes(c.bodyB)) { this.matter.world.removeConstraint(c); return false; } return true; });
+    [this.tool, this.head].forEach(o => o && o.destroy()); if (this.bladeBody) this.matter.world.remove(this.bladeBody);
+    [this.blade, this.armG, this.toolBeam].forEach(o => o && o.destroy());
+    BUILD.tool = to; VEHICLE.tool = to;
+    makeToolTextures(this, to);
+    const c = this.chassis; this.buildTool(c.x, c.y, c.rotation);
+    if (this.tool) this.tool.setVelocity(c.body.velocity.x, c.body.velocity.y);
+    SFX.smp('m_vaerktoej_B', 0.8);
   }
 
   // ---------- sammenstød og skade ----------
@@ -2695,6 +2897,11 @@ class Game extends Phaser.Scene {
   slopeAt(x) { return Math.atan2(this.groundY(x + 40) - this.groundY(x - 40), 80); }
 
   spawnObstacles(untilX) {
+    if (DEMO && DEMO_BIOME && !this.demoQ) {   // prøvebane med ét landskab: alle dets ting i rækkefølge, to gange – derefter tilfældigt
+      const own = OBSTACLES.filter(o => (!o.biome || o.biome === DEMO_BIOME) && (!o.biomes || o.biomes.includes(DEMO_BIOME))), x0 = this.startX || 220;
+      this.demoQ = []; for (let r = 0; r < 2; r++) own.forEach((def, i) => this.demoQ.push({ def, x: x0 + 1200 + (r * own.length + i) * 650 }));
+      this.nextObsX = x0 + 1200 + own.length * 2 * 650 + 300;
+    }
     if (DEMO && !this.demoQ) {   // prøvebanen: hvert landskabs egne forhindringer, fyldt op med de almindelige
       const seg = this.bLen * PX_PER_M, x0 = this.startX || 220, general = OBSTACLES.filter(o => !o.biome && !o.biomes); let gi = 0; this.demoQ = [];
       DEMO_ORDER.forEach((b, k) => { const own = OBSTACLES.filter(o => o.biome === b || (o.biomes && o.biomes.includes(b)));
@@ -3230,8 +3437,8 @@ class Game extends Phaser.Scene {
   }
 
   restartRound() { this.scene.stop('UI'); this.scene.restart(); }
-  toBuild()      { DEMO = false; this.scene.stop('UI'); this.scene.start('Build'); }
-  toMenu()       { DEMO = false; this.scene.stop('UI'); this.scene.start('Title'); }
+  toBuild()      { endDemo(); this.scene.stop('UI'); this.scene.start('Build'); }
+  toMenu()       { endDemo(); this.scene.stop('UI'); this.scene.start('Title'); }
 }
 
 // =====================================================================
@@ -3265,10 +3472,20 @@ class UI extends Phaser.Scene {
     this.hpShown = 100;
 
     this.btnL = { held: false }; this.btnR = { held: false };
+    if (DEMO) {   // prøvebanen: en række værktøjer foroven – tryk for at skifte, mens bilen kører
+      const list = [null, ...PARTS.tools], bw = 80, gap = 6, x0 = W / 2 - (list.length - 1) * (bw + gap) / 2, y = 166, boxes = [];
+      const mark = () => boxes.forEach(b => b.setStrokeStyle(b.tool === BUILD.tool ? 5 : 2, b.tool === BUILD.tool ? 0xf1c40f : 0xffffff));
+      list.forEach((to, i) => { const x = x0 + i * (bw + gap);
+        const box = this.add.rectangle(x, y, bw, 58, 0x34495e, 0.85).setDepth(60).setInteractive(); box.tool = to; boxes.push(box);
+        if (to) { const key = partTextureKey('tools', to); if (this.textures.exists(key)) { const img = this.add.image(x, y, key).setDepth(61), src = this.textures.get(key).getSourceImage(), k = Math.min((bw - 12) / src.width, 46 / src.height); img.setScale(k); if (to.drawSpin && this.textures.exists(key + '_spin')) this.add.image(x + to.spinAt.x * k, y + to.spinAt.y * k, key + '_spin').setScale(k).setDepth(61); } }
+        else this.add.text(x, y, '✕', { fontFamily: FONT, fontSize: '32px', color: '#fff' }).setOrigin(0.5).setDepth(61);
+        box.on('pointerdown', () => { if (game.broken || game.over) return; game.setTool(to); mark(); }); });
+      mark();
+    }
     if (game.auto) {
       const hint = this.add.text(W / 2, H - 70, 'Tryk for at hoppe!', { fontFamily: FONT, fontSize: '40px', color: '#fff', stroke: '#2c3e50', strokeThickness: 8 }).setOrigin(0.5);
       this.tweens.add({ targets: hint, alpha: 0, delay: 3000, duration: 800 });
-      this.input.on('pointerdown', () => game.tryJump());
+      this.input.on('pointerdown', (p, over) => { if (over && over.length) return; game.tryJump(); });   // tryk på en knap er ikke et hop
     } else {
       this.btnL = makeHoldButton(this, 110, H - 110, 70, '◀', 0x2980b9);
       this.btnR = makeHoldButton(this, 290, H - 110, 70, '▶', 0x2980b9);
