@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.15.0)
+//  Biglers Biler – etape 3  (v0.15.1)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -558,7 +558,7 @@ function makeTextures(s) {
       g.fillStyle(0xf1948a); g.fillCircle(60, 46, 5); g.fillCircle(90, 46, 5);
       wow(67, 83, 38, 7, 75, 62, 11, 12); g.fillStyle(F); g.fillEllipse(67, 54, 18, 8); g.fillEllipse(83, 54, 18, 8); g.fillStyle(0xe6a08a); g.fillCircle(75, 48, 5);
       g.fillStyle(F); g.fillRect(58, 28, 12, 3); g.fillRect(80, 28, 12, 3); }
-    else { g.fillStyle(F); g.fillEllipse(75, 54, 46, 24); }
+    else { g.fillStyle(SK); g.fillCircle(53, 44, 6); g.fillCircle(97, 44, 6); g.fillStyle(0xeef1f2); g.fillCircle(75, 44, 22); g.fillStyle(0xd5dbdb); [64, 75, 86].forEach(hx => g.fillRect(hx - 1, 34, 2, 26)); }   // baghovedet: hvidt hår og to ører
     g.fillStyle(R); g.beginPath(); g.moveTo(52, 30); g.lineTo(98, 30); g.lineTo(118, 12); g.lineTo(84, 4); g.closePath(); g.fillPath();
     g.fillStyle(F); g.fillRoundedRect(50, 22, 50, 12, 6); g.fillCircle(118, 14, 8); };
   cre('santa', 150, 160, () => santa(true)); cre('santa_back', 150, 160, () => santa(false));
@@ -585,6 +585,7 @@ function makeTextures(s) {
       g.fillStyle(0xcdb98f); g.fillEllipse(78, 82, 66, 70); g.fillStyle(0xa8925f); g.fillRect(52, 46, 16, 8); g.fillStyle(0xcdb98f); g.fillTriangle(44, 38, 62, 42, 58, 52);
       g.fillStyle(0xf1c40f); g.fillCircle(70, 52, 6); g.fillCircle(80, 50, 5); g.fillStyle(0xa8925f); g.fillRoundedRect(84, 92, 14, 12, 3); limb(14, F, 96, 72, 66, 54, SK, 8); }
     g.fillStyle(SK); g.fillCircle(65, 38, 22);
+    if (!front) { g.fillCircle(43, 38, 5); g.fillCircle(87, 38, 5); g.fillStyle(0x4a3426); g.fillCircle(65, 38, 22); g.fillStyle(SK); g.fillRect(58, 56, 14, 4); }   // baghovedet: hår, ører og nakke
     g.fillStyle(K); g.fillEllipse(65, 22, 46, 24); g.fillRect(42, 18, 46, 10);
     if (!front) return;
     g.fillStyle(K); g.fillRoundedRect(42, 30, 46, 14, 7);
@@ -2203,7 +2204,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.15.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.15.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => startDemo(this)); } });
