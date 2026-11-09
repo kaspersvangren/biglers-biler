@@ -1,0 +1,17 @@
+{
+  "name": "Biglers Biler",
+  "short_name": "Biglers Biler",
+  "description": "Byg en skør bil med den enarmede tyveknægt og kør så langt du kan.",
+  "lang": "da",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1b1f3a",
+  "theme_color": "#1b1f3a",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
