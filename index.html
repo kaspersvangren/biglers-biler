@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.26.1)
+//  Biglers Biler – etape 3  (v0.26.2)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -3136,7 +3136,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.26.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.26.2', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
@@ -3215,7 +3215,7 @@ class Game extends Phaser.Scene {
     this.lite = false; this.liteOffs = 0; this.liteAt = 0; this.fastSince = 0; this.slowSince = 0; if (SETTINGS.lite) this.setLite(true);
 
     // terræn
-    this.t = { pts: [], bodies: [], gfx: this.add.graphics(), x: -800, y: GROUND_Y, slope: 0, nextRamp: 2200, rampLeft: 0 };
+    this.t = { pts: [], bodies: [], gfx: this.add.graphics(), x: -1600, y: GROUND_Y, slope: 0, nextRamp: 2200, rampLeft: 0 };
     this.t.pts.push({ x: this.t.x, y: this.t.y });
     this.extendTerrain(W * 2);
 
@@ -4199,7 +4199,7 @@ class Game extends Phaser.Scene {
     if (this.broken) return;
 
     // ude af banen: baglæns ud over kanten eller ned i et hul
-    if (c.x < this.t.pts[0].x + 100) return this.endRound(false, 'Du fløj ud af banen!');
+    if (c.x < this.t.pts[0].x + W * 0.6) return this.endRound(false, 'Du trillede ud af banen!');   // slutter, før banens bagkant kommer ind på skærmen
     if (c.y > 1500) return this.endRound(false, 'Bilen faldt i et hul!');
 
     // vendt på hovedet?
