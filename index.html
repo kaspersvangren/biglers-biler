@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.26.0)
+//  Biglers Biler – etape 3  (v0.26.1)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -1656,11 +1656,11 @@ const OBSTACLES = [
       const b = s.obsImage('bin', x, y - 38, { shape: { type: 'rectangle', width: 52, height: 72 }, isStatic: true }), lid = s.add.image(x, y - 82, 'bin_lid').setDepth(6.1);
       const obs = { gos: [b, lid], bodies: [b.body], hardness: 0.1, done: false, fragile: true, material: 'metal' };
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; if (!SFX.l('skrald')) { SFX.clunk(); s.time.delayedCall(100, () => SFX.crunch()); }
-        s.tweens.add({ targets: lid, y: lid.y - 260, x: lid.x + 180, angle: 540, duration: 800, ease: 'Quad.out', onComplete: () => s.tweens.add({ targets: lid, y: s.groundY(lid.x) - 8, duration: 500, ease: 'Bounce.out' }) });
+        const ld = s.makeLoose(lid, { type: 'rectangle', width: 64, height: 14 }, 4); ld.setVelocity(Phaser.Math.FloatBetween(5, 7.5), Phaser.Math.FloatBetween(-12, -10)); ld.setAngularVelocity(Phaser.Math.FloatBetween(0.25, 0.4));   // låget flyver i en naturlig bue, drejer rundt og lander
         s.spawnPieces(x, y - 60, 0xffffff, 5, 12, 6); s.spawnPieces(x, y - 60, 0x7f8c8d, 4, 10, 6); s.spawnPieces(x, y - 60, 0x8d5a2b, 3, 10, 5);
         for (let i = 0; i < 2; i++) { const bn = s.matter.add.image(x, y - 70, 'banana', null, { shape: { type: 'rectangle', width: 30, height: 12 }, density: 0.0005, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
           bn.setVelocity(Phaser.Math.FloatBetween(2, 7), -8); bn.setAngularVelocity(0.3); s.retire(bn, 3000); }
-        s.makeLoose(b, { type: 'rectangle', width: 52, height: 72 }, 5); obs.gos = [lid]; obs.bodies = []; };
+        s.makeLoose(b, { type: 'rectangle', width: 52, height: 72 }, 5); obs.gos = []; obs.bodies = []; };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'by', make(s, x, y) {   // blomsterbod: ejeren står bag boden – rammes boden, flyver blomsterne, og ejeren bliver sur
       const roof = s.add.image(x, y + 6, 'stall_roof').setOrigin(0.5, 1).setDepth(6.05);   // markise og stolper foran ejeren
@@ -3136,7 +3136,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.26.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.26.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
