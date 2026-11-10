@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.24.0)
+//  Biglers Biler – etape 3  (v0.25.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -473,6 +473,8 @@ function makeTextures(s) {
   g.generateTexture('cow', 140, 90); g.clear();
   // væsener til de andre landskaber (bunden i nederste kant)
   const cre = (key, w, h, fn) => { g.clear(); fn(); g.generateTexture(key, w, h); g.clear(); };
+  if (!s.textures.exists('softpuff')) { const ct = s.textures.createCanvas('softpuff', 128, 128), cx = ct.getContext(), gr = cx.createRadialGradient(64, 64, 0, 64, 64, 64);   // blød sky-klat med udflydende kant
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.65, 'rgba(255,255,255,0.35)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, 128, 128); ct.refresh(); }
   cre('penguin', 70, 90, () => { g.fillStyle(0x2c3e50); g.fillEllipse(35, 50, 56, 76); g.fillStyle(0xffffff); g.fillEllipse(35, 56, 36, 52); g.fillStyle(0x2c3e50); g.fillCircle(35, 18, 17); g.fillStyle(0xffffff); g.fillCircle(29, 16, 5); g.fillCircle(41, 16, 5); g.fillStyle(0x222222); g.fillCircle(30, 17, 2); g.fillCircle(42, 17, 2); g.fillStyle(0xf39c12); g.fillTriangle(30, 22, 40, 22, 35, 30); g.fillEllipse(24, 86, 20, 8); g.fillEllipse(46, 86, 20, 8); });
   cre('camel', 140, 100, () => { g.fillStyle(0xd4a056); [30, 48, 86, 104].forEach(x => g.fillRect(x, 66, 9, 34)); g.fillRoundedRect(22, 40, 96, 36, 14); g.fillCircle(50, 36, 18); g.fillCircle(84, 34, 20); g.fillRoundedRect(106, 10, 14, 46, 6); g.fillRoundedRect(104, 4, 30, 20, 8); g.fillStyle(0x222222); g.fillCircle(122, 12, 2.5); g.fillStyle(0xb9770e); g.fillRect(22, 60, 96, 6); });
   cre('monkey', 90, 100, () => { g.fillStyle(0x8d5a2b); g.fillEllipse(45, 62, 54, 60); g.fillCircle(45, 26, 22); g.fillCircle(24, 22, 8); g.fillCircle(66, 22, 8); g.lineStyle(6, 0x8d5a2b); g.beginPath(); g.moveTo(20, 80); g.lineTo(4, 60); g.lineTo(10, 40); g.strokePath(); g.fillStyle(0xf5cba7); g.fillEllipse(45, 30, 26, 22); g.fillEllipse(45, 66, 30, 30); g.fillStyle(0x222222); g.fillCircle(39, 26, 2.5); g.fillCircle(51, 26, 2.5); g.fillRect(40, 34, 10, 2); g.fillStyle(0x6e4a2a); g.fillEllipse(28, 96, 16, 8); g.fillEllipse(62, 96, 16, 8); });
@@ -934,20 +936,23 @@ function makeTextures(s) {
   cre('p_skull', 64, 64, () => { g.fillStyle(0xffffff); g.fillCircle(32, 26, 24); g.fillRoundedRect(18, 34, 28, 24, 6); g.fillStyle(0x000000, 0.55); g.fillCircle(23, 26, 7); g.fillCircle(41, 26, 7); g.fillTriangle(32, 34, 28, 42, 36, 42); [24, 31, 38].forEach(x => g.fillRect(x, 50, 3, 8)); });
   cre('p_bolt', 48, 70, () => { g.fillStyle(0xffffff); g.beginPath(); [[28, 0], [6, 38], [22, 38], [14, 70], [42, 26], [26, 26], [36, 0]].forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fillPath(); });
   // ---- v0.22 ----
-  cre('snake', 90, 150, () => {   // sød tegneserieslange: krop i stablede ringe (fjeder), stort hoved med store øjne, smil og tunge
-    const G1 = 0x2ecc71, G2 = 0x27ae60, BL = 0xd4efdf, OL = 0x1e8449;
-    g.fillStyle(G1); g.fillTriangle(14, 146, 4, 128, 22, 136);   // halespids
-    [[45, 134, 80, 26], [45, 112, 70, 24], [45, 92, 60, 22], [45, 74, 50, 20]].forEach(([x, y, w, h]) => { g.fillStyle(OL); g.fillEllipse(x, y, w + 6, h + 6); g.fillStyle(G1); g.fillEllipse(x, y, w, h); g.fillStyle(G2); g.fillEllipse(x, y + h * 0.22, w * 0.9, h * 0.4); g.fillStyle(0x82e0aa); g.fillEllipse(x - w * 0.18, y - h * 0.2, w * 0.4, h * 0.25); });
-    g.fillStyle(OL); g.fillRoundedRect(36, 40, 18, 34, 8); g.fillStyle(G1); g.fillRoundedRect(39, 40, 12, 34, 6); g.fillStyle(BL); g.fillRect(42, 46, 6, 26);
-    g.fillStyle(OL); g.fillEllipse(45, 28, 56, 44); g.fillStyle(G1); g.fillEllipse(45, 28, 50, 38); g.fillStyle(0x82e0aa); g.fillEllipse(38, 18, 20, 8);
-    g.fillStyle(0xffffff); g.fillCircle(35, 24, 9); g.fillCircle(55, 24, 9); g.fillStyle(0x222222); g.fillCircle(36, 25, 5); g.fillCircle(54, 25, 5); g.fillStyle(0xffffff); g.fillCircle(38, 22, 2); g.fillCircle(56, 22, 2);
-    g.lineStyle(2, OL); g.beginPath(); g.arc(45, 34, 7, 0.3, Math.PI - 0.3, false); g.strokePath(); g.fillStyle(0xf5b7b1); g.fillCircle(28, 34, 3); g.fillCircle(62, 34, 3);
-    g.lineStyle(2, 0xe74c3c); g.beginPath(); g.moveTo(45, 41); g.lineTo(45, 50); g.lineTo(41, 55); g.moveTo(45, 50); g.lineTo(49, 55); g.strokePath(); });
-  cre('snake_head', 90, 60, () => { const G1 = 0x2ecc71, OL = 0x1e8449;
-    g.fillStyle(OL); g.fillRoundedRect(36, 40, 18, 20, 8); g.fillStyle(G1); g.fillRoundedRect(39, 40, 12, 20, 6);
-    g.fillStyle(OL); g.fillEllipse(45, 28, 56, 44); g.fillStyle(G1); g.fillEllipse(45, 28, 50, 38); g.fillStyle(0x82e0aa); g.fillEllipse(38, 18, 20, 8);
-    g.fillStyle(0xffffff); g.fillCircle(35, 24, 9); g.fillCircle(55, 24, 9); g.fillStyle(0x222222); g.fillCircle(36, 25, 5); g.fillCircle(54, 25, 5); g.fillStyle(0xffffff); g.fillCircle(38, 22, 2); g.fillCircle(56, 22, 2);
-    g.lineStyle(2, OL); g.beginPath(); g.arc(45, 34, 7, 0.3, Math.PI - 0.3, false); g.strokePath(); g.lineStyle(2, 0xe74c3c); g.beginPath(); g.moveTo(45, 41); g.lineTo(45, 50); g.lineTo(41, 55); g.moveTo(45, 50); g.lineTo(49, 55); g.strokePath(); });
+  const cobraTop = () => {   // kobra: bredt nakkeskjold med lyst mønster bag et sødt hoved
+    const G1 = 0x8bae3a, OL = 0x4d6b1f, HL = 0xb5d16a, CR = 0xf9e79f, BR = 0xb9770e;
+    const hood = (k, y0, y1, pad) => { const L = [], R = []; for (let yy = y0; yy <= y1; yy += 2) { const u = (yy - 14) / 72, w = (9 + 35 * Math.pow(Math.sin(Math.PI * u), 0.8)) * k + pad; L.push({ x: 50 - w, y: yy }); R.unshift({ x: 50 + w, y: yy }); } return L.concat(R); };   // skjoldet: bredest på midten, smalt ved hoved og hals
+    g.fillStyle(OL); g.fillPoints(hood(1, 12, 88, 3), true); g.fillStyle(G1); g.fillPoints(hood(1, 14, 86, 0), true);
+    g.fillStyle(OL); g.fillEllipse(21, 50, 9, 13); g.fillEllipse(79, 50, 9, 13);
+    g.fillStyle(CR); g.fillPoints(hood(0.42, 34, 86, 0), true); g.fillStyle(BR); [52, 62, 72].forEach(yy => { const w = (9 + 35 * Math.pow(Math.sin(Math.PI * (yy - 14) / 72), 0.8)) * 0.84; g.fillEllipse(50, yy, w, 4); });
+    g.fillStyle(OL); g.fillEllipse(50, 25, 48, 36); g.fillStyle(G1); g.fillEllipse(50, 25, 42, 30); g.fillStyle(HL); g.fillEllipse(43, 15, 17, 6);
+    g.fillStyle(0xffffff); g.fillCircle(40, 23, 8); g.fillCircle(60, 23, 8); g.fillStyle(0x222222); g.fillCircle(41, 24, 4.5); g.fillCircle(59, 24, 4.5); g.fillStyle(0xffffff); g.fillCircle(43, 21, 2); g.fillCircle(61, 21, 2);
+    g.lineStyle(2, OL); g.beginPath(); g.arc(50, 31, 6, 0.3, Math.PI - 0.3, false); g.strokePath(); g.fillStyle(0xf5b7b1); g.fillCircle(33, 32, 3); g.fillCircle(67, 32, 3);
+    g.lineStyle(2, 0xe74c3c); g.beginPath(); g.moveTo(50, 38); g.lineTo(50, 46); g.lineTo(46, 51); g.moveTo(50, 46); g.lineTo(54, 51); g.strokePath(); };
+  cre('snake', 100, 150, () => {   // sammenrullet kobra: ringe nederst, hals op til nakkeskjoldet
+    const G1 = 0x8bae3a, G2 = 0x6e8f2b, OL = 0x4d6b1f, HL = 0xb5d16a, CR = 0xf9e79f;
+    g.fillStyle(G1); g.fillTriangle(16, 146, 6, 130, 24, 138);   // halespids
+    [[50, 136, 80, 24], [50, 116, 68, 22], [50, 98, 56, 20]].forEach(([x, y, w, h]) => { g.fillStyle(OL); g.fillEllipse(x, y, w + 6, h + 6); g.fillStyle(G1); g.fillEllipse(x, y, w, h); g.fillStyle(G2); g.fillEllipse(x, y + h * 0.22, w * 0.9, h * 0.4); g.fillStyle(HL); g.fillEllipse(x - w * 0.18, y - h * 0.2, w * 0.4, h * 0.25); });
+    g.fillStyle(OL); g.fillRoundedRect(41, 72, 18, 24, 8); g.fillStyle(G1); g.fillRoundedRect(44, 72, 12, 24, 6); g.fillStyle(CR); g.fillRect(47, 74, 6, 20);
+    cobraTop(); });
+  cre('snake_head', 100, 80, () => cobraTop());
   cre('stall_wreck2', 180, 84, () => {   // knækket disk: forpladen står stadig (takket overkant), planker og spande ligger foran
     g.fillStyle(0x8d5a2b); g.beginPath(); [[6, 84], [6, 24], [24, 14], [40, 26], [58, 10], [78, 22], [96, 8], [116, 24], [134, 12], [152, 26], [172, 16], [172, 84]].forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fillPath();
     g.fillStyle(0x6e4420); [46, 90, 134].forEach(x => g.fillRect(x, 26, 3, 58)); g.lineStyle(2, 0x5d3a1a); g.beginPath(); g.moveTo(70, 30); g.lineTo(78, 50); g.lineTo(72, 66); g.moveTo(120, 34); g.lineTo(112, 56); g.strokePath();
@@ -1490,23 +1495,23 @@ const OBSTACLES = [
         for (let i = 0; i < 5; i++) s.time.delayedCall(i * 100, () => { const sp = s.add.image(x + Phaser.Math.Between(-40, 40), y - 70 - Math.random() * 40, 'star_s').setDepth(8).setScale(0.7); s.tweens.add({ targets: sp, alpha: 0, scale: 0.2, duration: 500, onComplete: () => sp.destroy() }); }); };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'orken', make(s, x, y) {   // slangekurv: først kigger kun hovedet op – rammes kurven, springer kobraen ud på sin fjeder og hopper væk
-      const head = s.add.image(x, y - 40, 'snake_head').setDepth(5.9);
+      const head = s.add.image(x, y - 40, 'snake_head').setDepth(5.9).setScale(0.75);
       const b = s.obsImage('basket', x, y - 34, { shape: { type: 'rectangle', width: 70, height: 66 }, isStatic: true }); b.setDepth(6);
       const lid = s.add.image(x, y - 70, 'basket_lid').setDepth(6.1);
       const obs = { gos: [head, b, lid], bodies: [b.body], hardness: 0.1, done: false, fragile: true };
       const watch = s.add.zone(x, y, 1, 1); watch.up = false; s.actors.push(watch);
       watch.tick = (sc) => { if (watch.up || obs.done || !b.active || sc.chassis.x < x - 460) return; watch.up = true; SFX.pff();
         sc.tweens.add({ targets: lid, y: lid.y - 22, x: lid.x - 26, angle: -28, duration: 300, ease: 'Back.out' });   // låget løfter sig lidt
-        sc.tweens.add({ targets: head, y: y - 88, duration: 450, ease: 'Back.out', onComplete: () => sc.tweens.add({ targets: head, angle: { from: -10, to: 10 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' }) }); };
+        sc.tweens.add({ targets: head, y: y - 92, duration: 450, ease: 'Back.out', onComplete: () => sc.tweens.add({ targets: head, angle: { from: -10, to: 10 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' }) }); };
       obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; SFX.clunk(); SFX.boing(); s.tweens.killTweensOf(head); head.destroy();
         s.tweens.add({ targets: lid, y: s.groundY(x + 90) - 8, x: x + 90, angle: 200, duration: 500, ease: 'Quad.in' });
-        const cb = s.add.image(x - 20, y - 20, 'snake').setOrigin(0.5, 1).setDepth(7).setScale(1, 0.4); obs.gos = [lid, cb];
+        const cb = s.add.image(x - 20, y - 20, 'snake').setOrigin(0.5, 1).setDepth(7).setScale(0.75, 0.3); obs.gos = [lid, cb];
         s.makeLoose(b, { type: 'rectangle', width: 70, height: 66 }, 6, { cols: [0xd4a056, 0xa67c45], snd: 'wood' }); obs.bodies = [];
         let hx = cb.x; cb.setFlipX(true);
         const hop = (n) => { if (!cb.active || n > 40 || cb.x < s.cameras.main.scrollX - 120) { if (cb.active) cb.setVisible(false); return; }   // hopper videre, til den er ude af skærmen
           const x0 = hx, x1 = hx - 150, gy0 = s.groundY(x0) + 4, gy1 = s.groundY(x1) + 4; hx = x1; SFX.boing();   // som på en pogostylte: høje, bløde hop mod venstre – kroppen holder formen
-          s.tweens.addCounter({ from: 0, to: 1, duration: 780, onUpdate: tw => { if (!cb.active) return; const t = tw.getValue(); cb.x = x0 + (x1 - x0) * t; cb.y = gy0 + (gy1 - gy0) * t - Math.sin(Math.PI * t) * 210; cb.setAngle(-Math.sin(Math.PI * t) * 9);
-            if (n === 0) cb.scaleY = Math.min(1, 0.4 + t * 2.5); }, onComplete: () => hop(n + 1) }); };
+          s.tweens.addCounter({ from: 0, to: 1, duration: 780, onUpdate: tw => { if (!cb.active) return; const t = tw.getValue(); cb.x = x0 + (x1 - x0) * t; cb.y = gy0 + (gy1 - gy0) * t - Math.sin(Math.PI * t) * 180; cb.setAngle(-Math.sin(Math.PI * t) * 9);
+            if (n === 0) cb.scaleY = Math.min(0.75, 0.3 + t * 1.9); }, onComplete: () => hop(n + 1) }); };
         hop(0); };
       return obs; } },
   // ---------- Jungle ----------
@@ -1747,18 +1752,18 @@ const OBSTACLES = [
         glow.destroy(); c.destroy(); obs.gos = []; obs.bodies = []; };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'fantasy', make(s, x, y) {   // drageæg: bliver skubbet ud af reden – når det ligger stille, revner det, og en lille drage flyver ud
-      const nest = s.add.image(x, y + 4, 'dnest').setOrigin(0.5, 1).setDepth(6.1);
-      const e = s.obsImage('degg2', x, y - 42, { shape: { type: 'rectangle', width: 50, height: 64, chamfer: { radius: [24, 24, 12, 12] } }, isStatic: true }); e.setDepth(6);
+      const nest = s.add.image(x, y + 4, 'dnest').setOrigin(0.5, 1).setDepth(6.1).setScale(1.25);
+      const e = s.obsImage('degg2', x, y - 52, { shape: { type: 'rectangle', width: 50, height: 64, chamfer: { radius: [24, 24, 12, 12] } }, isStatic: true }); e.setDepth(6).setScale(1.3);
       s.tweens.add({ targets: e, angle: { from: -3, to: 3 }, duration: 260, yoyo: true, repeat: -1, repeatDelay: 1400 });
       const obs = { gos: [e, nest], bodies: [e.body], hardness: 0.05, done: false, fragile: true };
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(e.body); obs.bodies = []; s.tweens.killTweensOf(e); e.setDepth(8.5); SFX.bonk(); const ch = s.chassis;
-        const v = ch && ch.body ? Math.abs(ch.body.velocity.x) : 5, dist = Phaser.Math.Clamp(v * 100, 650, 1100), x0 = e.x, y0 = e.y, x1 = x0 + dist, y1 = s.groundY(x1) - 32, hgt = 90 + dist * 0.35;   // jo hurtigere, jo længere
+        const v = ch && ch.body ? Math.abs(ch.body.velocity.x) : 5, dist = Phaser.Math.Clamp(v * 100, 650, 1100), x0 = e.x, y0 = e.y, x1 = x0 + dist, y1 = s.groundY(x1) - 42, hgt = 90 + dist * 0.35;   // jo hurtigere, jo længere
         s.tweens.addCounter({ from: 0, to: 1, duration: 400 + dist * 0.45, onUpdate: tw => { if (!e.active || !e.body) { tw.stop(); return; } const t = tw.getValue(); obs.x = Math.max(obs.x || 0, x0 + (x1 - x0) * t); e.x = x0 + (x1 - x0) * t; e.y = y0 + (y1 - y0) * t - Math.sin(Math.PI * t) * hgt; e.angle = t * 540; },
           onComplete: () => { if (!e.active) return; e.setAngle(0).setTexture('degg2_crack'); SFX.crunch(); s.puffAt(x1, y1 + 20); s.cameras.main.shake(80, 0.003);   // krakelerer, når det lander
             s.tweens.add({ targets: e, angle: { from: -6, to: 6 }, duration: 70, yoyo: true, repeat: 3 });
             s.time.delayedCall(250, () => { if (!e.active) return; SFX.pop(); s.spawnPieces(e.x, e.y, 0x58d68d, 6, 12, 6); s.spawnPieces(e.x, e.y, 0x28b463, 4, 8, 5);
-              const d = s.add.image(e.x, e.y - 10, 'babydragon').setDepth(8); e.setVisible(false); SFX.boing(); obs.gos.push(d);
-              s.tweens.add({ targets: d, scaleY: 0.6, duration: 120, yoyo: true, repeat: 12 });
+              const d = s.add.image(e.x, e.y - 14, 'babydragon').setDepth(8).setScale(1.4); e.setVisible(false); SFX.boing(); obs.gos.push(d);
+              s.tweens.add({ targets: d, scaleY: 0.84, duration: 120, yoyo: true, repeat: 12 });
               s.tweens.add({ targets: d, x: d.x + 520, y: d.y - 420, duration: 2400, ease: 'Sine.in', onComplete: () => d.setVisible(false) }); }); } }); };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'fantasy', make(s, x, y) {   // tryllebryg: tre flasker på en hylde – de knuses med farvet røg og glimmer
@@ -1767,15 +1772,21 @@ const OBSTACLES = [
       const bots = keys.map((k, i) => { const b = s.add.image(x - 36 + i * 36, y - 60 - 22, k).setDepth(6.1); b.k = k; s.tweens.add({ targets: b, y: b.y - 3, duration: 600 + i * 150, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); return b; });
       const obs = { gos: [sh, ...bots], bodies: [sh.body], hardness: 0.05, done: false, fragile: true, material: 'porcelain' };
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true;
-        const drift = [[-110, -150], [0, -200], [110, -160]];   // hver sky sin vej: op til venstre, lige op, op til højre
-        bots.forEach((b, i) => s.time.delayedCall(i * 110, () => { if (!b.active) return; SFX.glass(); const c = tints[b.k], tx = b.x + drift[i][0], ty = b.y + drift[i][1];
-          for (let k = 0; k < 7; k++) { const a = k / 7 * Math.PI * 2, ox = Math.cos(a) * 34, oy = Math.sin(a) * 24;
-            const pf = s.add.image(b.x, b.y, 'smoke').setTint(c).setAlpha(0.85).setScale(1).setDepth(8);
-            s.tweens.add({ targets: pf, x: tx + ox, y: ty + oy, scale: 3.4, duration: 900, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pf, alpha: 0, scale: 4.2, y: pf.y - 30, duration: 700, delay: 100, onComplete: () => pf.destroy() }) }); }
-          const pic = s.add.image(b.x, b.y, { potion_r: 'p_heart', potion_g: 'p_skull', potion_b: 'p_bolt' }[b.k]).setDepth(8.1).setAlpha(0).setScale(0.4).setTint({ potion_r: 0xffb3c1, potion_g: 0xd5f5e3, potion_b: 0xf9e79f }[b.k]);   // billedet midt i sin egen sky
-          s.tweens.add({ targets: pic, x: tx, y: ty, alpha: 0.95, scale: 1.4, duration: 900, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pic, alpha: 0, scale: 1.7, y: pic.y - 30, duration: 700, delay: 100, onComplete: () => pic.destroy() }) });
-          const sp = s.add.image(b.x, b.y - 20, 'star_s').setDepth(8).setTint(c); s.tweens.add({ targets: sp, y: sp.y - 60, alpha: 0, angle: 180, duration: 800, onComplete: () => sp.destroy() });
-          s.spawnPieces(b.x, b.y, 0xd6eaf8, 3, 7, 5); b.destroy(); }));
+        const ch = s.chassis, v = ch && ch.body ? Math.abs(ch.body.velocity.x) : 5, far = Phaser.Math.Clamp(330 + v * 65, 600, 1100);   // flaskerne flyver frem og lander foran bilen
+        const burst = (b, bx, by) => { SFX.glass(); const c = tints[b.k], cy = by - 85;   // splintres – en blød, farvet sky vælter op, hvor flasken landede
+          s.spawnPieces(bx, by, 0xd6eaf8, 4, 7, 6); s.spawnPieces(bx, by, c, 3, 8, 5);
+          for (let k = 0; k < 10; k++) { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()), ox = Math.cos(a) * 78 * r, oy = Math.sin(a) * 36 * r, sc = 0.8 + Math.random() * 0.9;
+            const pf = s.add.image(bx + ox * 0.3, by, 'softpuff').setTint(c).setAlpha(0).setScale(0.3).setDepth(8).setAngle(Math.random() * 360);
+            s.tweens.add({ targets: pf, x: bx + ox, y: cy + oy, scale: sc, alpha: 0.6, duration: 550 + k * 25, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pf, alpha: 0, scale: sc * 1.25, y: pf.y - 30, duration: 800, delay: 250, onComplete: () => pf.destroy() }) }); }
+          const pic = s.add.image(bx, by, { potion_r: 'p_heart', potion_g: 'p_skull', potion_b: 'p_bolt' }[b.k]).setDepth(8.1).setAlpha(0).setScale(0.4).setTint({ potion_r: 0xffb3c1, potion_g: 0xd5f5e3, potion_b: 0xf9e79f }[b.k]);   // billedet midt i skyen
+          s.tweens.add({ targets: pic, y: cy, alpha: 0.95, scale: 1.4, duration: 600, ease: 'Sine.out', onComplete: () => s.tweens.add({ targets: pic, alpha: 0, scale: 1.7, y: pic.y - 30, duration: 800, delay: 250, onComplete: () => pic.destroy() }) });
+          const sp = s.add.image(bx, by - 20, 'star_s').setDepth(8).setTint(c); s.tweens.add({ targets: sp, y: sp.y - 60, alpha: 0, angle: 180, duration: 800, onComplete: () => sp.destroy() });
+          b.destroy(); };
+        bots.forEach((b, i) => { s.tweens.killTweensOf(b); b.setDepth(8.5); const dist = far * (1 - (2 - i) * 0.28) + Phaser.Math.Between(-20, 20), x0 = b.x, y0 = b.y, x1 = x0 + dist, y1 = s.groundY(x1) - 16;
+          const hgt = 70 + dist * 0.15 + Phaser.Math.Between(-20, 20), spin = (360 + Math.random() * 360) * (i % 2 ? -1 : 1);
+          s.tweens.addCounter({ from: 0, to: 1, delay: i * 70, duration: 350 + dist * 0.45, onUpdate: tw => { if (!b.active) { tw.stop(); return; } const t = tw.getValue(); b.x = x0 + (x1 - x0) * t; b.y = y0 + (y1 - y0) * t - Math.sin(Math.PI * t) * hgt; b.angle = t * spin; },
+            onComplete: () => { if (b.active) burst(b, x1, y1); } }); });
+        SFX.bonk();
         s.makeLoose(sh, { type: 'rectangle', width: 116, height: 58 }, 4); obs.gos = []; obs.bodies = []; };
       return obs; } },
   // ---------- Eng ----------
@@ -3121,7 +3132,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.24.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.25.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
