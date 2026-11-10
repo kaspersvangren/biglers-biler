@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.26.2)
+//  Biglers Biler – etape 3  (v0.27.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -339,10 +339,7 @@ function makeTextures(s) {
   g.fillStyle(0xd4ac0d); g.fillRect(12, 26, 38, 6); g.fillRect(12, 38, 38, 6);
   g.fillStyle(0x3498db); g.fillRoundedRect(72, 0, 92, 56, { tl: 16, tr: 20, bl: 0, br: 0 }); // førerhus
   g.fillStyle(0xbdefff); g.fillRoundedRect(84, 8, 70, 34, 8);                       // vindue
-  g.fillStyle(0xffd8b0); g.fillCircle(119, 27, 13);                                 // hoved
-  g.fillStyle(0x5a3a1a); g.fillRoundedRect(106, 12, 26, 10, 5);                     // hår
-  g.fillStyle(0x222222); g.fillCircle(114, 27, 2); g.fillCircle(124, 27, 2);        // øjne
-  g.lineStyle(2, 0x222222); g.beginPath(); g.arc(119, 30, 5, 0.2, Math.PI - 0.2); g.strokePath(); // smil
+  FACE(g, 119, 28, 0.95);                                                          // føreren (Freddy)
   g.generateTexture('top', 170, 56); g.clear();
 
   // hjul
@@ -1882,8 +1879,23 @@ const PATH = (cmds) => {
 };
 const P = (g, cmds, color, outline, ow) => { const pts = PATH(cmds); if (outline !== undefined) { g.lineStyle(ow || 5, outline, 1); g.strokePoints(pts, true, true); } g.fillStyle(color, 1); g.fillPoints(pts, true); };
 const RO = (g, x, y, w, h, r, c, o, ow) => { R(g, x, y, w, h, r, c); g.lineStyle(ow || 4, o, 1); g.strokeRoundedRect(x, y, w, h, r); };   // afrundet rektangel med kant
-const FACE = (g, x, y, k) => { k = k || 1; C(g, x, y, 13 * k, 0xffd8b0); R(g, x - 13 * k, y - 15 * k, 26 * k, 10 * k, 5 * k, 0x5a3a1a); C(g, x - 5 * k, y, 2 * k, 0x222222); C(g, x + 5 * k, y, 2 * k, 0x222222);
-  g.lineStyle(2 * k, 0x222222); g.beginPath(); g.arc(x, y + 3 * k, 5 * k, 0.2, Math.PI - 0.2); g.strokePath(); };
+const FACE = (g, x, y, k) => { k = k || 1;   // føreren er Freddy: lyst, kort hår med en lille tot, blå øjne, runde kinder og et stort grin
+  const SK = 0xffe2d2, HA = 0xf3c873, HD = 0xd9a648, EY = 0x5b8fd0, MO = 0x9b3b45;
+  C(g, x - 12.5 * k, y + 1.5 * k, 3.4 * k, SK); C(g, x + 12.5 * k, y + 1.5 * k, 3.4 * k, SK);                          // ører
+  g.fillStyle(SK); g.fillEllipse(x, y + 1 * k, 26 * k, 27 * k);                                                     // rundt hoved
+  const T = (a, b, c, d, e, f) => g.fillTriangle(x + a * k, y + b * k, x + c * k, y + d * k, x + e * k, y + f * k);
+  g.fillStyle(HA); g.fillEllipse(x, y - 8 * k, 27.5 * k, 14 * k);                                                  // kort, lyst hår med højt pandehår
+  g.fillStyle(SK); g.fillEllipse(x + 1.5 * k, y - 2.5 * k, 19 * k, 6 * k);                                           // panden skærer håret til forneden
+  g.fillStyle(HA);                                                                                                 // tjavset: totter, der stritter hver sin vej
+  T(-12, -10, -15, -12.5, -9, -13); T(-8, -13.5, -7, -17, -3, -14.5); T(-2, -14.5, 2, -17.5, 4, -14); T(5, -13.5, 9.5, -15, 9, -11.5);
+  T(11, -9, 14.5, -9, 12.5, -5.5);                                                                                  // korte totter langs toppen
+  T(-11, -5.5, -12.5, -2, -9, -4); T(-8, -5.5, -6.5, -2.5, -4.5, -5.5); T(-3.5, -6, -1.5, -3, 0.5, -6.5); T(2, -6.5, 4, -4, 5.5, -7);   // pandehår i små totter
+  g.fillStyle(HD); g.fillRect(x - 4 * k, y - 11 * k, 6 * k, 1 * k); g.fillRect(x + 4 * k, y - 9.5 * k, 4 * k, 1 * k); g.fillRect(x - 10 * k, y - 8.5 * k, 4 * k, 1 * k);   // strøg i håret
+  g.fillStyle(0xf5a9a0, 0.6); g.fillEllipse(x - 7.5 * k, y + 5 * k, 6 * k, 4 * k); g.fillEllipse(x + 7.5 * k, y + 5 * k, 6 * k, 4 * k);      // røde kinder
+  [-5, 5].forEach(d => { C(g, x + d * k, y - 0.5 * k, 2.7 * k, 0xffffff); C(g, x + d * k, y - 0.3 * k, 1.9 * k, EY); C(g, x + d * k, y - 0.3 * k, 0.95 * k, 0x1b2631); C(g, x + (d + 0.8) * k, y - 1.2 * k, 0.6 * k, 0xffffff); });   // blå øjne
+  C(g, x, y + 2.8 * k, 1.1 * k, 0xf0b8a8);                                                                             // næse
+  g.fillStyle(MO); g.beginPath(); g.arc(x, y + 5 * k, 5.5 * k, 0.05, Math.PI - 0.05, false); g.closePath(); g.fillPath();   // stort grin
+  g.fillStyle(0xffffff); g.fillRect(x - 4 * k, y + 5 * k, 8 * k, 1.5 * k); };
 
 // ---------- CHASSIS ----------
 // w,h: fysikkassen. topH: overdelens højde (tegnes ovenpå). motorX/Y: hvor motoren tegnes i overdelen.
@@ -3136,7 +3148,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.26.2', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.27.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
