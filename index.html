@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.27.0)
+//  Biglers Biler – etape 3  (v0.27.1)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -2691,8 +2691,14 @@ const MOTOR_GROW = 1.2;
 function motorPlace(ch, mo, wh) {
   if (mo.roofKey) { const r = ch.roof || [ch.w / 2, 20], s = 0.72; return { x: r[0] - 30 * s, y: r[1] - 44 * s + 3, s }; }
   const s0 = ch.motorScale || 1, s = s0 * MOTOR_GROW * (mo.grow || 1), cx = ch.motorX + 30 * s0, by = ch.motorY + 44 * s0;
-  if (wh && wh.r >= 60 && ch.roof) return { x: ch.roof[0] - 30 * s, y: ch.roof[1] - 44 * s + 3, s, roof: true };   // kæmpehjul dækker motorhjelmen – motoren flytter op på taget
+  if (wh && wh.r >= 60 && ch.roof && giantCover(ch, wh, cx - 30 * s, by - 44 * s, 60 * s, 44 * s) > 0.3) return { x: ch.roof[0] - 30 * s, y: ch.roof[1] - 44 * s + 3, s, roof: true };   // kæmpehjulet dækker motoren – så flytter den op på taget
   return { x: cx - 30 * s, y: by - 44 * s, s };
+}
+// hvor stor en del af et felt i overdelen (tegne-koordinater, før bilens skala) et kæmpehjul dækker: 0..1
+function giantCover(ch, wh, x, y, w, h) {
+  const sc = ch.scale || 1, r = wh.r / sc, cy = ch.topH + ch.h - 2 / sc, gx = giantHalf(ch, wh.r) / sc, cxs = [ch.w / 2 - gx, ch.w / 2 + gx];
+  let n = 0; for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) { const px = x + (i + 0.5) * w / 6, py = y + (j + 0.5) * h / 6; if (cxs.some(c => (px - c) ** 2 + (py - cy) ** 2 < r * r)) n++; }
+  return n / 36;
 }
 // kæmpehjul: hjulet stikker kun lidt ud over bilens ende, og der holdes luft mellem de to hjul på korte biler (spil-pixels, fra midten)
 function giantHalf(ch, r) { return Math.max(ch.w * (ch.scale || 1) / 2 - r * 0.6, r + 16); }
@@ -3148,7 +3154,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.27.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.27.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
