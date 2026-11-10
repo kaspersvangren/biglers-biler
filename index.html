@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.25.0)
+//  Biglers Biler – etape 3  (v0.26.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -225,12 +225,15 @@ SFX.smp = function (k, vol, rate) {   // spil en optaget lyd; false hvis den ikk
 // korte lyde hentes ved første tryk; motoren hentes, når bilen er bygget; musikken hentes ét nummer ad gangen
 const LYD_KORT = ['pop1', 'pop2', 'pop3', 'pop4', 'strandbold', 'dyr_ko', 'dyr_pingvin', 'dyr_kamel', 'dyr_abe', 'dyr_ged', 'dyr_astronaut',
   'm_chassis', 'm_hjul', 'm_motor', 'm_vaerktoej_B', 'enarmet_spin', 'enarmet_ding', 'tada', 'bonk', 'f_lander', 'f_bump', 'bounce_B', 'krak_bil', 'krak_ufo', 'hop', 'ufo_straale', 'saw_loop', 'dyr_hest'];
+const LYD_TING = ['aeg', 'bjaelder', 'blomst', 'bodejer', 'drage', 'flagermus', 'hoestak', 'kedel', 'knaek', 'kokos', 'krystal', 'kylling', 'lianer', 'magi', 'minevogn', 'moenter', 'papegoeje', 'raket', 'skrald', 'slange', 'stenskred', 'vand'];   // lyde til tingene i landskaberne (lyd/l_<navn>.ogg)
+LYD_KORT.push(...LYD_TING.map(k => 'l_' + k));
 const LYD_MONTERING = { chassis: 'm_chassis', wheels: 'm_hjul', motors: 'm_motor', tools: 'm_vaerktoej_B' };   // lyden, når delen lander på bilen i værkstedet
 const LYD_SIG = { moo: 'dyr_ko', squawk: 'dyr_pingvin', grunt: 'dyr_kamel', ooh: 'dyr_abe', baa: 'dyr_ged', whee: 'dyr_astronaut' };
 const LYD_MOTOR = { standard: 'motor_standard', v8: 'motor_v8', electric: 'motor_electric', hamster: 'motor_hamster', rubber: 'motor_rubber', jet: 'motor_jet', rocket: 'motor_rocket' };
 const LYD_MOTOR_FART = { rubber: [0.55, 1.95] };   // afspilningshastighed fra stillestående til fuld fart (standard 0.85–1.95)
 const MUSIK = { Menu: [23.499, 76.426], Game_1: [43.05, 104.026], Game2: [15.569, 81.4], Game3: [62.044, 112.621], Game4: [25.565, 54.138] };   // [løkken starter, løkken slutter] i sekunder
 const MUSIK_VOL = 0.32;
+SFX.l = function (k, v, rate) { return this.smp('l_' + k, v === undefined ? 0.8 : v, rate); };   // tingenes egne lyde; false, hvis filen ikke er hentet (så bruges den gamle lyd)
 SFX.fil = {};   // navn -> 'henter' | 'klar' | 'fejl'
 SFX.hent = function (k, decode = true) {
   if (this.fil[k] || !this.ctx) return; this.fil[k] = 'henter';
@@ -1150,7 +1153,8 @@ function cartObstacle(s, x, y, k) {
   let astroGone = false;
   const floatAstro = () => { if (astroGone) return; astroGone = true; const a = s.add.image(c.x + 6, c.y - 30, 'astronaut').setDepth(8).setScale(0.75); obs.gos.push(a); SFX.say('whee');   // astronauten svæver væk
     s.tweens.add({ targets: a, x: a.x + 160, y: a.y - 420, angle: 300, duration: 4200, ease: 'Sine.out', onComplete: () => a.setVisible(false) }); };
-  const apart = () => { obs.done = true; SFX.crunch(); SFX.clunk(); if (k.zap) SFX.zap(); s.cameras.main.shake(140, 0.005);
+  const apart = () => { obs.done = true; if (!(k.snd && SFX.smp('krak_bil', 0.85))) { SFX.crunch(); SFX.clunk(); }   // minevognen: hele krakket, når den falder fra hinanden
+    if (k.zap) SFX.zap(); s.cameras.main.shake(140, 0.005);
     if (k.astro) floatAstro();
     [-k.w * 0.3, k.w * 0.3].forEach((dx, i) => { const wh = s.matter.add.image(c.x + dx, c.y + 10, 'cartwheel', null, { shape: { type: 'circle', radius: 11 }, density: 0.001, friction: 0.6, restitution: 0.4, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7).setScale(k.wheelScale || 1);
       wh.setVelocity(i ? 6 : -2, -6); wh.setAngularVelocity(0.3); s.retire(wh, 4000); });
@@ -1158,9 +1162,9 @@ function cartObstacle(s, x, y, k) {
   obs.onHit = (imp) => { if (obs.done || !c.active || imp < (obs.hits ? 2.5 : 1.2)) return; const now = s.time.now, ch = s.chassis; if (now - obs.lastHit < 800 || !ch || !ch.body) return; obs.lastHit = now;   // et nyt, rigtigt stød – ikke bare at bilen skubber
     if (obs.flat || obs.hits >= 2) return apart();
     if (ch.y < c.y - 30 && ch.body.velocity.y > 0.5) {   // bilen kom ovenfra: flad
-      obs.flat = true; obs.hits++; SFX.crunch(); s.cameras.main.shake(120, 0.005); s.spawnPieces(c.x, c.y, k.gold, 6, 9, 6); if (k.astro) floatAstro();
+      obs.flat = true; obs.hits++; if (!(k.snd && SFX.l('minevogn'))) SFX.crunch(); s.cameras.main.shake(120, 0.005); s.spawnPieces(c.x, c.y, k.gold, 6, 9, 6); if (k.astro) floatAstro();
       swap(k.flat, 16, k.flatOy, (k.flatOy - 0.5) * k.texH); c.setVelocity(ch.body.velocity.x * 0.5, 0); return; }
-    obs.hits++; SFX.clunk(); if (k.zap) SFX.zap(); s.spawnPieces(c.x, c.y - 30, k.gold, 6, 10, 6);
+    obs.hits++; if (!(k.snd && SFX.l('minevogn'))) SFX.clunk(); if (k.zap) SFX.zap(); s.spawnPieces(c.x, c.y - 30, k.gold, 6, 10, 6);
     if (obs.hits === 1) { const n = swap(k.tex, k.h, 0, 0); n.setVelocity(Math.max(5, ch.body.velocity.x * 1.3), -2); }
     else { c.setTexture(k.dent); c.setVelocity(Math.max(4, ch.body.velocity.x * 1.2), -3); } };
   return obs;
@@ -1359,7 +1363,7 @@ const OBSTACLES = [
           c.setVelocity(Phaser.Math.FloatBetween(-3, 10), Phaser.Math.FloatBetween(-13, -5)); c.setAngularVelocity(Phaser.Math.FloatBetween(-0.3, 0.3));
           s.retire(c, 4000 + i * 60); }
         s.spawnPieces(x, y - 80, 0x58d68d, 6, 12, 6);
-        [0, 90, 180, 300].forEach(d => s.time.delayedCall(d, () => SFX.pop()));
+        if (!SFX.l('kedel')) [0, 90, 180, 300].forEach(d => s.time.delayedCall(d, () => SFX.pop()));
         s.makeLoose(pot, { type: 'rectangle', width: 104, height: 88 }, 5); obs.gos = [fire]; obs.bodies = []; };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'nat', make(s, x, y) {   // gammel træstub: saven skærer toppen af
@@ -1379,11 +1383,11 @@ const OBSTACLES = [
         s.tweens.add({ targets: b, angle: { from: -5, to: 5 }, duration: 900 + i * 130, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); bats.push(b); });
       const obs = { gos: [tree, ...bats], bodies: [], hardness: 0 };
       const watch = s.add.zone(x, y, 1, 1); watch.flown = false; s.actors.push(watch);
-      watch.tick = (sc) => { if (watch.flown || !tree.active || sc.chassis.x < x - 520) return; watch.flown = true; SFX.whoosh();
+      watch.tick = (sc) => { if (watch.flown || !tree.active || sc.chassis.x < x - 520) return; watch.flown = true; SFX.l('flagermus') || SFX.whoosh();
         bats.forEach((b, i) => sc.time.delayedCall(i * 140, () => { if (!b.active) return; sc.tweens.killTweensOf(b); b.setTexture('bat').setOrigin(0.5).setAngle(0).setY(b.y + 18);
           sc.tweens.add({ targets: b, scaleY: 0.35, duration: 90, yoyo: true, repeat: 14 });
           sc.tweens.add({ targets: b, x: b.x + 380 + Math.random() * 260, y: b.y - 360 - Math.random() * 200, duration: 1700 + Math.random() * 500, ease: 'Sine.in', onComplete: () => b.setVisible(false) });
-          if (i % 2) SFX.whoosh(); })); };
+          if (i % 2 && !SFX.buf.l_flagermus) SFX.whoosh(); })); };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'nat', make(s, x, y) {   // gravsten: bor og kølle smadrer den, ellers vælter den bare
       const body = s.matter.add.rectangle(x, y - 40, 54, 80, { isStatic: true, label: 'obs', chamfer: { radius: [22, 22, 0, 0] } });
@@ -1425,7 +1429,7 @@ const OBSTACLES = [
           bb.setVelocity(Phaser.Math.FloatBetween(-2, 6), Phaser.Math.FloatBetween(-5, 0)); s.retire(bb, 3500); }
         s.tweens.add({ targets: star, x: star.x + 420, y: star.y - 420, angle: 720, duration: 1500, ease: 'Quad.out', onComplete: () => star.setVisible(false) });
         for (let i = 0; i < 6; i++) s.time.delayedCall(i * 120, () => { if (!star.visible) return; const sp = s.add.image(star.x, star.y, 'star_s').setDepth(8).setScale(0.6); s.tweens.add({ targets: sp, alpha: 0, scale: 0.2, y: sp.y + 30, duration: 600, onComplete: () => sp.destroy() }); });
-        s.tweens.add({ targets: img, angle: 82, duration: 800, ease: 'Quad.in', onComplete: () => { SFX.pff(); s.puffAt(x + 200, y - 10); s.cameras.main.shake(100, 0.003); } }); };
+        s.tweens.add({ targets: img, angle: 82, duration: 800, ease: 'Quad.in', onComplete: () => { SFX.pff(); SFX.l('bjaelder', 0.6); s.puffAt(x + 200, y - 10); s.cameras.main.shake(100, 0.003); } }); };
       obs.onHit = (imp, part) => { if (part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.drawSpin) return;   // saven får lov at save
         if (imp >= 1.5) fall(false); };
       obs.saw = () => fall(true);
@@ -1446,7 +1450,7 @@ const OBSTACLES = [
       const at = (lx, ly) => ({ x: x + lx * Math.cos(tilt) - ly * Math.sin(tilt), y: y + 8 + lx * Math.sin(tilt) + ly * Math.cos(tilt) });   // punkt i stokkens eget system (0,0 = foden)
       const c = at(0, -110), body = s.matter.add.rectangle(c.x, c.y, 30, 210, { isStatic: true, label: 'obs', angle: tilt });
       const obs = { gos: [img], bodies: [body], hardness: 0.2, done: false, fragile: true };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.crunch(); s.spawnPieces(c.x, c.y, 0xe74c3c, 5, 8, 5); s.spawnPieces(c.x, c.y, 0xffffff, 5, 8, 5);
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.l('knaek') || SFX.crunch(); s.spawnPieces(c.x, c.y, 0xe74c3c, 5, 8, 5); s.spawnPieces(c.x, c.y, 0xffffff, 5, 8, 5);
         [['bigcane_top', 50 - ox, 58 - 236, 9, 116], ['bigcane_bot', 50 - ox, 176 - 236, 4, 120]].forEach(([fr, lx, ly, sp, hh]) => { const q = at(lx, ly);
           const pc = s.matter.add.image(q.x, q.y, fr, null, { shape: { type: 'rectangle', width: 40, height: hh - 16 }, density: 0.0006, friction: 0.3, label: 'piece', collisionFilter: { group: GRP_PIECE }, angle: tilt }).setFlipX(flip).setDepth(7);
           pc.setVelocity(Phaser.Math.FloatBetween(2, sp), Phaser.Math.FloatBetween(-sp * 1.3, -2)); pc.setAngularVelocity(Phaser.Math.FloatBetween(-0.25, 0.25)); s.retire(pc, 3500); });
@@ -1457,7 +1461,7 @@ const OBSTACLES = [
       const img = s.add.image(x, y + 4, 'gingerbread').setOrigin(0.5, 1).setDepth(6);
       s.tweens.add({ targets: img, angle: { from: -3, to: 3 }, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
       const obs = { gos: [img], bodies: [body], hardness: 0.05, fragile: true, done: false };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.crunch(); s.time.delayedCall(60, () => SFX.pop());
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.l('knaek') || SFX.crunch(); s.time.delayedCall(60, () => SFX.pop());
         const by = y + 4 - 162, parts = [['gb_head', 65, 34, 26, 'c'], ['gb_body', 65, 92, 0, 'r'], ['gb_arm', 30, 66, 0, 'r'], ['gb_arm', 100, 66, 0, 'r'], ['gb_leg', 47, 128, 0, 'r'], ['gb_leg', 83, 128, 0, 'r']];
         parts.forEach(([k, lx, ly, rad], i) => { const t = s.textures.get(k).getSourceImage();
           const pc = s.obsImage(k, x - 65 + lx, by + ly, { shape: rad ? { type: 'circle', radius: rad } : { type: 'rectangle', width: t.width * 0.8, height: t.height * 0.8 }, density: 0.0006, friction: 0.4, restitution: 0.3, label: 'piece', collisionFilter: { group: GRP_PIECE } });
@@ -1487,7 +1491,7 @@ const OBSTACLES = [
   { minD: 0, w: 3, flat: true, biome: 'orken', make(s, x, y) {   // skattekiste: låget springer op, og guldmønter sprøjter ud
       const c = s.obsImage('chest', x, y - 32, { shape: { type: 'rectangle', width: 92, height: 58 }, isStatic: true });
       const obs = { gos: [c], bodies: [c.body], hardness: 0.1, done: false, fragile: true };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(c.body); obs.bodies = []; c.setTexture('chest_open'); SFX.clunk(); SFX.smp('enarmet_ding', 0.5);
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; s.matter.world.remove(c.body); obs.bodies = []; c.setTexture('chest_open'); SFX.clunk(); SFX.l('moenter') || SFX.smp('enarmet_ding', 0.5);
         s.tweens.add({ targets: c, scaleY: 1.12, duration: 120, yoyo: true });
         for (let i = 0; i < 14; i++) { const k = s.matter.add.image(x + Phaser.Math.Between(-30, 30), y - 60, 'coin', null, { shape: { type: 'circle', radius: 8 }, density: 0.0005, restitution: 0.5, friction: 0.4, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
           k.setVelocity(Phaser.Math.FloatBetween(-4, 8), Phaser.Math.FloatBetween(-14, -6)); k.setAngularVelocity(Phaser.Math.FloatBetween(-0.3, 0.3));
@@ -1500,10 +1504,10 @@ const OBSTACLES = [
       const lid = s.add.image(x, y - 70, 'basket_lid').setDepth(6.1);
       const obs = { gos: [head, b, lid], bodies: [b.body], hardness: 0.1, done: false, fragile: true };
       const watch = s.add.zone(x, y, 1, 1); watch.up = false; s.actors.push(watch);
-      watch.tick = (sc) => { if (watch.up || obs.done || !b.active || sc.chassis.x < x - 460) return; watch.up = true; SFX.pff();
+      watch.tick = (sc) => { if (watch.up || obs.done || !b.active || sc.chassis.x < x - 460) return; watch.up = true; SFX.l('slange', 0.7) || SFX.pff();
         sc.tweens.add({ targets: lid, y: lid.y - 22, x: lid.x - 26, angle: -28, duration: 300, ease: 'Back.out' });   // låget løfter sig lidt
         sc.tweens.add({ targets: head, y: y - 92, duration: 450, ease: 'Back.out', onComplete: () => sc.tweens.add({ targets: head, angle: { from: -10, to: 10 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.inOut' }) }); };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; SFX.clunk(); SFX.boing(); s.tweens.killTweensOf(head); head.destroy();
+      obs.onHit = (imp) => { if (obs.done || imp < 1.5) return; obs.done = true; SFX.clunk(); SFX.l('slange') || SFX.boing(); s.tweens.killTweensOf(head); head.destroy();
         s.tweens.add({ targets: lid, y: s.groundY(x + 90) - 8, x: x + 90, angle: 200, duration: 500, ease: 'Quad.in' });
         const cb = s.add.image(x - 20, y - 20, 'snake').setOrigin(0.5, 1).setDepth(7).setScale(0.75, 0.3); obs.gos = [lid, cb];
         s.makeLoose(b, { type: 'rectangle', width: 70, height: 66 }, 6, { cols: [0xd4a056, 0xa67c45], snd: 'wood' }); obs.bodies = [];
@@ -1522,7 +1526,7 @@ const OBSTACLES = [
       const obs = { gos: [img, ...nuts], bodies: [body], hardness: 0.15, material: 'wood', sawable: true, done: false };
       const fall = (sawn) => { if (obs.done) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.whoosh(); if (sawn) { SFX.wood(); s.spawnPieces(x, y - 20, 0xe8c58f, 10, 5, 4); }
         nuts.forEach((n, i) => { const c = s.matter.add.image(n.x, n.y, 'coconut', null, { shape: { type: 'circle', radius: 12 }, density: 0.001, restitution: 0.4, friction: 0.5, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
-          c.setVelocity(Phaser.Math.FloatBetween(1, 5), Phaser.Math.FloatBetween(-3, 0)); c.setAngularVelocity(0.2); s.time.delayedCall(300 + i * 150, () => SFX.bonk()); n.destroy();
+          c.setVelocity(Phaser.Math.FloatBetween(1, 5), Phaser.Math.FloatBetween(-3, 0)); c.setAngularVelocity(0.2); s.time.delayedCall(300 + i * 150, () => SFX.l('kokos') || SFX.bonk()); n.destroy();
           s.retire(c, 4500); });
         s.tweens.add({ targets: img, angle: 82, duration: 850, ease: 'Quad.in', onComplete: () => { SFX.pff(); s.puffAt(x + 220, y - 10); s.cameras.main.shake(100, 0.003); } }); };
       obs.onHit = (imp, part) => { if (part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.drawSpin) return; if (imp >= 1.5) fall(false); };
@@ -1555,7 +1559,7 @@ const OBSTACLES = [
         for (let st = 0; st < steps; st++) {
           ropes.forEach(r => { r.pts.forEach((p, i) => { if (i === 0 && r.fixed) return; const vx = Phaser.Math.Clamp((p.x - p.px) * 0.97, -6, 6), vy = Phaser.Math.Clamp((p.y - p.py) * 0.97, -6, 6); p.px = p.x; p.py = p.y; p.x += vx; p.y += vy + 0.35;
               if (i > 0 && !sc.broken && sc.touchesCar(p.x, p.y, 6)) { const sg = cvx >= 0 ? 1 : -1, v = Math.min(4, Math.max(1.5, Math.abs(cvx) * 0.5)); p.x += sg * 1.5; p.px = p.x - sg * v;   // skubbes med bilen, men slynges ikke
-                if (time - act.lastSnd > 700) { act.lastSnd = time; SFX.whoosh(); } } });
+                if (time - act.lastSnd > 1100) { act.lastSnd = time; SFX.l('lianer', 0.6) || SFX.whoosh(); } } });
             if (!r.fixed) { r.life -= 0.012; if (r.life <= 0) r.pts = []; }
             for (let it = 0; it < 8; it++) { if (r.fixed) { r.pts[0].x = r.ax; r.pts[0].y = r.ay; }
               for (let i = 1; i < r.pts.length; i++) { const a = r.pts[i - 1], b = r.pts[i], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.001, f = (d - r.sl) / d;
@@ -1570,7 +1574,7 @@ const OBSTACLES = [
       s.tweens.add({ targets: f, angle: { from: -3, to: 3 }, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
       const body = s.matter.add.rectangle(x, y - 90, 70, 170, { isStatic: true, isSensor: true, label: 'obs' });
       const obs = { gos: [f], bodies: [body], hardness: 0, done: false };
-      obs.onHit = () => { if (obs.done) return; obs.done = true; s.tweens.killTweensOf(f); f.setAngle(0).setTexture('bigflower').setScale(0.6); SFX.pop(); s.time.delayedCall(90, () => SFX.pop());
+      obs.onHit = () => { if (obs.done) return; obs.done = true; s.tweens.killTweensOf(f); f.setAngle(0).setTexture('bigflower').setScale(0.6); if (!SFX.l('blomst')) { SFX.pop(); s.time.delayedCall(90, () => SFX.pop()); }
         s.tweens.add({ targets: f, scale: 1, duration: 450, ease: 'Back.out' });
         for (let i = 0; i < 6; i++) { const sp = s.add.image(x + Phaser.Math.Between(-60, 60), y - 120 - Math.random() * 60, 'star_s').setDepth(8).setScale(0.6).setTint(0xf9e04b); s.tweens.add({ targets: sp, alpha: 0, scale: 0.2, y: sp.y - 40, duration: 700, delay: i * 60, onComplete: () => sp.destroy() }); }
         for (let i = 0; i < 14; i++) { const sd = s.add.image(x, y - 128, 'piece').setTint(i % 2 ? 0x3b2410 : 0xf1c40f).setDisplaySize(8, 8).setDepth(7);
@@ -1583,7 +1587,7 @@ const OBSTACLES = [
       const obs = { gos: [tree, p], bodies: [], hardness: 0 };
       const watch = s.add.zone(x, y, 1, 1); watch.gone = false; s.actors.push(watch);
       watch.tick = (sc) => { if (watch.gone || !p.active || sc.chassis.x < x - 440) return; watch.gone = true; sc.tweens.killTweensOf(p);
-        SFX.blip(1200, 1800, 0.1, 'square', 0.12); sc.time.delayedCall(140, () => SFX.blip(1400, 2000, 0.09, 'square', 0.1));
+        if (!SFX.l('papegoeje')) { SFX.blip(1200, 1800, 0.1, 'square', 0.12); sc.time.delayedCall(140, () => SFX.blip(1400, 2000, 0.09, 'square', 0.1)); }
         p.setTexture('parrot_fly').setAngle(-10); sc.spawnPieces(p.x, p.y, 0xe74c3c, 2, 6, 3); sc.spawnPieces(p.x, p.y, 0x2ecc71, 2, 6, 3);
         sc.tweens.add({ targets: p, scaleY: 0.4, duration: 110, yoyo: true, repeat: 10 });
         sc.tweens.add({ targets: p, x: p.x + 600, y: p.y - 380, duration: 2200, ease: 'Sine.in', onComplete: () => p.setVisible(false) }); };
@@ -1609,7 +1613,7 @@ const OBSTACLES = [
       const sign = s.add.image(x - 120, y + 6, 'slide_sign').setOrigin(0.5, 1).setDepth(5.8), gos = [sign], bodies = [];
       const obs = { gos, bodies, hardness: 0.3, material: 'stone' };
       const watch = s.add.zone(x, y, 1, 1); watch.go = false; s.actors.push(watch);
-      watch.tick = (sc) => { if (watch.go || sc.chassis.x < x - 700) return; watch.go = true; sc.cameras.main.shake(400, 0.004); SFX.crunch();
+      watch.tick = (sc) => { if (watch.go || sc.chassis.x < x - 700) return; watch.go = true; sc.cameras.main.shake(400, 0.004); SFX.l('stenskred', 0.9) || SFX.crunch();
         for (let i = 0; i < 5; i++) sc.time.delayedCall(i * 160, () => { if (!sign.active) return; const r = 16 + Math.random() * 12;
           const st = sc.obsImage('rock', x + 120 + i * 50, y - 520 - i * 40, { shape: { type: 'circle', radius: r }, density: 0.003, friction: 0.9, frictionAir: 0.01, restitution: 0.25 }, r * 2.2, r * 2.2);
           st.setVelocity(-3 - Math.random() * 3, 4); st.setAngularVelocity(-0.1); st.obs = obs; st.body.obs = obs; gos.push(st); bodies.push(st.body); obs.bodies = bodies;
@@ -1629,12 +1633,12 @@ const OBSTACLES = [
         obs.gos = []; obs.bodies = []; };
       return obs; } },
   { minD: 0, w: 3, flat: true, biome: 'bjerg', make(s, x, y) {   // minevogn på skinner: triller, får buler og falder fra hinanden – eller bliver mast flad
-      return cartObstacle(s, x, y, { tex: 'mcart', dent: 'mcart_dent', flat: 'mcart_flat', rail: 'rail2', y0: 50, w: 144, h: 94, texH: 104, flatOy: 88 / 104, gold: 0xf1c40f, plate: 0x5d6d7e, wheelScale: 1.3 }); } },
+      return cartObstacle(s, x, y, { tex: 'mcart', snd: true, dent: 'mcart_dent', flat: 'mcart_flat', rail: 'rail2', y0: 50, w: 144, h: 94, texH: 104, flatOy: 88 / 104, gold: 0xf1c40f, plate: 0x5d6d7e, wheelScale: 1.3 }); } },
   { minD: 0, w: 3, flat: true, biome: 'by', make(s, x, y) {   // brandhane: vælter, og en vandstråle sprøjter op – kører man igennem, løfter den bilen
       const body = s.matter.add.rectangle(x, y - 36, 44, 72, { isStatic: true, label: 'obs' });
       const img = s.add.image(x, y + 4, 'hydrant_big').setOrigin(0.5, 1).setDepth(6);
       const obs = { gos: [img], bodies: [body], hardness: 0.15, material: 'metal', done: false };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.clunk(); SFX.flush();
+      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; if (!SFX.l('vand')) { SFX.clunk(); SFX.flush(); }
         s.tweens.add({ targets: img, angle: 80, duration: 500, ease: 'Bounce.out' });
         const cols = [0x5dade2, 0xaed6f1, 0xffffff, 0x3498db];
         s.time.addEvent({ delay: 45, repeat: 90, callback: () => { if (!img.active) return;
@@ -1651,7 +1655,7 @@ const OBSTACLES = [
   { minD: 0, w: 3, flat: true, biome: 'by', make(s, x, y) {   // skraldespand: låget flyver af, og affaldet drysser ud
       const b = s.obsImage('bin', x, y - 38, { shape: { type: 'rectangle', width: 52, height: 72 }, isStatic: true }), lid = s.add.image(x, y - 82, 'bin_lid').setDepth(6.1);
       const obs = { gos: [b, lid], bodies: [b.body], hardness: 0.1, done: false, fragile: true, material: 'metal' };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; SFX.clunk(); s.time.delayedCall(100, () => SFX.crunch());
+      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; if (!SFX.l('skrald')) { SFX.clunk(); s.time.delayedCall(100, () => SFX.crunch()); }
         s.tweens.add({ targets: lid, y: lid.y - 260, x: lid.x + 180, angle: 540, duration: 800, ease: 'Quad.out', onComplete: () => s.tweens.add({ targets: lid, y: s.groundY(lid.x) - 8, duration: 500, ease: 'Bounce.out' }) });
         s.spawnPieces(x, y - 60, 0xffffff, 5, 12, 6); s.spawnPieces(x, y - 60, 0x7f8c8d, 4, 10, 6); s.spawnPieces(x, y - 60, 0x8d5a2b, 3, 10, 5);
         for (let i = 0; i < 2; i++) { const bn = s.matter.add.image(x, y - 70, 'banana', null, { shape: { type: 'rectangle', width: 30, height: 12 }, density: 0.0005, label: 'piece', collisionFilter: { group: GRP_PIECE } }).setDepth(7);
@@ -1673,7 +1677,7 @@ const OBSTACLES = [
         s.tweens.add({ targets: roof, angle: -7, y: roof.y + 8, duration: 600, ease: 'Bounce.out' });   // markisen hænger skævt
         s.time.delayedCall(250, () => { if (!own.active) return; s.tweens.killTweensOf(own); own.setTexture('vendor_mad');   // sur!
           s.tweens.add({ targets: own, y: own.y - 14, duration: 150, yoyo: true, repeat: 7, ease: 'Quad.out' });
-          [0, 200, 420].forEach(d => s.time.delayedCall(d, () => SFX.blip(220, 140, 0.16, 'sawtooth', 0.14)));
+          if (!SFX.l('bodejer')) [0, 200, 420].forEach(d => s.time.delayedCall(d, () => SFX.blip(220, 140, 0.16, 'sawtooth', 0.14)));
           const tx = s.add.text(own.x, own.y - 150, 'Hov hov!', { fontFamily: FONT, fontSize: '34px', color: '#e74c3c', stroke: '#ffffff', strokeThickness: 7 }).setOrigin(0.5).setDepth(9);
           s.tweens.add({ targets: tx, y: tx.y - 30, alpha: 0, delay: 1500, duration: 600, onComplete: () => tx.destroy() });
           for (let i = 0; i < 8; i++) s.time.delayedCall(i * 160, () => { if (!own.active) return; [-1, 1].forEach(sd => { const pf = s.add.image(own.x + sd * 20, own.y - 96, 'smoke').setTint(0xdddddd).setAlpha(0.8).setScale(0.35).setDepth(8);
@@ -1710,7 +1714,7 @@ const OBSTACLES = [
         n.setVelocity(Math.max(3, ch && ch.body ? ch.body.velocity.x * 0.8 : 3), -3); n.setAngularVelocity(0.04); r.destroy(); obs.gos = [n]; SFX.clunk();
         s.time.delayedCall(300, () => { if (!n.active) return;   // tænder og flyver flydende videre: beholder sin fart og drejning, drejningen aftager, farten vokser
           let vx = n.body.velocity.x * 60, vy = n.body.velocity.y * 60, om = Phaser.Math.RadToDeg(n.body.angularVelocity) * 60, thr = 0, prev = 0, last = 0;
-          const f = s.add.image(n.x, n.y, 'rocket2').setDepth(6).setAngle(n.angle), sx = f.x, sy = f.y; n.destroy(); obs.gos = [f]; SFX.zap(); SFX.whoosh();
+          const f = s.add.image(n.x, n.y, 'rocket2').setDepth(6).setAngle(n.angle), sx = f.x, sy = f.y; n.destroy(); obs.gos = [f]; if (!SFX.l('raket', 0.9)) { SFX.zap(); SFX.whoosh(); }
           s.tweens.addCounter({ from: 0, to: 1, duration: 5000, onUpdate: (tw) => { if (!f.active) { tw.stop(); return; } const el = tw.elapsed, dt = Math.min(50, el - prev) / 1000; prev = el; if (dt <= 0) return;
               om *= Math.exp(-dt * 3); f.angle += om * dt; thr = Math.min(2600, thr + 5200 * dt);
               const t = Phaser.Math.DegToRad(f.angle), dx = Math.sin(t), dy = -Math.cos(t), dr = Math.exp(-dt * 0.6);
@@ -1746,7 +1750,7 @@ const OBSTACLES = [
       const obs = { gos: [glow, c], bodies: [c.body], hardness: 0.3, material: 'stone', done: false };
       obs.onHit = (imp, part) => { if (obs.done) return;
         const easy = part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.breaks.includes('stone');
-        if (imp < (easy ? 1 : 2.5)) return; obs.done = true; obs.hardness = 0; SFX.glass(); s.time.delayedCall(90, () => SFX.glass());
+        if (imp < (easy ? 1 : 2.5)) return; obs.done = true; obs.hardness = 0; SFX.glass(); SFX.l('krystal', 0.7) || s.time.delayedCall(90, () => SFX.glass());
         [0x9b59b6, 0x48c9b0, 0xc39bd3, 0x76d7c4].forEach(col => s.spawnPieces(c.x, c.y, col, 4, 12, 7));
         for (let i = 0; i < 6; i++) { const sp = s.add.image(c.x + Phaser.Math.Between(-50, 50), c.y - Phaser.Math.Between(0, 60), 'star_s').setDepth(8).setScale(0.7); s.tweens.add({ targets: sp, alpha: 0, scale: 0.2, y: sp.y - 30, duration: 700, delay: i * 70, onComplete: () => sp.destroy() }); }
         glow.destroy(); c.destroy(); obs.gos = []; obs.bodies = []; };
@@ -1759,10 +1763,10 @@ const OBSTACLES = [
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(e.body); obs.bodies = []; s.tweens.killTweensOf(e); e.setDepth(8.5); SFX.bonk(); const ch = s.chassis;
         const v = ch && ch.body ? Math.abs(ch.body.velocity.x) : 5, dist = Phaser.Math.Clamp(v * 100, 650, 1100), x0 = e.x, y0 = e.y, x1 = x0 + dist, y1 = s.groundY(x1) - 42, hgt = 90 + dist * 0.35;   // jo hurtigere, jo længere
         s.tweens.addCounter({ from: 0, to: 1, duration: 400 + dist * 0.45, onUpdate: tw => { if (!e.active || !e.body) { tw.stop(); return; } const t = tw.getValue(); obs.x = Math.max(obs.x || 0, x0 + (x1 - x0) * t); e.x = x0 + (x1 - x0) * t; e.y = y0 + (y1 - y0) * t - Math.sin(Math.PI * t) * hgt; e.angle = t * 540; },
-          onComplete: () => { if (!e.active) return; e.setAngle(0).setTexture('degg2_crack'); SFX.crunch(); s.puffAt(x1, y1 + 20); s.cameras.main.shake(80, 0.003);   // krakelerer, når det lander
+          onComplete: () => { if (!e.active) return; e.setAngle(0).setTexture('degg2_crack'); SFX.l('aeg') || SFX.crunch(); s.puffAt(x1, y1 + 20); s.cameras.main.shake(80, 0.003);   // krakelerer, når det lander
             s.tweens.add({ targets: e, angle: { from: -6, to: 6 }, duration: 70, yoyo: true, repeat: 3 });
             s.time.delayedCall(250, () => { if (!e.active) return; SFX.pop(); s.spawnPieces(e.x, e.y, 0x58d68d, 6, 12, 6); s.spawnPieces(e.x, e.y, 0x28b463, 4, 8, 5);
-              const d = s.add.image(e.x, e.y - 14, 'babydragon').setDepth(8).setScale(1.4); e.setVisible(false); SFX.boing(); obs.gos.push(d);
+              const d = s.add.image(e.x, e.y - 14, 'babydragon').setDepth(8).setScale(1.4); e.setVisible(false); SFX.l('drage') || SFX.boing(); obs.gos.push(d);
               s.tweens.add({ targets: d, scaleY: 0.84, duration: 120, yoyo: true, repeat: 12 });
               s.tweens.add({ targets: d, x: d.x + 520, y: d.y - 420, duration: 2400, ease: 'Sine.in', onComplete: () => d.setVisible(false) }); }); } }); };
       return obs; } },
@@ -1773,7 +1777,7 @@ const OBSTACLES = [
       const obs = { gos: [sh, ...bots], bodies: [sh.body], hardness: 0.05, done: false, fragile: true, material: 'porcelain' };
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true;
         const ch = s.chassis, v = ch && ch.body ? Math.abs(ch.body.velocity.x) : 5, far = Phaser.Math.Clamp(330 + v * 65, 600, 1100);   // flaskerne flyver frem og lander foran bilen
-        const burst = (b, bx, by) => { SFX.glass(); const c = tints[b.k], cy = by - 85;   // splintres – en blød, farvet sky vælter op, hvor flasken landede
+        const burst = (b, bx, by) => { SFX.glass(); SFX.l('magi', 0.6); const c = tints[b.k], cy = by - 85;   // splintres – en blød, farvet sky vælter op, hvor flasken landede
           s.spawnPieces(bx, by, 0xd6eaf8, 4, 7, 6); s.spawnPieces(bx, by, c, 3, 8, 5);
           for (let k = 0; k < 10; k++) { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()), ox = Math.cos(a) * 78 * r, oy = Math.sin(a) * 36 * r, sc = 0.8 + Math.random() * 0.9;
             const pf = s.add.image(bx + ox * 0.3, by, 'softpuff').setTint(c).setAlpha(0).setScale(0.3).setDepth(8).setAngle(Math.random() * 360);
@@ -1793,7 +1797,7 @@ const OBSTACLES = [
   { minD: 0, w: 3, flat: true, biome: 'eng', make(s, x, y) {   // høstak: stor kuppel – strå flyver i alle retninger, og en enkelt nål glimter (nål i en høstak!)
       const h = s.obsImage('haystack2', x + 7, y - 84, { shape: { type: 'rectangle', width: 150, height: 160, chamfer: { radius: [60, 60, 6, 6] } }, isStatic: true });
       const obs = { gos: [h], bodies: [h.body], hardness: 0.02, done: false, fragile: true };
-      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; SFX.pff(); s.time.delayedCall(80, () => SFX.pff());
+      obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; if (!SFX.l('hoestak')) { SFX.pff(); s.time.delayedCall(80, () => SFX.pff()); }
         const fly = (st, big) => { const tx = st.x + Phaser.Math.Between(-180, 300), ty = st.y - Phaser.Math.Between(80, big ? 320 : 260);
           s.tweens.add({ targets: st, x: tx, y: ty, angle: st.angle + 360, duration: 550, ease: 'Quad.out', onComplete: () => s.tweens.add({ targets: st, x: tx + Phaser.Math.Between(-40, 40), y: s.groundY(tx) - 3, angle: st.angle + 200, duration: 1300 + Math.random() * 700, ease: 'Sine.in', onComplete: () => s.tweens.add({ targets: st, alpha: 0, delay: big ? 2500 : 1200, duration: 500, onComplete: () => st.destroy() }) }) }); };
         for (let i = 0; i < 60; i++) { const st = s.add.image(x + Phaser.Math.Between(-70, 70), y - Phaser.Math.Between(10, 150), 'straw').setDepth(7).setAngle(Math.random() * 180).setTint(i % 3 ? 0xffffff : 0xd4ac0d); fly(st); }
@@ -1807,7 +1811,7 @@ const OBSTACLES = [
       const obs = { gos: [img], bodies: [body], hardness: 0.1, material: 'wood', done: false };
       obs.onHit = (imp) => { if (obs.done || imp < 1.2) return; obs.done = true; s.matter.world.remove(body); obs.bodies = []; SFX.wood();
         s.tweens.add({ targets: img, angle: 75, duration: 700, ease: 'Bounce.out' });
-        const cackle = () => { SFX.blip(700, 1000, 0.07, 'square', 0.1); setTimeout(() => SFX.blip(800, 1200, 0.06, 'square', 0.09), 90); setTimeout(() => SFX.blip(650, 1000, 0.1, 'square', 0.1), 190); };
+        const cackle = () => { if (SFX.l('kylling', 0.7)) return; SFX.blip(700, 1000, 0.07, 'square', 0.1); setTimeout(() => SFX.blip(800, 1200, 0.06, 'square', 0.09), 90); setTimeout(() => SFX.blip(650, 1000, 0.1, 'square', 0.1), 190); };
         cackle(); s.time.delayedCall(400, cackle);
         for (let i = 0; i < 4; i++) { const hn = s.add.image(x, y - 40, 'hen').setDepth(8), dir = i % 2 ? -1 : 1; if (dir < 0) hn.setFlipX(true); obs.gos.push(hn);
           s.tweens.add({ targets: hn, scaleY: 0.7, duration: 90, yoyo: true, repeat: 8 });
@@ -3132,7 +3136,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.25.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.26.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
