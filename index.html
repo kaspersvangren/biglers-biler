@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.27.1)
+//  Biglers Biler – etape 3  (v0.28.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -2053,6 +2053,55 @@ PARTS.chassis = [
       for (let x = 8; x < 198; x += 14) Q(g, x, 30, 3, 9, 0xd5d8dc);                // trin
       RO(g, 24, 42, 6, 9, 1, 0x95a5a6, O, 1.5); RO(g, 140, 42, 6, 9, 1, 0x95a5a6, O, 1.5);   // stigens holdere
       RO(g, 184, 31, 16, 10, 3, 0x3498db, O, 2); } },   // blåt blink
+  { id: 'bed', name: 'Himmelseng', roof: [95, 6], full: true, rearY: 132, w: 190, h: 50, topH: 104, topW: 190, topOx: 0, density: 0.0025, back: -62, front: 62, motorX: 123, motorY: 86, motorScale: 0.46, scale: 1.3,
+    body(g) {},
+    top(g) { const O = 0x3b2a2a, WD = 0x9c5b2e, WL = 0xc27c45, PK = 0xf5b7b1, PS = 0xf1948a, BL = 0x85c1e9, SK = 0xffe2d2;   // himmelseng: Freddy sidder op under dynen
+      RO(g, 6, 18, 12, 128, 4, WD, O, 3); RO(g, 172, 18, 12, 128, 4, WD, O, 3);                                   // sengestolper
+      P(g, [['M', 18, 30], ['L', 46, 30], ['C', 40, 58, 28, 72, 24, 84], ['L', 32, 118], ['L', 18, 118]], PK, O, 3);   // gardiner, bundet op
+      P(g, [['M', 172, 30], ['L', 144, 30], ['C', 150, 58, 162, 72, 166, 84], ['L', 158, 118], ['L', 172, 118]], PK, O, 3);
+      C(g, 24, 84, 4.5, 0xe74c3c); C(g, 166, 84, 4.5, 0xe74c3c);                                                  // sløjfer
+      P(g, [['M', 18, 120], ['L', 18, 72], ['C', 18, 56, 50, 56, 50, 72], ['L', 50, 120]], WL, O, 3.5);            // hovedgærde
+      C(g, 30, 74, 4, PS); C(g, 38, 74, 4, PS); g.fillStyle(PS); g.fillTriangle(26, 76, 42, 76, 34, 84);              // hjerte i gærdet
+      RO(g, 152, 92, 22, 32, 6, WL, O, 3.5);                                                                     // fodgærde
+      RO(g, 22, 96, 40, 16, 8, 0xffffff, O, 2.5);                                                                // pude
+      RO(g, 40, 92, 34, 26, 10, 0x5dade2, O, 2.5); [[48, 100], [60, 98], [54, 108], [66, 106]].forEach(([x, y]) => C(g, x, y, 1.8, 0xffffff));   // pyjamas med prikker
+      FACE(g, 57, 80, 0.95);
+      RO(g, 14, 110, 162, 14, 6, 0xffffff, O, 3);                                                                // madras
+      P(g, [['M', 62, 104], ['C', 96, 96, 140, 98, 172, 106], ['L', 172, 124], ['L', 58, 124], ['C', 52, 116, 54, 108, 62, 104]], BL, O, 3);   // dyne
+      [[84, 108], [104, 114], [124, 106], [146, 113], [162, 108]].forEach(([x, y]) => C(g, x, y, 2.4, 0xf7dc6f));   // stjerner på dynen
+      C(g, 66, 112, 4.5, SK);                                                                                    // hånd på dynen
+      RO(g, 4, 122, 182, 22, 6, WD, O, 4); Q(g, 12, 128, 166, 3, WL);                                            // sengeramme
+      RO(g, 8, 142, 12, 12, 3, WD, O, 3); RO(g, 170, 142, 12, 12, 3, WD, O, 3);                                  // ben
+      for (let x = 4; x < 186; x += 14) C(g, x + 7, 26, 7.5, PS);                                                // kappe med buer
+      RO(g, 0, 8, 190, 18, 6, PK, O, 4); Q(g, 6, 14, 178, 3, 0xfadbd8);                                           // himlen
+      [12, 178].forEach(x => { C(g, x, 6, 7, WL); g.lineStyle(2.5, O); g.strokeCircle(x, 6, 7); }); } },        // knopper
+  { id: 'hut', name: 'Lille hytte', roof: [72, 12], full: true, rearY: 130, w: 172, h: 50, topH: 110, topW: 172, topOx: 0, density: 0.0035, back: -56, front: 56, motorX: 139, motorY: 120, motorScale: 0.46, scale: 1.3,
+    body(g) {},
+    top(g) { const O = 0x3b2a2a, LG = 0xb9773f, LL = 0xc98d55, LD = 0x8e5a2b, RF = 0xc0392b, RD = 0x922b21;   // bjælkehytte: Freddy kigger ud ad vinduet
+      RO(g, 100, 22, 16, 34, 2, 0x95a5a6, O, 3); Q(g, 102, 32, 12, 2, 0x7f8c8d); Q(g, 102, 42, 12, 2, 0x7f8c8d); RO(g, 97, 16, 22, 8, 2, 0x7f8c8d, O, 2.5);   // skorsten
+      RO(g, 10, 62, 124, 88, 4, LG, O, 4);                                                                       // væg
+      for (let y = 66, i = 0; y < 146; y += 12, i++) { R(g, 12, y, 120, 10, 5, i % 2 ? LG : LL); g.lineStyle(1.5, LD); g.strokeRoundedRect(12, y, 120, 10, 5);
+        [10, 134].forEach(x => { C(g, x, y + 5, 5.5, 0xd7a46b); g.lineStyle(1.5, LD); g.strokeCircle(x, y + 5, 5.5); C(g, x, y + 5, 1.8, LD); }); }   // bjælker med ender
+      RO(g, 14, 80, 12, 42, 2, 0x27ae60, O, 2.5); RO(g, 72, 80, 12, 42, 2, 0x27ae60, O, 2.5);                     // skodder
+      RO(g, 26, 82, 46, 38, 4, 0xbdefff, O, 3.5); FACE(g, 49, 104, 0.95);                                         // vindue med Freddy
+      RO(g, 22, 120, 54, 8, 2, LD, O, 2.5); [[30, 0xe74c3c], [40, 0xf1c40f], [50, 0xe74c3c], [60, 0x9b59b6], [68, 0xf1c40f]].forEach(([x, c]) => { Q(g, x - 0.5, 114, 1.5, 6, 0x27ae60); C(g, x, 114, 3, c); });   // blomsterkasse
+      RO(g, 94, 92, 30, 56, { tl: 14, tr: 14, bl: 0, br: 0 }, 0x6e3b1f, O, 3); C(g, 117, 122, 2.8, 0xf1c40f); C(g, 109, 104, 5, 0xbdefff);   // dør med knop og rudehul
+      P(g, [['M', 0, 74], ['L', 72, 10], ['L', 144, 74]], RF, O, 4);                                               // tag
+      g.lineStyle(2, RD); [28, 44, 60].forEach(y => { const hw = (y - 10) * 72 / 64; g.beginPath(); g.moveTo(72 - hw + 4, y); g.lineTo(72 + hw - 4, y); g.strokePath(); });   // tagrækker
+      RO(g, 132, 136, 38, 10, 2, LD, O, 3); RO(g, 4, 146, 168, 14, 4, LD, O, 4); } },                            // veranda (motoren står her) og bundbjælke
+  { id: 'banana', name: 'Kæmpebanan', roof: [98, 16], full: true, rearY: 96, w: 200, h: 46, topH: 74, topW: 210, topOx: 5, density: 0.0022, back: -64, front: 64, motorX: 143, motorY: 50, motorScale: 0.46, scale: 1.3,
+    body(g) {},
+    top(g) { const O = 0x3b2a2a, Y = 0xf7dc6f, YD = 0xe2b80f, YL = 0xfcf3cf, SK = 0xffe2d2;   // Freddy rider på en kæmpebanan
+      RO(g, 90, 72, 12, 24, 5, 0x34495e, O, 2.5);                                                                // bageste ben
+      P(g, [['M', 8, 64], ['C', 40, 126, 160, 128, 196, 62], ['L', 202, 50], ['C', 190, 80, 50, 84, 14, 54], ['L', 8, 64]], Y, O, 4);   // bananen
+      P(g, [['M', 22, 82], ['C', 64, 120, 150, 120, 188, 76], ['C', 150, 110, 64, 110, 22, 82]], YD);              // skygge forneden
+      P(g, [['M', 30, 66], ['C', 70, 86, 140, 86, 180, 66], ['C', 140, 80, 70, 80, 30, 66]], YL);                  // glans foroven
+      P(g, [['M', 194, 58], ['L', 200, 42], ['L', 208, 44], ['L', 202, 60]], 0x7d6608, O, 3);                        // stilk
+      C(g, 10, 59, 5, 0x5d4037); g.lineStyle(2.5, O); g.strokeCircle(10, 59, 5);                                   // spids
+      RO(g, 84, 46, 28, 30, 9, 0x95a5a6, O, 2.5); g.lineStyle(2, 0x2c3e50); g.beginPath(); g.moveTo(94, 52); g.lineTo(92, 44); g.moveTo(102, 52); g.lineTo(105, 45); g.strokePath(); C(g, 98, 58, 5, 0xffffff);   // grå t-shirt med kanin
+      RO(g, 100, 74, 12, 26, 5, 0x34495e, O, 2.5); RO(g, 98, 96, 18, 9, 4, 0xe74c3c, O, 2.5);                     // forreste ben og sko
+      C(g, 82, 72, 5, SK); C(g, 114, 72, 5, SK);                                                                 // hænder holder fast
+      FACE(g, 98, 34, 0.95); } },
   { id: 'sofa', name: 'Sofa', roof: [49, 16], full: true, rearY: 82, w: 146, h: 50, topH: 60, topW: 146, topOx: 0, density: 0.002, back: -43, front: 43, motorX: 84, motorY: 40, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, PU = 0x9b59b6, PD = 0x7d3c98, PL = 0xb57fd0;   // samme stil som bilerne: mørkt omrids, flade farver
@@ -2202,6 +2251,18 @@ PARTS.chassis = [
       FACE(g, 142.4, 92.0, 0.5); } },
 ];
 // ---------- HJUL ----------
+const POOP_F = [1, 0.9, 1.04, 0.92, 0.98, 0.88, 1.03, 0.93, 0.97];   // hundelortens ujævne kant (samme form i fysikken)
+function drawGear(g, cx, cy, r, n, col, dark, rot) {   // tandhjul: n tænder ud til r, krop med huller og nav
+  rot = rot || 0; const ri = r * 0.8, tw = Math.PI / n;
+  const ring = (ro, rin) => { const pts = []; for (let i = 0; i < n; i++) { const a = rot + i * 2 * Math.PI / n; [[a - tw * 0.62, rin], [a - tw * 0.38, ro], [a + tw * 0.38, ro], [a + tw * 0.62, rin]].forEach(([aa, rr]) => pts.push({ x: cx + Math.cos(aa) * rr, y: cy + Math.sin(aa) * rr })); } return pts; };
+  g.fillStyle(dark); g.fillPoints(ring(r, ri), true); g.fillStyle(col); g.fillPoints(ring(r - 2.5, ri - 2.5), true);
+  C(g, cx, cy, ri * 0.74, dark); C(g, cx, cy, ri * 0.74 - 2.5, col);
+  for (let i = 0; i < 5; i++) { const a = rot + i * 2 * Math.PI / 5 + 0.3; C(g, cx + Math.cos(a) * ri * 0.45, cy + Math.sin(a) * ri * 0.45, ri * 0.15, dark); }
+  C(g, cx, cy, ri * 0.22, dark); C(g, cx, cy, ri * 0.15, col); C(g, cx, cy, ri * 0.06, dark);
+}
+// mellemhjul mellem to tandhjul (pitch-radius rp, afstand d): ét, eller tre små, hvis ét ville blive større end hjulene – et ulige antal, så begge hjul drejer samme vej
+function idlers(d, rp, rMax) { let k = 1, rmp = Math.max(rp * 0.3, d / 2 - rp); while (rmp > rMax && k < 7) { k += 2; rmp = (d - 2 * rp) / (2 * k); } rmp = Math.max(rp * 0.3, rmp);
+  return { k, rmp, rm: rmp / 0.9, offs: Array.from({ length: k }, (_, j) => rp + rmp + j * 2 * rmp) }; }
 PARTS.wheels = [
   { id: 'micro', name: 'Mikrohjul', r: 10, density: 0.1, grip: 1.2,
     draw(g, r) { const c = r + 2; C(g, c, c, r, 0x222222); C(g, c, c, r * 0.5, 0xf1c40f); } },
@@ -2244,6 +2305,17 @@ PARTS.wheels = [
     draw(g, r) { const c = r + 2; g.fillStyle(0xfdf2e9); g.fillEllipse(c, c, r * 1.7, r * 2.1); C(g, c - 8, c - 10, 5, 0xffffff); C(g, c + 6, c + 4, 3, 0xf5cba7); C(g, c - 4, c + 12, 2, 0xf5cba7); } },
   { id: 'pogo', name: 'Fjedre', r: 26, density: 0.003, grip: 1.0, spring: true,
     draw(g, r) { const c = r + 2; C(g, c, c, r, 0x222222); C(g, c, c, r * 0.62, 0xecf0f1); g.lineStyle(4, 0xe74c3c); for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2; g.beginPath(); g.moveTo(c, c); g.lineTo(c + Math.cos(a) * r * 0.55, c + Math.sin(a) * r * 0.55); g.strokePath(); } C(g, c, c, 5, 0xe74c3c); } },
+  { id: 'poop', name: 'Hundelorte', r: 30, density: 0.004, grip: 0.9, shape: 'blob',
+    draw(g, r) { const c = r + 2, pts = k => POOP_F.map((f, i) => { const a = i * Math.PI * 2 / POOP_F.length; return { x: c + Math.cos(a) * r * f * k, y: c + Math.sin(a) * r * f * k }; });   // set ovenfra: snoet bunke med ujævn kant
+      g.fillStyle(0x4a2511); g.fillPoints(pts(1), true); g.fillStyle(0x7b4520); g.fillPoints(pts(0.9), true); g.fillStyle(0x93582b); g.fillPoints(pts(0.62), true); g.fillStyle(0xa86a35); g.fillPoints(pts(0.34), true);
+      g.lineStyle(2.5, 0x4a2511); g.beginPath(); for (let i = 0; i <= 40; i++) { const t = i / 40, a = t * Math.PI * 5, rr = r * 0.82 * (1 - t); i ? g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr) : g.moveTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); } g.strokePath();   // spiralen
+      C(g, c - r * 0.3, c - r * 0.35, r * 0.12, 0xffffff, 0.45); } },
+  { id: 'lid', name: 'Skraldespandslåg', r: 32, density: 0.003, grip: 0.8,
+    draw(g, r) { const c = r + 2; C(g, c, c, r, 0x5d6d7e); C(g, c, c, r - 3, 0xaab7b8); g.lineStyle(2, 0x7f8c8d); [0.78, 0.56].forEach(f => g.strokeCircle(c, c, r * f)); C(g, c, c, r * 0.34, 0x95a5a6);   // låg med riller
+      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + 0.5; C(g, c + Math.cos(a) * r * 0.9, c + Math.sin(a) * r * 0.9, 1.8, 0x7f8c8d); }   // nitter
+      RO(g, c - r * 0.55, c - 5, r * 1.1, 10, 4, 0x566573, 0x2c3e50, 2); [-1, 1].forEach(s => C(g, c + s * r * 0.55, c, 4, 0x2c3e50)); } },   // håndtag
+  { id: 'gear', name: 'Tandhjul', r: 40, density: 0.004, grip: 1.0, shape: 'gear', gear: true,   // et tredje tandhjul imellem griber i begge (tegnes i spillet)
+    draw(g, r) { const c = r + 2; drawGear(g, c, c, r, 12, 0x95a5a6, 0x4d5656); } },
   { id: 'donut', name: 'Donuts', r: 32, density: 0.003, grip: 0.9,
     draw(g, r) { const c = r + 2; C(g, c, c, r, 0xd9a066); C(g, c, c, r - 4, 0xf78fb3); [[0x3498db, 0], [0xf1c40f, 1], [0x2ecc71, 2], [0xffffff, 3], [0xe74c3c, 4], [0x9b59b6, 5]].forEach(([col, i]) => { const a = i * 1.05; R(g, c + Math.cos(a) * r * 0.65 - 3, c + Math.sin(a) * r * 0.65 - 1, 7, 3, 1, col); }); C(g, c, c, r * 0.3, 0x8d5a2b); } }
 ];
@@ -2477,6 +2549,7 @@ function assembleCar(scene, p, ch, wh, mo, to) {
     if (ch.dangle.prop) p.add(scene.add.image(ch.dangle.ox + ch.dangle.prop.ox, d.y + ch.dangle.prop.oy, 'p_chassis_' + ch.id + '_prop')); }
   const xs = wheelGeom(ch, wh).xs, wheels = [];
   if (wh.belt) { const bg = scene.add.graphics(); beltPath(bg, xs[0], cy + oy, xs[1], cy + oy, (wh.r + 7) / sc0, 0); p.add(bg); }
+  if (wh.gear) { const rp = wh.r * 0.9 / sc0, id = idlers(xs[1] - xs[0], rp, rp * 1.25), n = Math.max(6, Math.round(12 * id.rm * sc0 / wh.r)), gg = scene.add.graphics(); id.offs.forEach((o, j) => drawGear(gg, xs[0] + o, cy + oy, id.rm, n, 0xf0b429, 0x9a6b12, Math.PI + Math.PI / n + j * Math.PI / n)); p.add(gg); }
   const rs = rearScaleFor(ch, wh);
   xs.forEach((ox, i) => { const k = i === 0 ? rs : 1, dy = -(k - 1) * wh.r / sc0;
     if (wh.spring) p.add(springImg(scene, ch, ox, cy, cy + oy + 50 + dy));
@@ -3079,6 +3152,10 @@ class Build extends Phaser.Scene {
         const wp = wxs.map((ox, wi) => [ox, cy + oy + (part.spring ? 50 : 0) - (wi === 0 ? (rs - 1) * part.r / (ch.scale || 1) : 0)]);
         this.time.delayedCall(1430, () => { drawSusp(sg, ch, (x, y) => [tx + x - TW / 2, ty + y - TH / 2], wp, 1); sg.setAlpha(0); this.tweens.add({ targets: sg, alpha: 1, duration: 200 }); });
       }
+      if (part.gear) {   // mellemhjulet tegnes, når tandhjulene er landet
+        const gg = this.add.graphics(); p.addAt(gg, p.list.length - 2); const s0 = ch.scale || 1, rp = part.r * 0.9 / s0, id = idlers(wxs[1] - wxs[0], rp, rp * 1.25), n = Math.max(6, Math.round(12 * id.rm * s0 / part.r)), yy = cy + oy;
+        this.time.delayedCall(1430, () => { id.offs.forEach((o, j) => drawGear(gg, wxs[0] + o, yy, id.rm, n, 0xf0b429, 0x9a6b12, Math.PI + Math.PI / n + j * Math.PI / n)); gg.setAlpha(0); this.tweens.add({ targets: gg, alpha: 1, duration: 200 }); });
+      }
       if (part.belt) {   // bæltet tegnes om de to hjul, når de er landet
         const bg = this.add.graphics(); p.addAt(bg, p.list.length - 2);
         const xs = wxs, R = (part.r + 7) / (ch.scale || 1), yy = cy + oy;
@@ -3154,7 +3231,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.27.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.28.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
@@ -3477,7 +3554,9 @@ class Game extends Phaser.Scene {
     const wshapeR = (r) => V.wheel.shape === 'square' ? { type: 'rectangle', width: r * 2 * 0.9, height: r * 2 * 0.9 }
       : V.wheel.shape === 'triangle' ? { type: 'polygon', sides: 3, radius: r * 1.4 }
       : V.wheel.shape === 'star' ? { type: 'polygon', sides: 5, radius: r }
-      : V.wheel.shape === 'egg' ? { type: 'polygon', sides: 8, radius: r } : { type: 'circle', radius: r };
+      : V.wheel.shape === 'egg' ? { type: 'polygon', sides: 8, radius: r }
+      : V.wheel.shape === 'blob' ? { type: 'fromVerts', verts: POOP_F.map((f, i) => { const a = i * Math.PI * 2 / POOP_F.length; return { x: Math.cos(a) * r * f, y: Math.sin(a) * r * f }; }) }   // hundelort: humper på den ujævne kant
+      : V.wheel.shape === 'gear' ? { type: 'circle', radius: r * 0.93 } : { type: 'circle', radius: r };   // tandhjul: tænderne synker lidt ned
     // traktoren: baghjulet er større, og det løftes, så begge hjul rører jorden samtidig
     this.rearScale = rearScaleFor(BUILD.chassis, BUILD.wheels); this.rearDy = -(this.rearScale - 1) * V.wheel.r;
     const mk = (ox, k) => this.matter.add.image(x + ox, y + V.wheel.oy + (BUILD.wheels.spring ? 50 : 0) + (k > 1 ? this.rearDy : 0), 'v_wheel', null, {
@@ -3490,6 +3569,13 @@ class Game extends Phaser.Scene {
     this.wheels.forEach(w => w.setDepth(14));   // hjul i forreste lag, foran værktøjet
     this.wheelSkins = [];
     this.belt = BUILD.wheels.belt ? this.add.graphics().setDepth(13) : null;
+    this.midGear = null;
+    if (BUILD.wheels.gear) {   // mellemhjul imellem tandhjulene, der griber i begge og drejer den anden vej
+      const wr = V.wheel.r, rp = wr * 0.9, id = idlers(V.wheel.front - V.wheel.back, rp, rp * 1.25), n = Math.max(6, Math.round(12 * id.rm / wr));
+      if (this.textures.exists('v_midgear')) this.textures.remove('v_midgear');
+      const gg = this.add.graphics(); drawGear(gg, id.rm + 3, id.rm + 3, id.rm, n, 0xf0b429, 0x9a6b12); gg.generateTexture('v_midgear', Math.ceil(id.rm * 2 + 6), Math.ceil(id.rm * 2 + 6)); gg.destroy();
+      this.midGear = { imgs: id.offs.map(() => this.add.image(x, y + V.wheel.oy, 'v_midgear').setDepth(13.5)), offs: id.offs, ratio: rp / id.rmp, n, rad: id.rm };
+    }
     this.susp = suspFor(BUILD.chassis, BUILD.wheels) ? this.add.graphics().setDepth(8.9) : null;   // monstertruckens affjedring (bag karrosseriet)   // larvefødder: bælte rundt om hjulene, tegnes hvert billede
     if (BUILD.wheels.upright) this.wheels.forEach(w => { w.setAlpha(0); this.wheelSkins.push(this.add.image(w.x, w.y, 'v_wheel').setDepth(14)); });   // rulleskøjter: billedet står op, hjulet ruller
 
@@ -3663,6 +3749,7 @@ class Game extends Phaser.Scene {
     if (this.rearMotor) { this.tweens.add({ targets: this.rearMotor.img, y: '-=200', x: '-=160', angle: -500, alpha: 0, duration: 1300 }); if (this.rearMotor.bar) this.rearMotor.bar.img.setVisible(false); }
     if (this.blade) { if (this.bladeBody) { this.matter.world.remove(this.bladeBody); this.bladeBody = null; } this.tweens.add({ targets: this.blade, y: '-=300', x: '+=200', angle: 900, alpha: 0, duration: 1500 }); }
     if (this.armG) this.armG.clear();
+    if (this.midGear) { this.midGear.imgs.forEach(im => { const mg = this.makeLoose(im, { type: 'circle', radius: this.midGear.rad * 0.9 }, 4); mg.setVelocity(Phaser.Math.FloatBetween(-3, 3), -8); mg.setAngularVelocity(0.3); }); this.midGear = null; }   // mellemhjulene triller deres vej
     setTimeout(() => this.endRound(false, 'Bilen gik i stykker!'), 1700);
   }
 
@@ -4060,7 +4147,7 @@ class Game extends Phaser.Scene {
   }
   ipFollowers() {   // ting, der tegnes efter bilen (og ikke er fysik-kroppe selv), flyttes med bilens mellemstilling
     if (this.broken) return [];
-    return [this.top, this.rearMotor && this.rearMotor.img, this.rearMotor && this.rearMotor.bar && this.rearMotor.bar.img, ...this.blinks.map(b => b.img), ...this.wheelSkins, this.belt, this.susp, this.toolBeam, this.blade, this.armG, this.beamImg].filter(Boolean);
+    return [this.top, this.rearMotor && this.rearMotor.img, this.rearMotor && this.rearMotor.bar && this.rearMotor.bar.img, ...this.blinks.map(b => b.img), ...this.wheelSkins, this.belt, ...(this.midGear ? this.midGear.imgs : []), this.susp, this.toolBeam, this.blade, this.armG, this.beamImg].filter(Boolean);
   }
   ipApply() {
     if (this.over || !this.chassis || !this.chassis.body || this.ipList) return;
@@ -4144,6 +4231,8 @@ class Game extends Phaser.Scene {
     if (this.forkSlice) this.placeSlice();
     this.wheelSkins.forEach((sk, i) => sk.setPosition(this.wheels[i].x, this.wheels[i].y));
     if (this.belt) this.drawBelt();
+    if (this.midGear && !this.broken) { const [b, f] = this.wheels, al = Math.atan2(f.y - b.y, f.x - b.x), L = Math.hypot(f.x - b.x, f.y - b.y) || 1, M = this.midGear, sk = L / (M.offs[M.offs.length - 1] + M.offs[0]);
+      M.imgs.forEach((im, j) => { const t = M.offs[j] * sk; im.setPosition(b.x + (f.x - b.x) * t / L, b.y + (f.y - b.y) * t / L).setRotation(al + Math.PI + Math.PI / M.n + j * Math.PI / M.n + (j % 2 ? 1 : -1) * (b.rotation - al) * M.ratio); }); }
     if (this.susp && !this.broken) {
       const c = this.chassis, a = c.rotation, V = VEHICLE, ch = BUILD.chassis, sc = V.chassis.scale, TW = ch.topW || ch.w, TH = ch.topH + ch.h, co = Math.cos(a), si = Math.sin(a);
       const map = (x, y) => { const lx = this.topOx + (x - TW / 2) * sc, ly = this.topOy + (y - TH / 2 + 12) * sc; return [c.x + lx * co - ly * si, c.y + lx * si + ly * co]; };
