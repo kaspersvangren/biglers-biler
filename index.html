@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.29.2)
+//  Biglers Biler – etape 3  (v0.29.3)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -2568,6 +2568,7 @@ function assembleCar(scene, p, ch, wh, mo, to) {
     const tool = scene.add.image(mount + to.w / 2, cy + to.oy, 'p_tools_' + to.id); p.add(tool);
     if (to.drawSpin) { const sp = scene.add.image(tool.x + to.spinAt.x, tool.y + to.spinAt.y, 'p_tools_' + to.id + '_spin'); p.add(sp); scene.tweens.add({ targets: sp, angle: 360, duration: 800, repeat: -1 }); }
   }
+  wheels.forEach(w => p.bringToTop(w));   // hjulene forrest, foran motor og værktøj – som i spillet
   return { wheels, upright: wh.upright };
 }
 
@@ -3146,7 +3147,7 @@ class Build extends Phaser.Scene {
       const rs = rearScaleFor(ch, part);
       wxs.forEach((ox, wi) => { const wk = wi === 0 ? rs : 1, wdy = -(wk - 1) * part.r / (ch.scale || 1);
         if (part.spring) { const sp = springImg(this, ch, ox, cy, cy + oy + 50 + wdy); p.add(sp); drop(sp); }
-        const w = this.add.image(ox, cy + oy + (part.spring ? 50 : 0) + wdy, 'p_wheels_' + part.id + (part.belt ? '_one' : '')).setScale(wk / (ch.scale || 1)); p.add(w); drop(w, ox < 0 ? 'left' : 'right');
+        const w = this.add.image(ox, cy + oy + (part.spring ? 50 : 0) + wdy, 'p_wheels_' + part.id + (part.belt ? '_one' : '')).setScale(wk / (ch.scale || 1)); w.isWheel = true; p.add(w); drop(w, ox < 0 ? 'left' : 'right');
         if (!part.upright) this.tweens.add({ targets: w, angle: 360, duration: 2000, repeat: -1, delay: 1200 }); });
       if (suspFor(ch, part)) {   // monstertruckens affjedring ind til de nye hjul, når de er landet
         const sg = this.add.graphics(); p.addAt(sg, 0); const TW = ch.topW || ch.w, TH = ch.topH + (ch.full ? ch.h : 0), tx = ch.topOx || 0, ty = cy + topRel(ch);
@@ -3166,12 +3167,14 @@ class Build extends Phaser.Scene {
       const ms = ch.motorScale || 1;
       if (part.rear) { const rp = rearMotorPos(ch, part, this.chosen.wheels); p.motor = this.add.image(rp.x, p.body.y + rp.y, 'rm_' + part.id).setScale(rmS(part)); p.addAt(p.motor, 0); if (rp.bar) { const bi = rearBarImg(this, rp.bar, p.body.y); p.addAt(bi, 0); drop(bi, 'left'); } drop(p.motor, 'left'); }   // jet/raket flyver ind bagfra
       else { const mp = motorPlace(ch, part, this.chosen.wheels); p.motor = this.add.image(-ch.w / 2 + mp.x + 31 * mp.s, p.body.y - ch.h / 2 - ch.topH + mp.y + 11 * mp.s, 'p_motors_' + part.id).setScale(mp.s); p.add(p.motor); drop(p.motor, 'top'); }
+      p.list.filter(o => o.isWheel).forEach(o => p.bringToTop(o));   // hjulene forrest, som i spillet
     } else if (kind === 'tools') {
       const wh = this.chosen.wheels, mount = toolMount(ch, wh);
       if (mount > ch.w / 2) { const beam = this.add.image((ch.w / 2 + mount) / 2, p.body.y + part.oy, 'slab').setDisplaySize(mount - ch.w / 2 + 12, 10).setTint(0x7f8c8d); p.addAt(beam, 0); drop(beam, 'right'); }
       p.tool = this.add.image(mount + part.w / 2, p.body.y + part.oy, 'p_tools_' + part.id); p.tool.toolOy = part.oy; p.add(p.tool);
       if (part.drawSpin) { const sp = this.add.image(p.tool.x + part.spinAt.x, p.tool.y + part.spinAt.y, 'p_tools_' + part.id + '_spin'); p.add(sp); drop(sp, 'right'); this.tweens.add({ targets: sp, angle: 360, duration: 800, repeat: -1, delay: 1200 }); }
       drop(p.tool, 'right');
+      p.list.filter(o => o.isWheel).forEach(o => p.bringToTop(o));
     }
   }
 }
@@ -3232,7 +3235,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.29.2', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.29.3', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
