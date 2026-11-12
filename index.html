@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.29.0)
+//  Biglers Biler – etape 3  (v0.29.1)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -2059,10 +2059,11 @@ PARTS.chassis = [
       RO(g, 6, 18, 12, 128, 4, WD, O, 3); RO(g, 172, 18, 12, 128, 4, WD, O, 3);                                   // sengestolper
       P(g, [['M', 18, 30], ['L', 46, 30], ['C', 40, 58, 28, 72, 24, 84], ['L', 32, 118], ['L', 18, 118]], PK, O, 3);   // gardiner, bundet op
       P(g, [['M', 172, 30], ['L', 144, 30], ['C', 150, 58, 162, 72, 166, 84], ['L', 158, 118], ['L', 172, 118]], PK, O, 3);
-      C(g, 24, 84, 4.5, 0xe74c3c); C(g, 166, 84, 4.5, 0xe74c3c);                                                  // sløjfer
       P(g, [['M', 18, 120], ['L', 18, 72], ['C', 18, 56, 50, 56, 50, 72], ['L', 50, 120]], WL, O, 3.5);            // hovedgærde
       C(g, 30, 74, 4, PS); C(g, 38, 74, 4, PS); g.fillStyle(PS); g.fillTriangle(26, 76, 42, 76, 34, 84);              // hjerte i gærdet
       RO(g, 152, 92, 22, 32, 6, WL, O, 3.5);                                                                     // fodgærde
+      [[24, 84], [166, 84]].forEach(([x, y]) => { g.fillStyle(0xc0392b); g.fillTriangle(x - 1, y, x - 6, y + 11, x - 1, y + 10); g.fillTriangle(x + 1, y, x + 6, y + 11, x + 1, y + 10);   // sløjfer, der binder gardinerne op
+        g.fillStyle(0xe74c3c); g.fillTriangle(x, y, x - 9, y - 6, x - 9, y + 6); g.fillTriangle(x, y, x + 9, y - 6, x + 9, y + 6); C(g, x, y, 2.8, 0xc0392b); });
       RO(g, 22, 96, 40, 16, 8, 0xffffff, O, 2.5);                                                                // pude
       RO(g, 40, 92, 34, 26, 10, 0x5dade2, O, 2.5); [[48, 100], [60, 98], [54, 108], [66, 106]].forEach(([x, y]) => C(g, x, y, 1.8, 0xffffff));   // pyjamas med prikker
       FACE(g, 57, 80, 0.95);
@@ -2089,9 +2090,10 @@ PARTS.chassis = [
       P(g, [['M', 0, 74], ['L', 72, 10], ['L', 144, 74]], RF, O, 4);                                               // tag
       g.lineStyle(2, RD); [28, 44, 60].forEach(y => { const hw = (y - 10) * 72 / 64; g.beginPath(); g.moveTo(72 - hw + 4, y); g.lineTo(72 + hw - 4, y); g.strokePath(); });   // tagrækker
       RO(g, 132, 136, 38, 10, 2, LD, O, 3); RO(g, 4, 146, 168, 14, 4, LD, O, 4); } },                            // veranda (motoren står her) og bundbjælke
-  { id: 'banana', name: 'Kæmpebanan', roof: [98, 16], full: true, rearY: 64, w: 200, h: 46, topH: 74, topW: 210, topOx: 5, density: 0.0022, back: -64, front: 64, motorX: 143, motorY: 50, motorScale: 0.46, scale: 1.3,
+  { id: 'banana', name: 'Kæmpebanan', roof: [112, 16], full: true, rearY: 64, w: 200, h: 46, topH: 74, topW: 210, topOx: 5, density: 0.0022, back: -64, front: 64, motorX: 143, motorY: 50, motorScale: 0.46, scale: 1.3,
     body(g) {},
-    top(g) { const O = 0x3b2a2a, Y = 0xf7dc6f, YD = 0xe2b80f, YL = 0xfcf3cf, SK = 0xffe2d2;   // Freddy rider på en kæmpebanan
+    top(g) { const O = 0x3b2a2a, Y = 0xf7dc6f, YD = 0xe2b80f, YL = 0xfcf3cf, SK = 0xffe2d2;   // Freddy rider på en kæmpebanan (tegnet spejlvendt: stilken bagerst, spidsen forrest)
+      g.save(); g.translateCanvas(210, 0); g.scaleCanvas(-1, 1);
       RO(g, 90, 72, 12, 24, 5, 0x34495e, O, 2.5);                                                                // bageste ben
       P(g, [['M', 8, 64], ['C', 40, 126, 160, 128, 196, 62], ['L', 202, 50], ['C', 190, 80, 50, 84, 14, 54], ['L', 8, 64]], Y, O, 4);   // bananen
       P(g, [['M', 22, 82], ['C', 64, 120, 150, 120, 188, 76], ['C', 150, 110, 64, 110, 22, 82]], YD);              // skygge forneden
@@ -2101,7 +2103,7 @@ PARTS.chassis = [
       RO(g, 84, 46, 28, 30, 9, 0x95a5a6, O, 2.5); g.lineStyle(2, 0x2c3e50); g.beginPath(); g.moveTo(94, 52); g.lineTo(92, 44); g.moveTo(102, 52); g.lineTo(105, 45); g.strokePath(); C(g, 98, 58, 5, 0xffffff);   // grå t-shirt med kanin
       RO(g, 100, 74, 12, 26, 5, 0x34495e, O, 2.5); RO(g, 98, 96, 18, 9, 4, 0xe74c3c, O, 2.5);                     // forreste ben og sko
       C(g, 82, 72, 5, SK); C(g, 114, 72, 5, SK);                                                                 // hænder holder fast
-      FACE(g, 98, 34, 0.95); } },
+      FACE(g, 98, 34, 0.95); g.restore(); } },
   { id: 'sofa', name: 'Sofa', roof: [49, 16], full: true, rearY: 82, w: 146, h: 50, topH: 60, topW: 146, topOx: 0, density: 0.002, back: -43, front: 43, motorX: 84, motorY: 40, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, PU = 0x9b59b6, PD = 0x7d3c98, PL = 0xb57fd0;   // samme stil som bilerne: mørkt omrids, flade farver
@@ -3231,7 +3233,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.29.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.29.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
