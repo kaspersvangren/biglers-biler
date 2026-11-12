@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.28.0)
+//  Biglers Biler – etape 3  (v0.29.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -2089,7 +2089,7 @@ PARTS.chassis = [
       P(g, [['M', 0, 74], ['L', 72, 10], ['L', 144, 74]], RF, O, 4);                                               // tag
       g.lineStyle(2, RD); [28, 44, 60].forEach(y => { const hw = (y - 10) * 72 / 64; g.beginPath(); g.moveTo(72 - hw + 4, y); g.lineTo(72 + hw - 4, y); g.strokePath(); });   // tagrækker
       RO(g, 132, 136, 38, 10, 2, LD, O, 3); RO(g, 4, 146, 168, 14, 4, LD, O, 4); } },                            // veranda (motoren står her) og bundbjælke
-  { id: 'banana', name: 'Kæmpebanan', roof: [98, 16], full: true, rearY: 96, w: 200, h: 46, topH: 74, topW: 210, topOx: 5, density: 0.0022, back: -64, front: 64, motorX: 143, motorY: 50, motorScale: 0.46, scale: 1.3,
+  { id: 'banana', name: 'Kæmpebanan', roof: [98, 16], full: true, rearY: 64, w: 200, h: 46, topH: 74, topW: 210, topOx: 5, density: 0.0022, back: -64, front: 64, motorX: 143, motorY: 50, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, Y = 0xf7dc6f, YD = 0xe2b80f, YL = 0xfcf3cf, SK = 0xffe2d2;   // Freddy rider på en kæmpebanan
       RO(g, 90, 72, 12, 24, 5, 0x34495e, O, 2.5);                                                                // bageste ben
@@ -2310,10 +2310,10 @@ PARTS.wheels = [
       g.fillStyle(0x4a2511); g.fillPoints(pts(1), true); g.fillStyle(0x7b4520); g.fillPoints(pts(0.9), true); g.fillStyle(0x93582b); g.fillPoints(pts(0.62), true); g.fillStyle(0xa86a35); g.fillPoints(pts(0.34), true);
       g.lineStyle(2.5, 0x4a2511); g.beginPath(); for (let i = 0; i <= 40; i++) { const t = i / 40, a = t * Math.PI * 5, rr = r * 0.82 * (1 - t); i ? g.lineTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr) : g.moveTo(c + Math.cos(a) * rr, c + Math.sin(a) * rr); } g.strokePath();   // spiralen
       C(g, c - r * 0.3, c - r * 0.35, r * 0.12, 0xffffff, 0.45); } },
-  { id: 'lid', name: 'Skraldespandslåg', r: 32, density: 0.003, grip: 0.8,
-    draw(g, r) { const c = r + 2; C(g, c, c, r, 0x5d6d7e); C(g, c, c, r - 3, 0xaab7b8); g.lineStyle(2, 0x7f8c8d); [0.78, 0.56].forEach(f => g.strokeCircle(c, c, r * f)); C(g, c, c, r * 0.34, 0x95a5a6);   // låg med riller
-      for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 + 0.5; C(g, c + Math.cos(a) * r * 0.9, c + Math.sin(a) * r * 0.9, 1.8, 0x7f8c8d); }   // nitter
-      RO(g, c - r * 0.55, c - 5, r * 1.1, 10, 4, 0x566573, 0x2c3e50, 2); [-1, 1].forEach(s => C(g, c + s * r * 0.55, c, 4, 0x2c3e50)); } },   // håndtag
+  { id: 'bike', name: 'Cykelhjul', r: 40, density: 0.002, grip: 1.0,
+    draw(g, r) { const c = r + 2; g.lineStyle(6, 0x2c2c2c); g.strokeCircle(c, c, r - 3); g.lineStyle(2.5, 0xbdc3c7); g.strokeCircle(c, c, r - 7);   // tyndt dæk og blank fælg
+      g.lineStyle(1, 0xd5dbdb); for (let i = 0; i < 32; i++) { const a = i * Math.PI / 16, a2 = a + (i % 2 ? 0.35 : -0.35); g.beginPath(); g.moveTo(c + Math.cos(a2) * 4, c + Math.sin(a2) * 4); g.lineTo(c + Math.cos(a) * (r - 8), c + Math.sin(a) * (r - 8)); g.strokePath(); }   // mange tynde eger, krydset
+      C(g, c, c, 5.5, 0x7f8c8d); C(g, c, c, 2.5, 0xecf0f1); Q(g, c - 1.5, c - r + 6, 3, 5, 0x7f8c8d); } },   // nav og ventil
   { id: 'gear', name: 'Tandhjul', r: 40, density: 0.004, grip: 1.0, shape: 'gear', gear: true,   // et tredje tandhjul imellem griber i begge (tegnes i spillet)
     draw(g, r) { const c = r + 2; drawGear(g, c, c, r, 12, 0x95a5a6, 0x4d5656); } },
   { id: 'donut', name: 'Donuts', r: 32, density: 0.003, grip: 0.9,
@@ -3231,7 +3231,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.28.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.29.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
