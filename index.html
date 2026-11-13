@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.29.3)
+//  Biglers Biler – etape 3  (v0.30.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -1900,7 +1900,7 @@ const FACE = (g, x, y, k) => { k = k || 1;   // føreren er Freddy: lyst, kort h
 // ---------- CHASSIS ----------
 // w,h: fysikkassen. topH: overdelens højde (tegnes ovenpå). motorX/Y: hvor motoren tegnes i overdelen.
 PARTS.chassis = [
-  { id: 'racer', name: 'Racerbil', roof: [106, 80], full: true, rearY: 127, w: 192, h: 50, topH: 100, topW: 192, topOx: 0, density: 0.0028, back: -55, front: 59, motorX: 156, motorY: 88, motorScale: 0.4, scale: 1.3,
+  { id: 'racer', name: 'Racerbil', lamp: [178, 114], roof: [106, 80], full: true, rearY: 127, w: 192, h: 50, topH: 100, topW: 192, topOx: 0, density: 0.0028, back: -55, front: 59, motorX: 156, motorY: 88, motorScale: 0.4, scale: 1.3,
     body(g) {},
     top(g) {   // målt af på referencen: sportsvogn med vinge bagpå – gjort buttet og højere (lodret strakt fra bunden)
       P(g, [['M', 11.7, 86.7], ['L', 18.5, 86.7], ['L', 25.9, 101.6], ['L', 18.5, 102.4]], 0xff6b6b, 0x3b2a2a, 4);
@@ -1922,7 +1922,7 @@ PARTS.chassis = [
       Q(g, 10.5, 145.4, 181.3, 0.9, 0x3b2a2a);
       g.lineStyle(4, 0x3b2a2a, 1); g.strokePoints(PATH([['M', 10.5, 144.8], ['L', 9.4, 129.9], ['L', 8.8, 110.9], ['C', 14.0, 104.7, 25.4, 100.0, 36.8, 98.8], ['C', 56.7, 89.7, 73.8, 81.8, 90.9, 81.6], ['C', 113.7, 81.6, 133.7, 89.0, 149.3, 101.6], ['C', 165.0, 103.9, 179.3, 110.3, 189.0, 119.6], ['C', 191.8, 125.2, 192.7, 133.9, 191.8, 144.8], ['L', 190.7, 146.0], ['L', 11.7, 146.0]]), true, true);
       FACE(g, 106.0, 97.9, 0.62); } },
-  { id: 'pickup', name: 'Pickup', roof: [116, 74], full: true, rearY: 125, w: 208, h: 50, topH: 100, topW: 208, topOx: 0, density: 0.003, back: -55, front: 76, motorX: 162, motorY: 91, motorScale: 0.46, scale: 1.3,
+  { id: 'pickup', name: 'Pickup', lamp: [204, 119], roof: [116, 74], full: true, rearY: 125, w: 208, h: 50, topH: 100, topW: 208, topOx: 0, density: 0.003, back: -55, front: 76, motorX: 162, motorY: 91, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) {   // målt af på referencen (spejlet): runde skærme, stort førerhus, lad med træ-rækværk
       RO(g, 87.0, 93.9, 2.7, 15.9, 2, 0xd39b55, 0x3b2a2a, 2);
@@ -1949,7 +1949,7 @@ PARTS.chassis = [
       RO(g, 200.8, 139.8, 10.0, 6.4, 4, 0xbdc3c7, 0x3b2a2a, 2.5);
       RO(g, -1.5, 140.9, 8.3, 4.7, 4, 0xbdc3c7, 0x3b2a2a, 2.5);
       g.lineStyle(4, 0x3b2a2a, 1); g.strokePoints(PATH([['M', 0.0, 145.1], ['L', 0.0, 110.4], ['L', 92.6, 108.6], ['L', 92.6, 80.4], ['C', 92.6, 77.4, 94.4, 76.3, 97.3, 76.3], ['L', 139.1, 76.3], ['C', 142.0, 76.3, 144.4, 78.0, 145.2, 81.0], ['L', 152.3, 108.6], ['L', 194.9, 109.2], ['C', 202.6, 109.5, 206.7, 112.7, 207.3, 118.6], ['L', 207.9, 143.9], ['L', 206.7, 145.1]]), true, true); } },
-  { id: 'mtruck', name: 'Monstertruck', susp: { block: [[92, 120], [92, 127], [110, 120], [110, 127]], shocks: [[31.5, 112], [45.5, 112], [157.8, 112], [171.8, 112]] }, roof: [105, 48], full: true, rearY: 100, w: 200, h: 50, topH: 100, topW: 200, topOx: 0, density: 0.003, back: -62, front: 65, motorX: 150, motorY: 62, motorScale: 0.46, scale: 1.3,
+  { id: 'mtruck', name: 'Monstertruck', lamp: [197, 97], susp: { block: [[92, 120], [92, 127], [110, 120], [110, 127]], shocks: [[31.5, 112], [45.5, 112], [157.8, 112], [171.8, 112]] }, roof: [105, 48], full: true, rearY: 100, w: 200, h: 50, topH: 100, topW: 200, topOx: 0, density: 0.003, back: -62, front: 65, motorX: 150, motorY: 62, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) {   // målt af på referencen: løftet pickup på ramme med støddæmpere, styrtbøjle, lygte på taget og flammer – flad bund, ingen hjulkasser
       const O = 0x3b2a2a, BL = 0x3498db, BD = 0x2471a3, GR = 0x95a5a6;
@@ -1972,7 +1972,7 @@ PARTS.chassis = [
       RO(g, -1, 108, 14, 9, 3, GR, O, 2.5); RO(g, 186, 108, 14, 9, 3, GR, O, 2.5);                       // kofangere
       RO(g, 138, 74, 6, 5, 1.5, BL, O, 1.5);                                                             // sidespejl
       g.lineStyle(4, O, 1); g.strokePoints(PATH([['M', 0.5, 82.7], ['L', 79.0, 82.7], ['L', 80.3, 54.0], ['C', 80.3, 51.5, 82.0, 50.6, 84.0, 50.6], ['L', 124.0, 50.6], ['C', 126.5, 50.6, 128.0, 51.5, 129.0, 53.5], ['L', 143.4, 79.5], ['L', 184.0, 84.0], ['C', 193.0, 86.0, 197.5, 90.0, 198.0, 96.0], ['L', 198.0, 117.0], ['L', 0.5, 117.0]]), true, true); } },
-  { id: 'truck', name: 'Tømmerbil', roof: [186, 44], full: true, rearY: 108, w: 250, h: 50, topH: 100, topW: 250, topOx: 0, density: 0.0045, back: -55, front: 96, motorX: 212, motorY: 62, motorScale: 0.46, scale: 1.3,
+  { id: 'truck', name: 'Tømmerbil', lamp: [237, 92], roof: [186, 44], full: true, rearY: 108, w: 250, h: 50, topH: 100, topW: 250, topOx: 0, density: 0.0045, back: -55, front: 96, motorX: 212, motorY: 62, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, BL = 0x2e86de, BLD = 0x1f6fb5, GL = 0xa6e4ff;   // efter referencen (spejlet og lidt kortere): blå snudebil med lad fuld af træstammer
       RO(g, 4, 116, 238, 16, 3, 0x34495e, O, 3);                                   // ramme
@@ -1994,7 +1994,7 @@ PARTS.chassis = [
       RO(g, 150, 118, 40, 16, 6, 0xd6d6f0, O, 2.5);                                // tank
       RO(g, 236, 120, 16, 10, 3, 0xdfe6ee, O, 2.5);                                // kofanger
       RO(g, 154, 22, 6, 30, 2, 0x7f8c8d, O, 2); } },
-  { id: 'tractor', name: 'Traktor', roof: [62, 38], full: true, rearY: 116, bigRear: 1.5, w: 152, h: 50, topH: 100, topW: 152, topOx: 0, density: 0.004, back: -40, front: 52, motorX: 108, motorY: 74, motorScale: 0.46, scale: 1.3,
+  { id: 'tractor', name: 'Traktor', lamp: [148, 105], roof: [62, 38], full: true, rearY: 116, bigRear: 1.5, w: 152, h: 50, topH: 100, topW: 152, topOx: 0, density: 0.004, back: -40, front: 52, motorX: 108, motorY: 74, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) {   // målt af på referencen; baghjulet gøres 1,5 gange så stort (bigRear), som på en rigtig traktor
       P(g, [['M', 42.0, 48.8], ['L', 92.8, 48.8], ['L', 97.6, 96.8], ['L', 42.0, 96.8]], 0x5b7ea6, 0x3b2a2a, 4);
@@ -2011,8 +2011,9 @@ PARTS.chassis = [
       C(g, 148.0, 104.8, 7, 0x3b2a2a); C(g, 148.0, 104.8, 5, 0xf9c80e);
       P(g, [['M', 104.0, 140.0], ['C', 105.6, 127.6, 116.8, 122.0, 128.0, 122.0], ['C', 139.2, 122.0, 148.0, 127.6, 148.8, 140.0], ['L', 141.6, 140.0], ['C', 140.0, 131.6, 135.2, 128.4, 128.0, 128.4], ['C', 120.8, 128.4, 113.6, 131.6, 111.2, 140.0]], 0x4a6a90, 0x3b2a2a, 3);
       P(g, [['M', 7.2, 118.8], ['C', 8.8, 103.6, 20.8, 95.6, 36.0, 94.8], ['C', 53.6, 94.0, 71.2, 101.2, 75.2, 118.8], ['L', 75.2, 131.6], ['L', 68.8, 131.6], ['C', 67.2, 115.6, 54.4, 105.2, 36.0, 105.2], ['C', 20.8, 105.2, 14.4, 112.4, 13.6, 121.2]], 0x4f6f94, 0x3b2a2a, 4);
-      RO(g, 39.2, 126.8, 67.2, 5.2, 3, 0x4a6a90, 0x3b2a2a, 3); } },
-  { id: 'digger', name: 'Gravko', roof: [126, 24], full: true, rearY: 82, w: 170, h: 50, topH: 100, topW: 240, topOx: 35, toolOffset: 92, density: 0.005, back: -55, front: 55, motorX: 26, motorY: 38, motorScale: 0.5, scale: 1.3,
+      RO(g, 39.2, 126.8, 67.2, 5.2, 3, 0x4a6a90, 0x3b2a2a, 3);
+    C(g, 148.0, 104.8, 5, 0xfff3b0); RO(g, 88, 32, 12, 8, 2, 0xfff3b0, 0x3b2a2a, 2); RO(g, 72, 32, 12, 8, 2, 0xfff3b0, 0x3b2a2a, 2); } },   // forlygte og arbejdslygter på taget
+  { id: 'digger', name: 'Gravko', lamp: [156, 22], roof: [126, 24], full: true, rearY: 82, w: 170, h: 50, topH: 100, topW: 240, topOx: 35, toolOffset: 92, density: 0.005, back: -55, front: 55, motorX: 26, motorY: 38, motorScale: 0.5, scale: 1.3,
     dangle: { ox: 143, oy: -51, w: 48, h: 46, draw(g) { const O = 0x3b2a2a;   // skovlen hænger i et hængsel for enden af armen og dingler
       RO(g, 17, 1, 14, 11, 3, 0x5d6d6e, O, 2);
       P(g, [['M', 8, 10], ['L', 34, 10], ['C', 40, 12, 45, 18, 45, 26], ['C', 45, 32, 41, 37, 35, 40], ['L', 6, 40], ['L', 3, 30]], 0x7f8c8d, O, 2.5);
@@ -2032,8 +2033,9 @@ PARTS.chassis = [
       for (const x of [26, 38, 50]) { g.lineStyle(4, YD); g.beginPath(); g.moveTo(x + 8, 66); g.lineTo(x, 88); g.strokePath(); }   // riller
       P(g, [['M', 100, 100], ['L', 100, 36], ['C', 100, 30, 104, 26, 110, 26], ['L', 134, 26], ['C', 142, 26, 148, 32, 150, 40], ['L', 156, 100]], Y, O, 4);   // førerhus
       P(g, [['M', 108, 34], ['L', 136, 34], ['C', 140, 34, 143, 37, 144, 41], ['L', 149, 74], ['L', 108, 74]], GL, O, 2.5); FACE(g, 126, 54, 0.8);   // stor rude med fører
-      RO(g, 112, 82, 10, 3, 1, O, O, 1); C(g, 153, 92, 5, O); C(g, 153, 92, 3.5, 0xf39c12); } },
-  { id: 'fire', name: 'Brandbil', roof: [206, 38], full: true, rearY: 104, w: 265, h: 50, topH: 100, topW: 265, topOx: 0, density: 0.0045, back: -72, front: 86, motorX: 230, motorY: 66, motorScale: 0.46, scale: 1.3,
+      RO(g, 112, 82, 10, 3, 1, O, O, 1); C(g, 153, 92, 5, O); C(g, 153, 92, 3.5, 0xf39c12);
+      Q(g, 146, 22, 2.5, 6, O); RO(g, 143, 14, 14, 9, 3, 0xfff3b0, O, 2.5); } },   // arbejdslygte på førerhuset
+  { id: 'fire', name: 'Brandbil', lamp: [251, 106], roof: [206, 38], full: true, rearY: 104, w: 265, h: 50, topH: 100, topW: 265, topOx: 0, density: 0.0045, back: -72, front: 86, motorX: 230, motorY: 66, motorScale: 0.46, scale: 1.3,
     lights: [{ x: 192, y: 37, c: 0x3498db }],
     body(g) {},
     top(g) { const O = 0x3b2a2a, RD = 0xe53935, RDD = 0xc62828, GL = 0xa6e4ff;   // efter referencen (spejlet), med længere kølerhjelm til motoren
@@ -2053,7 +2055,7 @@ PARTS.chassis = [
       for (let x = 8; x < 198; x += 14) Q(g, x, 30, 3, 9, 0xd5d8dc);                // trin
       RO(g, 24, 42, 6, 9, 1, 0x95a5a6, O, 1.5); RO(g, 140, 42, 6, 9, 1, 0x95a5a6, O, 1.5);   // stigens holdere
       RO(g, 184, 31, 16, 10, 3, 0x3498db, O, 2); } },   // blåt blink
-  { id: 'bed', name: 'Himmelseng', roof: [95, 6], full: true, rearY: 132, w: 190, h: 50, topH: 104, topW: 190, topOx: 0, density: 0.0025, back: -62, front: 62, motorX: 123, motorY: 86, motorScale: 0.46, scale: 1.3,
+  { id: 'bed', name: 'Himmelseng', lamp: [186, 63], roof: [95, 6], full: true, rearY: 132, w: 190, h: 50, topH: 104, topW: 190, topOx: 0, density: 0.0025, back: -62, front: 62, motorX: 123, motorY: 86, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, WD = 0x9c5b2e, WL = 0xc27c45, PK = 0xf5b7b1, PS = 0xf1948a, BL = 0x85c1e9, SK = 0xffe2d2;   // himmelseng: Freddy sidder op under dynen
       RO(g, 6, 18, 12, 128, 4, WD, O, 3); RO(g, 172, 18, 12, 128, 4, WD, O, 3);                                   // sengestolper
@@ -2073,8 +2075,9 @@ PARTS.chassis = [
       RO(g, 8, 142, 12, 12, 3, WD, O, 3); RO(g, 170, 142, 12, 12, 3, WD, O, 3);                                  // ben
       for (let x = 4; x < 186; x += 14) C(g, x + 7, 26, 7.5, PS);                                                // kappe med buer
       RO(g, 0, 8, 190, 18, 6, PK, O, 4); Q(g, 6, 14, 178, 3, 0xfadbd8);                                           // himlen
-      [12, 178].forEach(x => { C(g, x, 6, 7, WL); g.lineStyle(2.5, O); g.strokeCircle(x, 6, 7); }); } },        // knopper
-  { id: 'hut', name: 'Lille hytte', roof: [72, 12], full: true, rearY: 130, w: 172, h: 50, topH: 110, topW: 172, topOx: 0, density: 0.0035, back: -56, front: 56, motorX: 139, motorY: 120, motorScale: 0.46, scale: 1.3,
+      [12, 178].forEach(x => { C(g, x, 6, 7, WL); g.lineStyle(2.5, O); g.strokeCircle(x, 6, 7); });        // knopper
+      Q(g, 180, 44, 2, 8, O); RO(g, 173, 51, 16, 5, 2, 0x7f8c8d, O, 2); RO(g, 175, 56, 12, 14, 3, 0xfff3b0, O, 2); } },   // lille lanterne på stolpen
+  { id: 'hut', name: 'Lille hytte', lamp: [146, 92], roof: [72, 12], full: true, rearY: 130, w: 172, h: 50, topH: 110, topW: 172, topOx: 0, density: 0.0035, back: -56, front: 56, motorX: 139, motorY: 120, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, LG = 0xb9773f, LL = 0xc98d55, LD = 0x8e5a2b, RF = 0xc0392b, RD = 0x922b21;   // bjælkehytte: Freddy kigger ud ad vinduet
       RO(g, 100, 22, 16, 34, 2, 0x95a5a6, O, 3); Q(g, 102, 32, 12, 2, 0x7f8c8d); Q(g, 102, 42, 12, 2, 0x7f8c8d); RO(g, 97, 16, 22, 8, 2, 0x7f8c8d, O, 2.5);   // skorsten
@@ -2087,8 +2090,9 @@ PARTS.chassis = [
       RO(g, 94, 92, 30, 56, { tl: 14, tr: 14, bl: 0, br: 0 }, 0x6e3b1f, O, 3); C(g, 117, 122, 2.8, 0xf1c40f); C(g, 109, 104, 5, 0xbdefff);   // dør med knop og rudehul
       P(g, [['M', 0, 74], ['L', 72, 10], ['L', 144, 74]], RF, O, 4);                                               // tag
       g.lineStyle(2, RD); [28, 44, 60].forEach(y => { const hw = (y - 10) * 72 / 64; g.beginPath(); g.moveTo(72 - hw + 4, y); g.lineTo(72 + hw - 4, y); g.strokePath(); });   // tagrækker
-      RO(g, 132, 136, 38, 10, 2, LD, O, 3); RO(g, 4, 146, 168, 14, 4, LD, O, 4); } },                            // veranda (motoren står her) og bundbjælke
-  { id: 'banana', name: 'Kæmpebanan', roof: [112, 16], giantMotor: [72, 76], full: true, rearY: 64, w: 200, h: 46, topH: 74, topW: 210, topOx: 5, density: 0.0022, back: -64, front: 64, motorX: 143, motorY: 50, motorScale: 0.46, scale: 1.3,
+      RO(g, 132, 136, 38, 10, 2, LD, O, 3); RO(g, 4, 146, 168, 14, 4, LD, O, 4);
+      g.lineStyle(2.5, O); g.beginPath(); g.moveTo(134, 82); g.lineTo(142, 82); g.lineTo(142, 86); g.strokePath(); RO(g, 136, 84, 12, 4, 2, 0x2c3e50, O, 2); RO(g, 137, 88, 10, 12, 3, 0xfff3b0, O, 2); } },   // lanterne ved døren                            // veranda (motoren står her) og bundbjælke
+  { id: 'banana', name: 'Kæmpebanan', lamp: [128, 27], roof: [112, 16], giantMotor: [72, 76], full: true, rearY: 64, w: 200, h: 46, topH: 74, topW: 210, topOx: 5, density: 0.0022, back: -64, front: 64, motorX: 143, motorY: 50, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, Y = 0xf7dc6f, YD = 0xe2b80f, YL = 0xfcf3cf, SK = 0xffe2d2;   // Freddy rider på en kæmpebanan (tegnet spejlvendt: stilken bagerst, spidsen forrest)
       g.save(); g.translateCanvas(210, 0); g.scaleCanvas(-1, 1);
@@ -2101,11 +2105,12 @@ PARTS.chassis = [
       RO(g, 84, 46, 28, 30, 9, 0x95a5a6, O, 2.5); g.lineStyle(2, 0x2c3e50); g.beginPath(); g.moveTo(94, 52); g.lineTo(92, 44); g.moveTo(102, 52); g.lineTo(105, 45); g.strokePath(); C(g, 98, 58, 5, 0xffffff);   // grå t-shirt med kanin
       RO(g, 100, 74, 12, 26, 5, 0x34495e, O, 2.5); RO(g, 98, 96, 18, 9, 4, 0xe74c3c, O, 2.5);                     // forreste ben og sko
       C(g, 82, 72, 5, SK); C(g, 114, 72, 5, SK);                                                                 // hænder holder fast
-      FACE(g, 98, 34, 0.95); g.restore(); } },
-  { id: 'sofa', name: 'Sofa', roof: [49, 16], full: true, rearY: 82, w: 146, h: 50, topH: 60, topW: 146, topOx: 0, density: 0.002, back: -43, front: 43, motorX: 84, motorY: 40, motorScale: 0.46, scale: 1.3,
+      FACE(g, 98, 34, 0.95); R(g, 85, 24.5, 27, 3.5, 1.5, 0x2c3e50); RO(g, 80, 21, 9, 9, 2.5, 0xfff3b0, O, 2); g.restore(); } },   // pandelampe på Freddy
+  { id: 'sofa', name: 'Sofa', lamp: [146, 11], roof: [49, 16], full: true, rearY: 82, w: 146, h: 50, topH: 60, topW: 146, topOx: 0, density: 0.002, back: -43, front: 43, motorX: 84, motorY: 40, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, PU = 0x9b59b6, PD = 0x7d3c98, PL = 0xb57fd0;   // samme stil som bilerne: mørkt omrids, flade farver
-      RO(g, 4, 18, 138, 54, 14, 0x8e44ad, O, 4);                                   // ryglæn
+      Q(g, 134, 12, 3, 92, 0x5d6d7e); RO(g, 126, 0, 22, 14, { tl: 4, tr: 4, bl: 2, br: 2 }, 0xfdebd0, O, 2.5); C(g, 140, 15, 3, 0xfff3b0);   // standerlampe bag sofaen
+    RO(g, 4, 18, 138, 54, 14, 0x8e44ad, O, 4);                                   // ryglæn
       RO(g, 18, 26, 52, 36, 9, PL, O, 2.5); RO(g, 76, 26, 52, 36, 9, PL, O, 2.5);   // rygpuder
       RO(g, 37, 40, 24, 28, 8, 0xe74c3c, O, 2.5); FACE(g, 49, 30, 0.85);            // føreren sidder i sofaen
       RO(g, 10, 98, 8, 10, 2, 0x6e4a2a, O, 2); RO(g, 128, 98, 8, 10, 2, 0x6e4a2a, O, 2);   // ben
@@ -2113,7 +2118,7 @@ PARTS.chassis = [
       RO(g, 20, 58, 52, 14, 6, PL, O, 2.5); RO(g, 74, 58, 52, 14, 6, PL, O, 2.5);   // sædehynder
       RO(g, 0, 38, 24, 64, 11, PD, O, 4); RO(g, 122, 38, 24, 64, 11, PD, O, 4);     // armlæn
       Q(g, 4, 44, 16, 4, PU); Q(g, 126, 44, 16, 4, PU); } },
-  { id: 'tub', name: 'Badekar', roof: [63, 15], full: true, rearY: 72, w: 154, h: 50, topH: 50, topW: 154, topOx: 0, density: 0.0025, back: -47, front: 47, motorX: 0, motorY: 22, motorScale: 0.5, scale: 1.3,
+  { id: 'tub', name: 'Badekar', lamp: [126, 20], roof: [63, 15], full: true, rearY: 72, w: 154, h: 50, topH: 50, topW: 154, topOx: 0, density: 0.0025, back: -47, front: 47, motorX: 0, motorY: 22, motorScale: 0.5, scale: 1.3,
     dangle: { ox: -71, oy: -29, w: 24, h: 56,   // påhængsmotorens underdel hænger uden på agterenden: skaft, plade, gearhus med finne – og en skrue, der snurrer
       draw(g) { R(g, 8, 0, 10, 36, 3, 0x5d6d6e); Q(g, 10, 4, 3, 30, 0x95a5a6); R(g, 1, 32, 22, 6, 2, 0x7f8c8d); R(g, 6, 36, 14, 14, 5, 0x5d6d6e); g.fillStyle(0x5d6d6e); g.fillTriangle(10, 48, 18, 48, 16, 56); },
       prop: { ox: -14, oy: 15, draw(g) { C(g, 14, 14, 4, 0x7f8c8d); g.fillStyle(0xd5dbdb); for (let i = 0; i < 3; i++) { const a = i * Math.PI * 2 / 3 - Math.PI / 2; g.fillEllipse(14 + Math.cos(a) * 9, 14 + Math.sin(a) * 9, 7, 16); } C(g, 14, 14, 3, 0xbdc3c7); } } },
@@ -2129,8 +2134,9 @@ PARTS.chassis = [
       C(g, 112, 34, 9, O); C(g, 112, 34, 7.5, 0xf1c40f); C(g, 119, 27, 6, O); C(g, 119, 27, 4.5, 0xf1c40f); g.fillStyle(0xe67e22); g.fillTriangle(123, 26, 130, 28, 123, 30); C(g, 120, 25, 1.2, 0x222222);   // badeand
       Q(g, 4, 62, 146, 3, 0xdfe6ea);                                                // let skygge
       [[22, 96], [128, 96]].forEach(([x, y]) => { RO(g, x - 6, y - 2, 12, 8, 3, GLD, O, 2); });   // løvefødder
+    RO(g, 112, 17, 13, 6, { tl: 5, tr: 5, bl: 1, br: 1 }, 0xe74c3c, O, 2); C(g, 125, 20, 3.2, 0xfff3b0); g.lineStyle(1.5, O); g.strokeCircle(125, 20, 3.2);   // badeanden har pandelampe på
     } },
-  { id: 'bus', name: 'Skolebus', roof: [96, 52], full: true, rearY: 108, w: 240, h: 50, topH: 100, topW: 250, topOx: 5, density: 0.0040, back: -58, front: 102, motorX: 199, motorY: 77, motorScale: 0.46, scale: 1.3,
+  { id: 'bus', name: 'Skolebus', lamp: [234, 124], roof: [96, 52], full: true, rearY: 108, w: 240, h: 50, topH: 100, topW: 250, topOx: 5, density: 0.0040, back: -58, front: 102, motorX: 199, motorY: 77, motorScale: 0.46, scale: 1.3,
     lights: [{ x: 10, y: 48, c: 0xe74c3c }, { x: 174, y: 48, c: 0xf39c12 }],
     body(g) {},
     top(g) { const O = 0x3b2a2a, Y = 0xf7c21b, YD = 0xe0a800, GL = 0xa6e4ff;   // 250 x 150 – samme proportioner som referencen, men kortere (5 vinduer)
@@ -2145,7 +2151,7 @@ PARTS.chassis = [
       C(g, 234, 124, 6, O); C(g, 234, 124, 4, 0xfff3b0); RO(g, 2, 112, 8, 6, 1, 0xe74c3c, O, 1.5);   // forlygte, baglygte
       Q(g, 189, 66, 2, 28, O); RO(g, 186, 63, 7, 10, 2, 0x6f6f6f, O, 2);   // sidespejl
       RO(g, 4, 46, 12, 8, 2, 0xe74c3c, O, 2); RO(g, 168, 46, 12, 8, 2, 0xf39c12, O, 2); } },   // blink på taget
-  { id: 'police', name: 'Politibil', roof: [60, 24], full: true, rearY: 80, w: 180, h: 46, topH: 60, topW: 200, topOx: 10, density: 0.003, back: -38, front: 69, motorX: 152, motorY: 38, motorScale: 0.44, scale: 1.3,
+  { id: 'police', name: 'Politibil', lamp: [195, 68], roof: [60, 24], full: true, rearY: 80, w: 180, h: 46, topH: 60, topW: 200, topOx: 10, density: 0.003, back: -38, front: 69, motorX: 152, motorY: 38, motorScale: 0.44, scale: 1.3,
     lights: [{ x: 80, y: 21, c: 0xe74c3c }, { x: 90, y: 21, c: 0x3498db }],
     body(g) {},
     top(g) { const O = 0x2b2b3a, D = 0x4a4a66, GL = 0xa6e4ff;   // 200 x 106 – målt af på referencen (627 px lang -> 200)
@@ -2157,7 +2163,7 @@ PARTS.chassis = [
       Q(g, 142, 58, 44, 5, 0x3a3a52);   // skygge på hjelmen
       RO(g, 191, 64, 8, 9, 2, GL, O, 2); RO(g, 3, 62, 7, 9, 2, 0xe74c3c, O, 2);   // for- og baglygte
       Q(g, 0, 94, 200, 6, 0x8e8e9e); Q(g, 0, 98, 200, 3, O); } },   // kofanger / kant i bunden
-  { id: 'ambulance', name: 'Ambulance', roof: [70, 60], full: true, rearY: 112, w: 223, h: 50, topH: 100, topW: 223, topOx: 0, density: 0.0034, back: -74, front: 57, motorX: 183, motorY: 86, motorScale: 0.42, scale: 1.3,
+  { id: 'ambulance', name: 'Ambulance', lamp: [220, 130], roof: [70, 60], full: true, rearY: 112, w: 223, h: 50, topH: 100, topW: 223, topOx: 0, density: 0.0034, back: -74, front: 57, motorX: 183, motorY: 86, motorScale: 0.42, scale: 1.3,
     lights: [{ x: 135, y: 59, c: 0xe74c3c }],
     body(g) {},
     top(g) {   // målt af på referencen (spejlet, så den kører mod højre)
@@ -2178,7 +2184,7 @@ PARTS.chassis = [
       RO(g, 0.0, 131.6, 7.6, 8.8, 3, 0xe74c3c, 0x3b2a2a, 2);
       Q(g, 132.7, 110.7, 8.9, 2.5, 0x3b2a2a);
       FACE(g, 138.4, 88.0, 0.78); } },
-  { id: 'dumper', name: 'Dumper', roof: [194, 30], full: true, rearY: 104, w: 262, h: 50, topH: 100, topW: 266, topOx: 2, density: 0.0055, back: -57, front: 85, motorX: 230, motorY: 66, motorScale: 0.44, scale: 1.3,
+  { id: 'dumper', name: 'Dumper', lamp: [247, 104], roof: [194, 30], full: true, rearY: 104, w: 262, h: 50, topH: 100, topW: 266, topOx: 2, density: 0.0055, back: -57, front: 85, motorX: 230, motorY: 66, motorScale: 0.44, scale: 1.3,
     body(g) {},
     top(g) {   // sidebillede bygget efter referencen: tippelad med skærm over førerhuset, kort hjelm med gitter
       RO(g, 8, 116, 240, 14, 3, 0x4a4a4a, 0x3b2a2a, 3);
@@ -2208,7 +2214,7 @@ PARTS.chassis = [
       g.lineStyle(2, 0x3b2a2a); g.beginPath(); g.moveTo(226, 60); g.lineTo(234, 58); g.strokePath();
       RO(g, 232, 50, 7, 13, 2, 0x6f6f6f, 0x3b2a2a, 2);
       FACE(g, 194, 70, 0.75); } },
-  { id: 'boat', name: 'Fiskekutter', roof: [142, 68], full: true, toolOffset: -18, rearY: 150, w: 266, h: 50, topH: 150, topW: 270, topOx: 2, density: 0.003, back: -71, front: 67, motorX: 8, motorY: 115, motorScale: 0.46, scale: 1.3,
+  { id: 'boat', name: 'Fiskekutter', lamp: [164, 64], roof: [142, 68], full: true, toolOffset: -18, rearY: 150, w: 266, h: 50, topH: 150, topW: 270, topOx: 2, density: 0.003, back: -71, front: 67, motorX: 8, motorY: 115, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) {   // målt af på referencen: skrog med bundmaling, ræling, styrehus, to master med rig
       P(g, [['M', 1.3, 134.9], ['L', 265.9, 126.9], ['C', 263.2, 147.0, 247.1, 173.9, 224.3, 188.7], ['L', 21.5, 190.0], ['C', 13.4, 180.6, 5.4, 156.4, 1.3, 134.9]], 0x7ec8e3, 0x3b2a2a, 4);
@@ -2248,7 +2254,8 @@ PARTS.chassis = [
       Q(g, 87.3, 47.6, 40.3, 4.1, 0x95a5a6);
       Q(g, 108.8, 14.1, 5.4, 34.9, 0x95a5a6);
       RO(g, 83.3, 59.7, 12.1, 9.4, 2, 0xe67e22, 0x3b2a2a, 1.5);
-      FACE(g, 142.4, 92.0, 0.5); } },
+      FACE(g, 142.4, 92.0, 0.5);
+    Q(g, 154, 66, 3, 4, 0x3b2a2a); RO(g, 149, 59, 13, 9, 3, 0xbdc3c7, 0x3b2a2a, 2); C(g, 163, 63.5, 3.8, 0xfff3b0); g.lineStyle(1.5, 0x3b2a2a); g.strokeCircle(163, 63.5, 3.8); } },   // søgelys på styrehuset
 ];
 // ---------- HJUL ----------
 const POOP_F = [1, 0.9, 1.04, 0.92, 0.98, 0.88, 1.03, 0.93, 0.97];   // hundelortens ujævne kant (samme form i fysikken)
@@ -3235,7 +3242,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.29.3', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.30.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
@@ -3278,6 +3285,7 @@ class Game extends Phaser.Scene {
   create() {
     makeTextures(this); makePartTextures(this); SFX.gameMusic(); SFX.hentMotor(BUILD.motor && BUILD.motor.id); this.events.once('shutdown', () => { SFX.stopEngine(); if (this.sawSnd) this.sawSnd.stop(); });   // motorlyden følger bilen: stoppes, når scenen forlades
     this.matter.world.autoUpdate = false; this.physAcc = 0;   // vi tager fysik-skridtene selv i update()
+    this.beamImg = null;   // lyskeglen hører til runden – den gamle blev slettet med forrige runde
     this.auto = SETTINGS.auto;
     this.over = false;
     this.startTime = this.time.now;
@@ -3547,6 +3555,8 @@ class Game extends Phaser.Scene {
     }).setDepth(10).setScale(V.chassis.scale);
     this.topOy = (BUILD.chassis.full ? -(BUILD.chassis.topH / 2 + 12) * V.chassis.scale : -(V.chassis.h / 2 + V.chassis.topH / 2)) - TOP_EXTRA / 2 * V.chassis.scale;
     this.topOx = V.chassis.topOx;
+    { const ch = BUILD.chassis, sc = V.chassis.scale, pad = ch.full ? 4 : 0, tw = (ch.topW || ch.w) + pad * 2, th = ch.topH + 24 + TOP_EXTRA + (ch.full ? ch.h : 0);   // hvor lygten sitter på den tegnede bil
+      this.lampLocal = ch.lamp ? { x: this.topOx + (ch.lamp[0] + pad - tw / 2) * sc, y: this.topOy + (ch.lamp[1] + 24 + TOP_EXTRA - th / 2) * sc } : { x: V.chassis.w / 2, y: -V.chassis.h * 0.2 }; }
     this.top = this.add.image(x + this.topOx, y + this.topOy, 'v_top').setDepth(9).setScale(V.chassis.scale);
     this.rearMotor = null;
     if (BUILD.motor && BUILD.motor.rear) { const mo = BUILD.motor, rp = rearMotorPos(BUILD.chassis, mo, BUILD.wheels), sc = V.chassis.scale, S = rmS(mo);
@@ -4299,7 +4309,7 @@ class Game extends Phaser.Scene {
     // forlygter om natten
     if (this.night > 0.02 && !this.broken) {
       if (!this.beamImg) this.beamImg = this.add.image(0, 0, 'headlight').setDepth(9).setOrigin(0, 0.5);
-      const a = c.rotation, fx = V.chassis.w / 2, fy = -V.chassis.h * 0.2;
+      const a = c.rotation, fx = this.lampLocal.x, fy = this.lampLocal.y;   // fra bilens egen lygte
       this.beamImg.setPosition(c.x + fx * Math.cos(a) - fy * Math.sin(a), c.y + fx * Math.sin(a) + fy * Math.cos(a)).setRotation(a + 0.08).setAlpha(this.night * 0.55).setVisible(true);
     } else if (this.beamImg) this.beamImg.setVisible(false);
 
