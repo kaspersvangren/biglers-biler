@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.30.0)
+//  Biglers Biler – etape 3  (v0.31.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -2106,10 +2106,15 @@ PARTS.chassis = [
       RO(g, 100, 74, 12, 26, 5, 0x34495e, O, 2.5); RO(g, 98, 96, 18, 9, 4, 0xe74c3c, O, 2.5);                     // forreste ben og sko
       C(g, 82, 72, 5, SK); C(g, 114, 72, 5, SK);                                                                 // hænder holder fast
       FACE(g, 98, 34, 0.95); R(g, 85, 24.5, 27, 3.5, 1.5, 0x2c3e50); RO(g, 80, 21, 9, 9, 2.5, 0xfff3b0, O, 2); g.restore(); } },   // pandelampe på Freddy
-  { id: 'sofa', name: 'Sofa', lamp: [146, 11], roof: [49, 16], full: true, rearY: 82, w: 146, h: 50, topH: 60, topW: 146, topOx: 0, density: 0.002, back: -43, front: 43, motorX: 84, motorY: 40, motorScale: 0.46, scale: 1.3,
+  { id: 'sofa', name: 'Sofa', lamp: [128, 3], lampDir: Math.PI / 2, lampScale: 0.4, topUp: 24, roof: [49, 16], full: true, rearY: 82, w: 146, h: 50, topH: 60, topW: 146, topOx: 0, density: 0.002, back: -43, front: 43, motorX: 84, motorY: 40, motorScale: 0.46, scale: 1.3,
     body(g) {},
     top(g) { const O = 0x3b2a2a, PU = 0x9b59b6, PD = 0x7d3c98, PL = 0xb57fd0;   // samme stil som bilerne: mørkt omrids, flade farver
-      Q(g, 134, 12, 3, 92, 0x5d6d7e); RO(g, 126, 0, 22, 14, { tl: 4, tr: 4, bl: 2, br: 2 }, 0xfdebd0, O, 2.5); C(g, 140, 15, 3, 0xfff3b0);   // standerlampe bag sofaen
+      { const BZ = 0xa0723c, BD = 0x6e4a2a;   // klassisk standerlampe bag sofaen: høj bronzestang, rund fod og bred stofskærm, der lyser nedad
+      g.fillStyle(0xfff3b0, 0.35); g.fillTriangle(128, 2, 104, 60, 152, 60);                                       // lysskær under skærmen
+      RO(g, 126.5, 0, 3, 104, 1.5, BZ, O, 1.5); RO(g, 125.5, 40, 5, 6, 1.5, 0x95a5a6, O, 1.5);                       // stang med justeringsled
+      g.fillStyle(O); g.fillEllipse(128, 106, 26, 7); g.fillStyle(BZ); g.fillEllipse(128, 105.5, 22, 5);              // rund fod
+      g.fillStyle(0xfdebd0); g.fillEllipse(128, 2, 40, 6);                                                        // lys indvendig kant
+      P(g, [['M', 114, -22], ['L', 142, -22], ['L', 148, 1], ['L', 108, 1]], 0x7d5a5a, O, 2.5); Q(g, 110, -3, 36, 2, BD); }   // skærm
     RO(g, 4, 18, 138, 54, 14, 0x8e44ad, O, 4);                                   // ryglæn
       RO(g, 18, 26, 52, 36, 9, PL, O, 2.5); RO(g, 76, 26, 52, 36, 9, PL, O, 2.5);   // rygpuder
       RO(g, 37, 40, 24, 28, 8, 0xe74c3c, O, 2.5); FACE(g, 49, 30, 0.85);            // føreren sidder i sofaen
@@ -2259,6 +2264,10 @@ PARTS.chassis = [
 ];
 // ---------- HJUL ----------
 const POOP_F = [1, 0.9, 1.04, 0.92, 0.98, 0.88, 1.03, 0.93, 0.97];   // hundelortens ujævne kant (samme form i fysikken)
+const PIZZA_A = 0.52;   // halv vinkel af det manglende pizzastykke (hullet peger mod højre i tegningen)
+const pizzaVerts = r => Array.from({ length: 22 }, (_, i) => { const a = PIZZA_A + i * (Math.PI * 2 - PIZZA_A * 2) / 21; return { x: Math.cos(a) * r, y: Math.sin(a) * r }; });
+const pizzaCx = r => { let A = 0, X = 0; const v = pizzaVerts(r); v.forEach((p, i) => { const q = v[(i + 1) % v.length], c = p.x * q.y - q.x * p.y; A += c; X += (p.x + q.x) * c; }); return X / (3 * A); };   // tyngdepunktet ligger lidt væk fra hullet
+function drawIris(g, x, y, r) { C(g, x, y, r * 0.36, 0x1b4f72); C(g, x, y, r * 0.31, 0x2e86c1); C(g, x, y, r * 0.21, 0x5dade2, 0.5); C(g, x, y, r * 0.16, 0x111111); C(g, x - r * 0.1, y - r * 0.1, r * 0.07, 0xffffff); }   // øjets iris og pupil
 function drawGear(g, cx, cy, r, n, col, dark, rot) {   // tandhjul: n tænder ud til r, krop med huller og nav
   rot = rot || 0; const ri = r * 0.8, tw = Math.PI / n;
   const ring = (ro, rin) => { const pts = []; for (let i = 0; i < n; i++) { const a = rot + i * 2 * Math.PI / n; [[a - tw * 0.62, rin], [a - tw * 0.38, ro], [a + tw * 0.38, ro], [a + tw * 0.62, rin]].forEach(([aa, rr]) => pts.push({ x: cx + Math.cos(aa) * rr, y: cy + Math.sin(aa) * rr })); } return pts; };
@@ -2323,6 +2332,21 @@ PARTS.wheels = [
       C(g, c, c, 5.5, 0x7f8c8d); C(g, c, c, 2.5, 0xecf0f1); Q(g, c - 1.5, c - r + 6, 3, 5, 0x7f8c8d); } },   // nav og ventil
   { id: 'gear', name: 'Tandhjul', r: 40, density: 0.004, grip: 1.0, shape: 'gear', gear: true,   // et tredje tandhjul imellem griber i begge (tegnes i spillet)
     draw(g, r) { const c = r + 2; drawGear(g, c, c, r, 12, 0x95a5a6, 0x4d5656); } },
+  { id: 'pizza', name: 'Pizza', r: 34, density: 0.003, grip: 0.95, shape: 'pizza',
+    draw(g, r) { const c = r + 2, A = PIZZA_A, sl = (rr, col) => { g.fillStyle(col); g.slice(c, c, rr, A, Math.PI * 2 - A, false); g.fillPath(); };
+      sl(r, 0x8e5a24); sl(r - 1.5, 0xd99a4e); sl(r - 6, 0xc0392b); sl(r - 8, 0xf7d358);   // bund, kant, tomatsovs, ost
+      g.fillStyle(0xf1c232, 0.8); [[2.2, 0.45], [3.4, 0.6], [4.4, 0.35], [1.4, 0.7], [5.4, 0.62]].forEach(([a, d]) => g.fillEllipse(c + Math.cos(a) * r * d, c + Math.sin(a) * r * d, 9, 6));   // smeltede ostepletter
+      [[1.25, 0.55], [2.35, 0.7], [3.15, 0.38], [3.95, 0.66], [4.85, 0.5], [5.55, 0.66], [2.75, 0.12]].forEach(([a, d]) => { const x = c + Math.cos(a) * r * d, y = c + Math.sin(a) * r * d; C(g, x, y, r * 0.15, 0x922b21); C(g, x, y, r * 0.12, 0xc0392b); C(g, x - 1.5, y - 1, 1.3, 0x7b241c); C(g, x + 1.5, y + 1.2, 1, 0x7b241c); });   // pepperoni
+      [[1.75, 0.82], [4.4, 0.8], [3.6, 0.2]].forEach(([a, d]) => { const x = c + Math.cos(a) * r * d * 0.85, y = c + Math.sin(a) * r * d * 0.85; g.fillStyle(0x27ae60); g.fillEllipse(x, y, 6, 3.5); });   // basilikum
+      g.lineStyle(1.2, 0xb9770e, 0.6); for (let k = 1; k < 5; k++) { const a = A + k * (Math.PI * 2 - A * 2) / 5; g.beginPath(); g.moveTo(c, c); g.lineTo(c + Math.cos(a) * (r - 7), c + Math.sin(a) * (r - 7)); g.strokePath(); }   // snit mellem stykkerne
+      g.lineStyle(2, 0x6e4318); g.beginPath(); g.moveTo(c + Math.cos(A) * r, c + Math.sin(A) * r); g.lineTo(c, c); g.lineTo(c + Math.cos(-A) * r, c + Math.sin(-A) * r); g.strokePath(); } },   // kanten hvor stykket mangler
+  { id: 'eye', name: 'Øje', r: 32, density: 0.003, grip: 0.9, eye: true,   // iris og pupil ruller frit rundt inde i øjet (i spillet)
+    draw(g, r, preview) { const c = r + 2; C(g, c, c, r, 0x34495e); C(g, c, c, r - 2.5, 0xf6dddd); C(g, c, c, r - 6, 0xfdfefe); C(g, c - r * 0.12, c - r * 0.14, r * 0.62, 0xffffff);   // hvide med lidt rødlig rand
+      g.lineStyle(1.2, 0xd2463c, 0.75); [[0.3, 0.55, 3], [1.35, 0.5, 2], [2.4, 0.6, 3], [3.3, 0.45, 2], [4.3, 0.58, 3], [5.25, 0.5, 2]].forEach(([a, L, n]) => {   // tynde, forgrenede blodårer fra kanten
+        let x = c + Math.cos(a) * (r - 3), y = c + Math.sin(a) * (r - 3), b = a + Math.PI; g.beginPath(); g.moveTo(x, y);
+        for (let k = 0; k < n + 2; k++) { b += (k % 2 ? 0.45 : -0.4); x += Math.cos(b) * r * L / (n + 2); y += Math.sin(b) * r * L / (n + 2); g.lineTo(x, y); }
+        g.strokePath(); const m = c + Math.cos(a) * (r - 3) * 0.78, mm = c + Math.sin(a) * (r - 3) * 0.78; g.beginPath(); g.moveTo(m, mm); g.lineTo(m + Math.cos(a + 2.4) * r * 0.16, mm + Math.sin(a + 2.4) * r * 0.16); g.strokePath(); });
+      if (preview) drawIris(g, c, c + r * 0.42, r); } },
   { id: 'donut', name: 'Donuts', r: 32, density: 0.003, grip: 0.9,
     draw(g, r) { const c = r + 2; C(g, c, c, r, 0xd9a066); C(g, c, c, r - 4, 0xf78fb3); [[0x3498db, 0], [0xf1c40f, 1], [0x2ecc71, 2], [0xffffff, 3], [0xe74c3c, 4], [0x9b59b6, 5]].forEach(([col, i]) => { const a = i * 1.05; R(g, c + Math.cos(a) * r * 0.65 - 3, c + Math.sin(a) * r * 0.65 - 1, 7, 3, 1, col); }); C(g, c, c, r * 0.3, 0x8d5a2b); } }
 ];
@@ -2512,7 +2536,7 @@ function carBottom(scene, imgs, ox) {
 // en fjeder fra bilens underkant ned til hjulets midte (hjulet ligger ovenpå og dækker den nederste del)
 function springImg(scene, ch, ox, cy, wheelY) {
   const sc0 = ch.scale || 1, k = 'p_chassis_' + ch.id;
-  const b = carBottom(scene, [{ key: k + '_body', cx: 0, cy, sc: 1 }, { key: k + '_top', cx: ch.topOx || 0, cy: cy + topRel(ch), sc: 1 }], ox);
+  const b = carBottom(scene, [{ key: k + '_body', cx: 0, cy, sc: 1 }, { key: k + '_top', cx: ch.topOx || 0, cy: cy + topRel(ch) - (ch.topUp || 0) / 2, sc: 1 }], ox);
   const top = (b === null ? cy + ch.h / 2 : b) - 2;
   return scene.add.image(ox, top, 'spring').setOrigin(0.5, 0).setScale(1 / sc0, Math.max(0.2, (wheelY - top) / 44));
 }
@@ -2550,7 +2574,7 @@ function assembleCar(scene, p, ch, wh, mo, to) {
   const sc0 = ch.scale || 1;
   const { oy, cy } = wheelGeom(ch, wh);
   const body = scene.add.image(0, cy, 'p_chassis_' + ch.id + '_body'); p.add(body);
-  p.add(scene.add.image(ch.topOx || 0, cy + topRel(ch), 'p_chassis_' + ch.id + '_top'));
+  p.add(scene.add.image(ch.topOx || 0, cy + topRel(ch) - (ch.topUp || 0) / 2, 'p_chassis_' + ch.id + '_top'));
   addBlinks(scene, p, ch, ch.topOx || 0, cy + topRel(ch), 1);
   if (ch.dangle) { const d = scene.add.image(ch.dangle.ox, cy + ch.dangle.oy + ch.dangle.h / 2, 'p_chassis_' + ch.id + '_dangle'); p.add(d);
     if (ch.dangle.prop) p.add(scene.add.image(ch.dangle.ox + ch.dangle.prop.ox, d.y + ch.dangle.prop.oy, 'p_chassis_' + ch.id + '_prop')); }
@@ -2827,15 +2851,16 @@ function makePartTextures(s) {
   const g = s.add.graphics();
   PARTS.chassis.forEach(p => {   // hel bil-silhuet: overdel + kasse
     const pad = p.full ? 4 : 0;   // luft til kanten på hele biler, så omridset ikke klippes (midten flytter sig ikke)
-    g.save(); g.translateCanvas(pad, 0); p.top(g); g.restore(); g.generateTexture('p_chassis_' + p.id + '_top', (p.topW || p.w) + pad * 2, p.topH + (p.full ? p.h : 0)); g.clear();
+    const up = p.topUp || 0;   // plads over tegningen (fx standerlampens skærm)
+    g.save(); g.translateCanvas(pad, up); p.top(g); g.restore(); g.generateTexture('p_chassis_' + p.id + '_top', (p.topW || p.w) + pad * 2, p.topH + (p.full ? p.h : 0) + up); g.clear();
     if (p.dangle) { p.dangle.draw(g); g.generateTexture('p_chassis_' + p.id + '_dangle', p.dangle.w, p.dangle.h); g.clear(); if (p.dangle.prop) { p.dangle.prop.draw(g); g.generateTexture('p_chassis_' + p.id + '_prop', 28, 28); g.clear(); } }
     p.body(g); g.generateTexture('p_chassis_' + p.id + '_body', p.w, p.h); g.clear();
   });
-  PARTS.wheels.forEach(p => { const m = p.shape === 'triangle' ? p.r * 0.5 : (p.upright ? 12 : 0); g.save(); g.translateCanvas(m, m); p.draw(g, p.r); g.restore(); g.generateTexture('p_wheels_' + p.id + (p.belt ? '_one' : ''), p.r * 2 + 4 + m * 2, p.r * 2 + 4 + m * 2); g.clear();
+  PARTS.wheels.forEach(p => { const m = p.shape === 'triangle' ? p.r * 0.5 : (p.upright ? 12 : 0); g.save(); g.translateCanvas(m, m); p.draw(g, p.r, true); g.restore(); g.generateTexture('p_wheels_' + p.id + (p.belt ? '_one' : ''), p.r * 2 + 4 + m * 2, p.r * 2 + 4 + m * 2); g.clear();
     if (p.belt) {   // i vinduet vises hele larvefoden: to hjul med bælte
       const R = p.r + 7, gap = 84, cx = R + 8 + gap / 2, cy = R + 8;
       beltPath(g, cx - gap / 2, cy, cx + gap / 2, cy, R, 0);
-      [cx - gap / 2, cx + gap / 2].forEach(x => { g.save(); g.translateCanvas(x - p.r - 2, cy - p.r - 2); p.draw(g, p.r); g.restore(); });
+      [cx - gap / 2, cx + gap / 2].forEach(x => { g.save(); g.translateCanvas(x - p.r - 2, cy - p.r - 2); p.draw(g, p.r, true); g.restore(); });
       g.generateTexture('p_wheels_' + p.id, 2 * R + 16 + gap, 2 * R + 16); g.clear();
     } });
   g.fillStyle(0x2c3e50); g.fillRoundedRect(0, 0, 40, 12, 5); g.fillStyle(0x95a5a6); g.fillRoundedRect(2, 2, 36, 8, 4); g.generateTexture('rm_bar', 40, 12); g.clear();   // bøjle til bagmotoren
@@ -2844,7 +2869,7 @@ function makePartTextures(s) {
   g.destroy();
   // hvor meget højere den tegnede bund sidder end bilens usynlige kasse (bruges til skøjterne)
   PARTS.chassis.forEach(ch => { const k = 'p_chassis_' + ch.id;
-    const bt = [ch.back, ch.front].map(ox => carBottom(s, [{ key: k + '_body', cx: 0, cy: 0, sc: 1 }, { key: k + '_top', cx: ch.topOx || 0, cy: topRel(ch), sc: 1 }], ox)).filter(v => v !== null);
+    const bt = [ch.back, ch.front].map(ox => carBottom(s, [{ key: k + '_body', cx: 0, cy: 0, sc: 1 }, { key: k + '_top', cx: ch.topOx || 0, cy: topRel(ch) - (ch.topUp || 0) / 2, sc: 1 }], ox)).filter(v => v !== null);
     ch.visGap = bt.length ? Math.max(0, ch.h / 2 - Math.max(...bt) - 1) : 0; });
 }
 // laver teksturerne til den byggede bil (overdel inkl. motor)
@@ -3014,7 +3039,7 @@ class Build extends Phaser.Scene {
     if (kind === 'chassis') {
       const sc = Math.min(170 / (part.topW || part.w), 130 / (part.h + part.topH));
       c.add(this.add.image(0, part.topH * sc / 2, partTextureKey(kind, part) + '_body').setScale(sc));
-      c.add(this.add.image((part.topOx || 0) * sc, (part.topH / 2 + topRel(part)) * sc, partTextureKey(kind, part) + '_top').setScale(sc));
+      c.add(this.add.image((part.topOx || 0) * sc, (part.topH / 2 + topRel(part) - (part.topUp || 0) / 2) * sc, partTextureKey(kind, part) + '_top').setScale(sc));
       addBlinks(this, c, part, (part.topOx || 0) * sc, (part.topH / 2 + topRel(part)) * sc, sc);
       if (part.dangle) { c.add(this.add.image(part.dangle.ox * sc, (part.topH / 2 + part.dangle.oy + part.dangle.h / 2) * sc, partTextureKey(kind, part) + '_dangle').setScale(sc));
         if (part.dangle.prop) c.add(this.add.image((part.dangle.ox + part.dangle.prop.ox) * sc, (part.topH / 2 + part.dangle.oy + part.dangle.h / 2 + part.dangle.prop.oy) * sc, partTextureKey(kind, part) + '_prop').setScale(sc)); }
@@ -3045,7 +3070,7 @@ class Build extends Phaser.Scene {
       w.topImg.setTexture(partTextureKey(kind, part) + '_top').setVisible(true);
       const sc = Math.min(170 / part.w, 130 / (part.h + part.topH));
       w.img.setScale(sc).setPosition(w.x, w.y + part.topH * sc / 2);
-      w.topImg.setScale(sc).setPosition(w.x, w.y + (part.topH / 2 + topRel(part)) * sc);
+      w.topImg.setScale(sc).setPosition(w.x, w.y + (part.topH / 2 + topRel(part) - (part.topUp || 0) / 2) * sc);
     } else {
       if (w.topImg) w.topImg.setVisible(false);
       const sc = Math.min(1, 160 / w.img.width, 130 / w.img.height);
@@ -3142,7 +3167,7 @@ class Build extends Phaser.Scene {
     if (kind === 'chassis') {
       const oy = part.h / 2 - 2, wheelR = 30;   // hjul kendes ikke endnu; bilen står på "ingenting"
       p.body = this.add.image(0, -wheelR - oy, 'p_chassis_' + part.id + '_body'); p.add(p.body);
-      p.top = this.add.image(part.topOx || 0, p.body.y + topRel(part), 'p_chassis_' + part.id + '_top'); p.add(p.top);
+      p.top = this.add.image(part.topOx || 0, p.body.y + topRel(part) - (part.topUp || 0) / 2, 'p_chassis_' + part.id + '_top'); p.add(p.top);
       if (part.dangle) { p.dangle = this.add.image(part.dangle.ox, p.body.y + part.dangle.oy + part.dangle.h / 2, 'p_chassis_' + part.id + '_dangle'); p.add(p.dangle); drop(p.dangle, 'left'); this.tweens.add({ targets: p.dangle, angle: 8, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.inOut', delay: 1200 });
         if (part.dangle.prop) { p.prop = this.add.image(part.dangle.ox + part.dangle.prop.ox, p.dangle.y + part.dangle.prop.oy, 'p_chassis_' + part.id + '_prop'); p.add(p.prop); drop(p.prop, 'left'); } }
       drop(p.body, 'left'); drop(p.top, 'left');   // karrosseriet kommer ind fra venstre uden for værkstedet
@@ -3242,7 +3267,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.30.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.31.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
@@ -3556,6 +3581,7 @@ class Game extends Phaser.Scene {
     this.topOy = (BUILD.chassis.full ? -(BUILD.chassis.topH / 2 + 12) * V.chassis.scale : -(V.chassis.h / 2 + V.chassis.topH / 2)) - TOP_EXTRA / 2 * V.chassis.scale;
     this.topOx = V.chassis.topOx;
     { const ch = BUILD.chassis, sc = V.chassis.scale, pad = ch.full ? 4 : 0, tw = (ch.topW || ch.w) + pad * 2, th = ch.topH + 24 + TOP_EXTRA + (ch.full ? ch.h : 0);   // hvor lygten sitter på den tegnede bil
+      this.lampDir = ch.lampDir || 0; this.lampScale = ch.lampScale || 1;
       this.lampLocal = ch.lamp ? { x: this.topOx + (ch.lamp[0] + pad - tw / 2) * sc, y: this.topOy + (ch.lamp[1] + 24 + TOP_EXTRA - th / 2) * sc } : { x: V.chassis.w / 2, y: -V.chassis.h * 0.2 }; }
     this.top = this.add.image(x + this.topOx, y + this.topOy, 'v_top').setDepth(9).setScale(V.chassis.scale);
     this.rearMotor = null;
@@ -3570,6 +3596,7 @@ class Game extends Phaser.Scene {
       : V.wheel.shape === 'star' ? { type: 'polygon', sides: 5, radius: r }
       : V.wheel.shape === 'egg' ? { type: 'polygon', sides: 8, radius: r }
       : V.wheel.shape === 'blob' ? { type: 'fromVerts', verts: POOP_F.map((f, i) => { const a = i * Math.PI * 2 / POOP_F.length; return { x: Math.cos(a) * r * f, y: Math.sin(a) * r * f }; }) }   // hundelort: humper på den ujævne kant
+      : V.wheel.shape === 'pizza' ? { type: 'fromVerts', verts: pizzaVerts(r) }   // pizza: det manglende stykke giver et bump hver omgang
       : V.wheel.shape === 'gear' ? { type: 'circle', radius: r * 0.93 } : { type: 'circle', radius: r };   // tandhjul: tænderne synker lidt ned
     // traktoren: baghjulet er større, og det løftes, så begge hjul rører jorden samtidig
     this.rearScale = rearScaleFor(BUILD.chassis, BUILD.wheels); this.rearDy = -(this.rearScale - 1) * V.wheel.r;
@@ -3577,11 +3604,16 @@ class Game extends Phaser.Scene {
       shape: wshapeR(V.wheel.r),   // setScale(k) nedenfor skalerer også fysik-kroppen
       density: V.wheel.density, friction: V.wheel.grip, frictionStatic: 1, restitution: BUILD.wheels.bouncy ? 0.8 : 0.15, frictionAir: 0.005,
       collisionFilter: filter, label: 'wheel'
-    }).setDepth(11).setScale(k).setOrigin(0.5);   // billedet drejer om sin midte (Phaser lægger ellers midten efter kassen om trekant/stjerne, ikke deres centrum)
+    }).setDepth(11).setScale(k).setOrigin(V.wheel.shape === 'pizza' ? 0.5 + pizzaCx(V.wheel.r) / (V.wheel.r * 2 + 4) : 0.5);   // pizza: kroppen sidder i tyngdepunktet   // billedet drejer om sin midte (Phaser lægger ellers midten efter kassen om trekant/stjerne, ikke deres centrum)
     this.wheels = [mk(V.wheel.back, this.rearScale), mk(V.wheel.front, 1)];
     this.wheels[0].rk = this.rearScale; this.wheels[1].rk = 1;   // det store baghjul drejer langsommere, så begge hjul kører lige hurtigt
     this.wheels.forEach(w => w.setDepth(14));   // hjul i forreste lag, foran værktøjet
     this.wheelSkins = [];
+    this.irises = null;
+    if (BUILD.wheels.eye) {   // øjet: iris og pupil ruller frit rundt inde i hjulet, trukket af tyngden og af hjulets drejning
+      if (!this.textures.exists('v_iris')) { const gi = this.add.graphics(); drawIris(gi, V.wheel.r * 0.42, V.wheel.r * 0.42, V.wheel.r); gi.generateTexture('v_iris', Math.ceil(V.wheel.r * 0.84), Math.ceil(V.wheel.r * 0.84)); gi.destroy(); }
+      this.irises = this.wheels.map(w => ({ img: this.add.image(w.x, w.y, 'v_iris').setDepth(14.05).setScale(w.scaleX), phi: 0, v: 0 }));
+    }
     this.belt = BUILD.wheels.belt ? this.add.graphics().setDepth(13) : null;
     this.midGear = null;
     if (BUILD.wheels.gear) {   // mellemhjul imellem tandhjulene, der griber i begge og drejer den anden vej
@@ -4244,6 +4276,10 @@ class Game extends Phaser.Scene {
     if (this.tool && !this.broken) this.animateTool(time, delta, throttle !== 0 || Math.abs(c.body.velocity.x) > 1);
     if (this.forkSlice) this.placeSlice();
     this.wheelSkins.forEach((sk, i) => sk.setPosition(this.wheels[i].x, this.wheels[i].y));
+    if (this.irises) { const f = Math.min(3, delta / 16.67); this.irises.forEach((e, i) => { const w = this.wheels[i];
+      if (!w || !w.active || !w.body || !w.visible) { e.img.setVisible(false); return; }
+      e.v += (-0.022 * Math.sin(e.phi) + 0.07 * (w.body.angularVelocity - e.v)) * f; e.v *= Math.pow(0.975, f); e.phi += e.v * f;   // pendul: tyngden trækker ned, hjulets drejning trækker med
+      const d = V.wheel.r * 0.42 * w.scaleX; e.img.setVisible(true).setScale(w.scaleX).setAlpha(w.alpha).setPosition(w.x - Math.sin(e.phi) * d, w.y + Math.cos(e.phi) * d).setRotation(e.phi * 0.3); }); }
     if (this.belt) this.drawBelt();
     if (this.midGear && !this.broken) { const [b, f] = this.wheels, al = Math.atan2(f.y - b.y, f.x - b.x), L = Math.hypot(f.x - b.x, f.y - b.y) || 1, M = this.midGear, sk = L / (M.offs[M.offs.length - 1] + M.offs[0]);
       M.imgs.forEach((im, j) => { const t = M.offs[j] * sk; im.setPosition(b.x + (f.x - b.x) * t / L, b.y + (f.y - b.y) * t / L).setRotation(al + Math.PI + Math.PI / M.n + j * Math.PI / M.n + (j % 2 ? 1 : -1) * (b.rotation - al) * M.ratio); }); }
@@ -4310,7 +4346,7 @@ class Game extends Phaser.Scene {
     if (this.night > 0.02 && !this.broken) {
       if (!this.beamImg) this.beamImg = this.add.image(0, 0, 'headlight').setDepth(9).setOrigin(0, 0.5);
       const a = c.rotation, fx = this.lampLocal.x, fy = this.lampLocal.y;   // fra bilens egen lygte
-      this.beamImg.setPosition(c.x + fx * Math.cos(a) - fy * Math.sin(a), c.y + fx * Math.sin(a) + fy * Math.cos(a)).setRotation(a + 0.08).setAlpha(this.night * 0.55).setVisible(true);
+      this.beamImg.setPosition(c.x + fx * Math.cos(a) - fy * Math.sin(a), c.y + fx * Math.sin(a) + fy * Math.cos(a)).setRotation(a + 0.08 + this.lampDir).setScale(this.lampScale, 1).setAlpha(this.night * 0.55).setVisible(true);
     } else if (this.beamImg) this.beamImg.setVisible(false);
 
     // score
