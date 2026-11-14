@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.33.2)
+//  Biglers Biler – etape 3  (v0.34.0)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -162,6 +162,12 @@ const SFX = {
   whoosh(){ this.noise(0.35, 0.15, 2500); this.blip(300, 900, 0.35, 'sine', 0.08); },
   flush() { this.noise(0.7, 0.3, 1200); [0, 120, 260, 420].forEach((d, i) => setTimeout(() => this.blip(420 - i * 60, 160, 0.18, 'sine', 0.2), d)); },
   click() { this.blip(600, 900, 0.08, 'square', 0.1); },
+  zap(dur) {   // elektrisk summen med knitren (kvægstaven)
+    if (!this.ctx) return; const c = this.ctx, t = c.currentTime, out = c.createGain(); out.gain.setValueAtTime(0.0001, t); out.gain.exponentialRampToValueAtTime(0.22, t + 0.03); out.gain.setValueAtTime(0.22, t + dur - 0.15); out.gain.exponentialRampToValueAtTime(0.0001, t + dur); out.connect(this.master);
+    const am = c.createGain(); am.gain.value = 0.5; am.connect(out); const lfo = c.createOscillator(), lg = c.createGain(); lfo.type = 'square'; lfo.frequency.value = 23; lg.gain.value = 0.5; lfo.connect(lg); lg.connect(am.gain);
+    [[110, 'sawtooth'], [221, 'square'], [333, 'sawtooth']].forEach(([f, ty]) => { const o = c.createOscillator(); o.type = ty; o.frequency.setValueAtTime(f, t); o.frequency.linearRampToValueAtTime(f * 1.06, t + dur); o.connect(am); o.start(t); o.stop(t + dur + 0.05); });
+    lfo.start(t); lfo.stop(t + dur + 0.05); for (let i = 0; i < 6; i++) setTimeout(() => this.noise(0.04, 0.25, 7000), i * dur * 160 + Math.random() * 60); },
+  spark() { this.noise(0.05, 0.2, 7000); this.blip(1800, 600, 0.06, 'square', 0.06); },
   ufo()   { [0, 150, 300, 450].forEach(d => setTimeout(() => this.blip(600, 1200, 0.14, 'sine', 0.12), d)); },
   zap()   { this.blip(1800, 200, 0.4, 'sawtooth', 0.2); this.noise(0.3, 0.3, 3000); },
   pfft() { this.noise(0.6, 0.35, 1800); this.blip(900, 120, 0.6, 'sawtooth', 0.1); this.blip(1400, 300, 0.5, 'sine', 0.08); },
@@ -1105,6 +1111,96 @@ function makeHoldButton(scene, x, y, r, label, color) {
 //  minD: hvor langt ude de må dukke op (0..1), w: hyppighed
 // =====================================================================
 // trold og mumie: står med ryggen til, vender sig om og bliver overraskede lige før bilen når frem – rammes de, flyver de snurrende op og lander rodet med stjerner om hovedet
+// røntgen-skeletter til kvægstaven (tex-koordinater for hver figurs forside)
+const ZAP_SK = {
+  troll:   { cx: 76, head: [76, 37, 25], sh: [[34, 68], [115, 68]], hands: [[14, 31], [137, 31]], hip: 117, feet: [[52, 154], [97, 154]], hw: 18 },
+  mummy:   { soot: 'bandage', cx: 65, head: [65, 30, 23], sh: [[38, 66], [93, 66]], hands: [[16, 33], [112, 33]], hip: 117, feet: [[50, 154], [80, 154]], hw: 14 },
+  santa:   { soot: 'hat', cx: 74, head: [74, 54, 24], sh: [[46, 79], [101, 79]], hands: [[12, 32], [133, 32]], hip: 126, feet: [[59, 149], [93, 149]], hw: 15 },
+  gorilla: { cx: 75, head: [74, 43, 24], sh: [[38, 71], [112, 71]], hands: [[12, 28], [137, 28]], hip: 126, feet: [[54, 154], [97, 154]], hw: 20, ape: true },
+  thief:   { cx: 65, head: [65, 42, 22], sh: [[35, 64], [95, 64]], hands: [[15, 28], [115, 28]], hip: 116, feet: [[50, 150], [84, 150]], hw: 15 },
+  yeti:    { cx: 76, head: [76, 48, 20], sh: [[40, 65], [110, 65]], hands: [[17, 32], [133, 32]], hip: 125, feet: [[55, 152], [97, 152]], hw: 18 },
+  alien:   { cx: 65, head: [65, 48, 30], sh: [[46, 88], [84, 88]], hands: [[18, 55], [112, 55]], hip: 133, feet: [[57, 152], [76, 152]], hw: 9, alien: [[32, 6], [99, 6]] },
+  scarecrow: { cx: 74, head: [74, 39, 22], sh: [[44, 62], [105, 62]], hands: [[18, 28], [130, 28]], hip: 120, feet: [[60, 156], [88, 156]], straw: true },
+};
+const ZAP_FLAME = {};   // hvor flammen sidder på den sodede figur (mumiens bandage, julemandens kvast)
+const XR_BONE = 0xeaf6ff, XR_GLOW = 0x7fdbff, XR_BODY = 0x1b2f52;
+function drawSkeleton(g, sp) {
+  const bone = (x1, y1, x2, y2, w) => { g.lineStyle(w + 5, XR_GLOW, 0.45); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.strokePath();
+    g.lineStyle(w, XR_BONE); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.strokePath(); g.fillStyle(XR_BONE); g.fillCircle(x1, y1, w * 0.8); g.fillCircle(x2, y2, w * 0.8); };
+  const [hx, hy, hr] = sp.head, cx = sp.cx, shy = (sp.sh[0][1] + sp.sh[1][1]) / 2;
+  if (sp.straw) {   // fugleskræmslet: en træpæl, to pinde og halm
+    const wood = (x1, y1, x2, y2, w) => { g.lineStyle(w + 5, XR_GLOW, 0.45); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.strokePath(); g.lineStyle(w, 0xd9b26f); g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.strokePath(); };
+    wood(cx, hy - 6, cx, 160, 9); sp.sh.forEach((s, i) => wood(s[0], s[1], sp.hands[i][0], sp.hands[i][1], 6)); wood(sp.sh[0][0], sp.sh[0][1], sp.sh[1][0], sp.sh[1][1], 7);
+    g.lineStyle(2.5, 0xf7dc6f, 0.95); const st = [[hx, hy, hr * 0.8], [cx, shy + 25, 26], [cx, shy + 45, 22]];
+    st.forEach(([x, y, r], k) => { for (let i = 0; i < 9; i++) { const a = i * 0.7 + k, b = a + 1.2 + (i % 3) * 0.3; g.beginPath(); g.moveTo(x + Math.cos(a) * r * 0.7, y + Math.sin(a) * r * 0.5); g.lineTo(x + Math.cos(b) * r * 0.8, y + Math.sin(b) * r * 0.55); g.strokePath(); } });
+    return; }
+  // ben og arme
+  sp.sh.forEach((s, i) => { const h0 = sp.hands[i], L = Math.hypot(h0[0] - s[0], h0[1] - s[1]), h = [h0[0] - (h0[0] - s[0]) / L * 4, h0[1] - (h0[1] - s[1]) / L * 4], ex = (s[0] + h[0]) / 2, ey = (s[1] + h[1]) / 2; bone(s[0], s[1], ex, ey, 5); bone(ex, ey, h[0], h[1], 4);   // hånden lidt inde i armen   // lige arme, som på figurerne
+    g.lineStyle(2.5, XR_BONE); for (let f = -1; f <= 1; f++) { const a = Math.atan2(h[1] - ey, h[0] - ex) + f * 0.5; g.beginPath(); g.moveTo(h[0], h[1]); g.lineTo(h[0] + Math.cos(a) * 6, h[1] + Math.sin(a) * 6); g.strokePath(); } });
+  [-1, 1].forEach((d, i) => { const f = sp.feet[i], ky = (sp.hip + f[1]) / 2; bone(f[0], sp.hip + 4, f[0], ky, 6); bone(f[0], ky, f[0], f[1] - 4, 5); bone(f[0] - 7, f[1] - 2, f[0] + 7, f[1] - 2, 4); });   // lige ben ned til fødderne
+  // bækken, rygsøjle, ribben, kraveben
+  g.fillStyle(XR_GLOW, 0.45); g.fillEllipse(cx, sp.hip, sp.hw * 2.4 + 6, 22); g.fillStyle(XR_BONE); g.fillEllipse(cx - sp.hw * 0.55, sp.hip, sp.hw * 1.2, 16); g.fillEllipse(cx + sp.hw * 0.55, sp.hip, sp.hw * 1.2, 16); g.fillStyle(XR_BODY); g.fillCircle(cx - sp.hw * 0.55, sp.hip + 1, sp.hw * 0.16); g.fillCircle(cx + sp.hw * 0.55, sp.hip + 1, sp.hw * 0.16);
+  const neckY = hy + hr * 0.8; for (let y = neckY; y < sp.hip - 8; y += 7) { g.fillStyle(XR_GLOW, 0.45); g.fillRoundedRect(cx - 6, y - 1, 12, 7, 3); g.fillStyle(XR_BONE); g.fillRoundedRect(cx - 4, y, 8, 5, 2); }
+  const ribW = Math.abs(sp.sh[1][0] - sp.sh[0][0]) * 0.42; for (let i = 0; i < 4; i++) { const y = shy + 7 + i * 8, w = ribW * (1 - i * 0.1);
+    [-1, 1].forEach(d => { g.lineStyle(7, XR_GLOW, 0.4); g.beginPath(); g.moveTo(cx, y); g.lineTo(cx + d * w * 0.8, y + 1); g.lineTo(cx + d * w, y + 6); g.strokePath(); g.lineStyle(3.5, XR_BONE); g.beginPath(); g.moveTo(cx, y); g.lineTo(cx + d * w * 0.8, y + 1); g.lineTo(cx + d * w, y + 6); g.strokePath(); }); }
+  bone(sp.sh[0][0], sp.sh[0][1], sp.sh[1][0], sp.sh[1][1], 3.5);
+  // kraniet
+  if (sp.alien) sp.alien.forEach(t => bone(hx + (t[0] - hx) * 0.35, hy - hr * 0.7, t[0], t[1] + 4, 3));
+  g.fillStyle(XR_GLOW, 0.45); g.fillEllipse(hx, hy, hr * 1.9 + 6, hr * 1.8 + 6); g.fillStyle(XR_BONE); g.fillEllipse(hx, hy - 2, hr * 1.9, hr * 1.6);
+  g.fillRoundedRect(hx - hr * (sp.ape ? 0.7 : 0.5), hy + hr * 0.35, hr * (sp.ape ? 1.4 : 1.0), hr * 0.55, 5);   // kæbe
+  g.fillStyle(XR_BODY); (sp.alien ? [-0.45, 0, 0.45] : [-0.38, 0.38]).forEach((o, i) => g.fillEllipse(hx + o * hr, hy - hr * (sp.alien && i === 1 ? 0.35 : 0.1), hr * 0.42, hr * 0.48));
+  g.fillTriangle(hx, hy + hr * 0.12, hx - 4, hy + hr * 0.32, hx + 4, hy + hr * 0.32);
+  g.lineStyle(1.6, XR_BODY); for (let k = -2; k <= 2; k++) { const x = hx + k * hr * (sp.ape ? 0.24 : 0.17); g.beginPath(); g.moveTo(x, hy + hr * 0.42); g.lineTo(x, hy + hr * 0.82); g.strokePath(); }
+  g.beginPath(); g.moveTo(hx - hr * (sp.ape ? 0.6 : 0.42), hy + hr * 0.6); g.lineTo(hx + hr * (sp.ape ? 0.6 : 0.42), hy + hr * 0.6); g.strokePath();
+}
+function makeXray(scene, key) {   // figurens silhuet i mørkeblåt med lysende skelet
+  const k = 'xr_' + key; if (scene.textures.exists(k)) return k; const src = scene.textures.get(key).getSourceImage(), w = src.width, h = src.height;
+  const rt = scene.make.renderTexture({ width: w, height: h }, false), im = scene.make.image({ key, x: w / 2, y: h / 2 }, false).setTintFill(XR_BODY), g = scene.make.graphics({}, false);
+  drawSkeleton(g, ZAP_SK[key]); rt.draw(im); rt.draw(g); rt.saveTexture(k); im.destroy(); g.destroy(); return k; }
+function drawFlame(g, x, y, k) {   // lille flamme med bunden i (x, y)
+  g.fillStyle(0xe74c3c); g.fillCircle(x, y - 4 * k, 5 * k); g.fillTriangle(x - 5 * k, y - 5 * k, x + 5 * k, y - 5 * k, x + 1 * k, y - 17 * k);
+  g.fillStyle(0xf39c12); g.fillCircle(x, y - 3.5 * k, 3.4 * k); g.fillTriangle(x - 3.4 * k, y - 4 * k, x + 3.4 * k, y - 4 * k, x + 0.5 * k, y - 12 * k);
+  g.fillStyle(0xfff3b0); g.fillCircle(x, y - 3 * k, 1.8 * k); }
+function makeSoot(scene, key) {   // sodet figur: strittende hår – mumien får en strittende bandage og julemanden en stiv hue, begge med en lille flamme
+  const k = 'soot_' + key; if (scene.textures.exists(k)) return k; const src = scene.textures.get(key).getSourceImage(), w = src.width, h = src.height, sp = ZAP_SK[key], T = 48;
+  const rt = scene.make.renderTexture({ width: w, height: h + T }, false), im = scene.make.image({ key, x: w / 2, y: h / 2 + T }, false).setTint(0x6d6d6d), g = scene.make.graphics({}, false);
+  rt.draw(im);
+  const [hx, hy0, hr] = sp.head, hy = hy0 + T;
+  if (sp.soot === 'hat') {   // huen slettes og tegnes stiv lige op, med flamme i kvasten
+    const er = scene.make.graphics({}, false); er.fillStyle(0xffffff); er.fillRect(46, 0, 66, T + 25); er.fillRect(99, T + 18, 17, 15); er.fillCircle(118, T + 13, 9.5); rt.erase(er); er.destroy();
+    g.fillStyle(0x5a1a12); g.fillTriangle(hx - 22, T + 27, hx + 20, T + 27, hx - 2, T - 26); g.fillStyle(0x7a2418); g.fillTriangle(hx - 12, T + 27, hx + 2, T + 27, hx - 3, T - 18);
+    g.fillStyle(0x9a9a9a); g.fillRoundedRect(hx - 26, T + 22, 50, 10, 5); g.fillCircle(hx - 2, T - 27, 7); ZAP_FLAME[key] = [hx - 2, T - 32, 0.9]; }
+  else if (sp.soot === 'bandage') {   // en løs bandage stritter op fra hovedet, med flamme i spidsen
+    g.fillStyle(0x8f8a7a); g.beginPath(); g.moveTo(hx - 6, hy - hr + 4); g.lineTo(hx - 12, hy - hr - 10); g.lineTo(hx - 6, hy - hr - 22); g.lineTo(hx - 12, hy - hr - 34); g.lineTo(hx - 5, hy - hr - 34); g.lineTo(hx + 1, hy - hr - 22); g.lineTo(hx - 5, hy - hr - 10); g.lineTo(hx + 2, hy - hr + 4); g.closePath(); g.fillPath();
+    g.lineStyle(1.2, 0x6b6656); [[-9, -8], [-8, -20], [-8, -30]].forEach(([dx, dy]) => { g.beginPath(); g.moveTo(hx + dx - 2, hy - hr + dy); g.lineTo(hx + dx + 5, hy - hr + dy - 2); g.strokePath(); });
+    ZAP_FLAME[key] = [hx - 8.5, hy - hr - 33, 1.1]; }
+  else { g.lineStyle(3.5, 0x1c1c1c);
+    for (let i = 0; i < 11; i++) { const a = -Math.PI * 0.95 + i * Math.PI * 0.9 / 10, r0 = hr * 0.8, L = hr * (0.55 + (i % 3) * 0.18), x0 = hx + Math.cos(a) * r0, y0 = hy + Math.sin(a) * r0;   // strittende hår: stive strå med et knæk
+      const mx = x0 + Math.cos(a) * L * 0.55 + Math.cos(a + 1.57) * 3, my = y0 + Math.sin(a) * L * 0.55 + Math.sin(a + 1.57) * 3; g.beginPath(); g.moveTo(x0, y0); g.lineTo(mx, my); g.lineTo(x0 + Math.cos(a) * L, y0 + Math.sin(a) * L); g.strokePath(); } }
+  g.fillStyle(0x111111, 0.35); [[-0.5, 0.2, 14], [0.4, -0.2, 10], [0.1, 0.9, 18]].forEach(([dx, dy, r]) => g.fillEllipse(hx + dx * hr, hy + hr * 0.4 + dy * hr * 2, r * 1.6, r));   // sodpletter
+  rt.draw(g); rt.saveTexture(k); im.destroy(); g.destroy(); return k; }
+function zapArcs(g, x, y, w, h) {   // blå lyn rundt om figuren
+  g.clear(); for (let n = 0; n < 4; n++) { let px = x + Phaser.Math.FloatBetween(-w / 2, w / 2), py = y - h; const pts = [[px, py]];
+    for (let i = 0; i < 6; i++) { px += Phaser.Math.FloatBetween(-18, 18); py += h / 6; pts.push([px, py]); }
+    [[7, 0x7fdbff, 0.35], [3, 0x7fdbff, 1], [1.2, 0xffffff, 1]].forEach(([wd, col, al]) => { g.lineStyle(wd, col, al); g.beginPath(); pts.forEach(([a, b], i) => i ? g.lineTo(a, b) : g.moveTo(a, b)); g.strokePath(); }); } }
+function zapFigure(s, t, key, obs) {   // kvægstaven: figuren står stiv, blinker med røntgen, bliver sodet og vælter som et bræt
+  const xr = makeXray(s, key), soot = makeSoot(s, key), w = t.width, h = t.height, x0 = t.x, gy = t.y + h / 2 - 2;
+  SFX.zap(1.1); const d0 = t.depth; t.setDepth(17);   // foran bilen, mens den zappes
+  const arcs = s.add.graphics().setDepth(t.depth + 0.2); obs.gos.push(arcs);
+  s.tweens.add({ targets: t, x: { from: x0 - 3, to: x0 + 3 }, duration: 45, yoyo: true, repeat: 11 });   // ryster
+  s.tweens.add({ targets: t, y: t.y - 14, duration: 120, ease: 'Quad.out' });
+  let n = 0; s.time.addEvent({ delay: 75, repeat: 13, callback: () => { if (!t.active) return; n++; t.setTexture(n % 2 ? xr : key); if (n % 2) zapArcs(arcs, x0, gy - 10, w, h); else arcs.clear();
+    if (n === 14) { arcs.destroy();   // færdig: sodet, strittende, røg – og så vælter den stiv
+      const c = s.add.container(x0, gy).setDepth(17), img = s.add.image(0, 0, soot).setOrigin(0.5, 1); c.add(img); t.setVisible(false); obs.gos.push(c);
+      const fl = ZAP_FLAME[key]; if (fl) { if (!s.textures.exists('zap_flame')) { const gf = s.add.graphics(); drawFlame(gf, 10, 22, 1); gf.generateTexture('zap_flame', 20, 24); gf.destroy(); }
+        const f = s.add.image(fl[0] - w / 2, fl[1] - img.height, 'zap_flame').setOrigin(0.5, 22 / 24).setScale(fl[2]); c.add(f);
+        s.tweens.add({ targets: f, scaleY: fl[2] * 1.25, scaleX: fl[2] * 0.85, duration: 110, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
+      SFX.pfft(); for (let i = 0; i < 4; i++) { const p = s.add.circle(x0 + Phaser.Math.Between(-20, 20), gy - h + 10, Phaser.Math.Between(9, 15), 0x7f8c8d, 0.75).setDepth(t.depth + 0.3);
+        s.tweens.add({ targets: p, y: p.y - 70 - i * 15, x: p.x + Phaser.Math.Between(-20, 20), scale: 2.2, alpha: 0, duration: 1100 + i * 150, delay: i * 120, onComplete: () => p.destroy() }); }   // røgen letter
+      const slope = Phaser.Math.RadToDeg(Math.atan2(s.groundY(x0 + h) - gy, h));   // lægger sig langs skrænten
+      s.time.delayedCall(650, () => c.setDepth(d0)); s.tweens.add({ targets: c, angle: 90 + slope, duration: 520, delay: 650, ease: 'Quad.in', onComplete: () => { SFX.clunk(); s.cameras.main.shake(140, 0.005); s.spawnPieces(x0 + h * 0.6, gy - 6, 0x95a5a6, 5, 6, 3); } });
+    } } });
+}
 function surpriseObstacle(s, x, y, key, w, h, opt = {}) {   // opt.drop: taber noget, når den vender sig (tyvens sæk); opt.fly: svæver væk i stedet for at lande (spøgelset)
   const t = s.obsImage(key + '_back', x, y - h / 2 + 2, { shape: { type: 'rectangle', width: w * 0.75, height: h }, isStatic: true });
   const obs = { gos: [t], bodies: [t.body], hardness: 0.2, material: 'wood', done: false };
@@ -1122,8 +1218,11 @@ function surpriseObstacle(s, x, y, key, w, h, opt = {}) {   // opt.drop: taber n
     }
     const q = sc.add.text(x, y - h - 30, '!', { fontFamily: FONT, fontSize: '56px', color: '#f1c40f', stroke: '#2c3e50', strokeThickness: 8 }).setOrigin(0.5).setDepth(8);
     sc.tweens.add({ targets: q, y: q.y - 40, alpha: 0, duration: 900, delay: 200, onComplete: () => q.destroy() }); };
-  obs.onHit = (imp, part) => { if (obs.done || (imp < 0.6 && !part)) return; obs.done = true; SFX.bonk();   // ethvert puf fra bilen sender den til vejrs
+  obs.onHit = (imp, part) => { if (obs.done || (imp < 0.6 && !part)) return; obs.done = true;   // ethvert puf fra bilen sender den til vejrs
+    const zap = !opt.fly && ZAP_SK[key] && part && part.label === 'tool' && VEHICLE.tool && VEHICLE.tool.zap;   // kvægstaven zapper i stedet (ikke spøgelset)
+    if (!zap) SFX.bonk();
     t.setTexture(key); s.matter.world.remove(t.body); obs.bodies = [];
+    if (zap) { zapFigure(s, t, key, obs); return; }
     if (opt.fly) {   // spøgelset blafrer op og forsvinder
       s.tweens.add({ targets: t, x: t.x + 520, y: t.y - 520, alpha: 0, duration: 1600, ease: 'Sine.in' });
       s.tweens.add({ targets: t, angle: 18, duration: 200, yoyo: true, repeat: 3, ease: 'Sine.inOut' }); return;
@@ -2508,6 +2607,14 @@ PARTS.tools = [
       g.fillStyle(0x5d8aa8); g.fillTriangle(46, 8, 74, -2, 62, 18); g.fillTriangle(46, 32, 74, 42, 62, 22);
       g.fillStyle(0xffffff); for (let i = 0; i < 4; i++) { g.fillTriangle(50 + i * 6, 10 - i * 2, 56 + i * 6, 8 - i * 2, 53 + i * 6, 16 - i * 2); g.fillTriangle(50 + i * 6, 30 + i * 2, 56 + i * 6, 32 + i * 2, 53 + i * 6, 24 + i * 2); }
       C(g, 54, 14, 3, 0x222222); } },
+  { id: 'prod', name: 'Kvægstav', w: 112, h: 30, oy: 0, protect: 0.9, smash: 1.0, breaks: [], zap: true, frames: 3,
+  draw(g, ph) { ph = ph || 0;
+    R(g, 0, 7, 40, 16, 6, 0x222222); for (let x = 6; x < 38; x += 6) Q(g, x, 7, 2, 16, 0x3d3d3d);   // gummigreb
+    R(g, 38, 6, 16, 18, 3, 0xf1c40f); g.fillStyle(0x222222); for (let x = 38; x < 54; x += 8) g.fillTriangle(x, 24, x + 4, 6, x + 8, 6);   // gul/sort advarsel
+    C(g, 30, 7, 4, 0xe74c3c); R(g, 54, 11, 40, 8, 4, 0x95a5a6); Q(g, 56, 12, 36, 2, 0xd5dbdb);   // knap og skaft
+    R(g, 90, 8, 8, 14, 3, 0xc0392b); R(g, 97, 7, 14, 4, 2, 0xd68910); R(g, 97, 19, 14, 4, 2, 0xd68910);   // isolator og kobberspidser
+    const jit = [[0, 0, 0], [1, -1, 1], [-1, 1, -1]][ph % 3]; g.lineStyle(2.5, 0x7fdbff); g.beginPath(); g.moveTo(108, 10); g.lineTo(104 + jit[0], 14); g.lineTo(109 + jit[1], 16); g.lineTo(105 + jit[2], 20); g.strokePath();
+    g.lineStyle(1.2, 0xffffff); g.beginPath(); g.moveTo(108, 10); g.lineTo(104 + jit[0], 14); g.lineTo(109 + jit[1], 16); g.lineTo(105 + jit[2], 20); g.strokePath(); } },   // kvægstaven: gør ikke meget, men zapper figurerne med røntgen
   { id: 'brush', name: 'Tandbørste', w: 100, h: 26, oy: 2, protect: 0.9, smash: 1.0, breaks: [],
     base: { w: 12, h: 26 }, head: { w: 96, h: 26, anim: 'scrub', sensor: true },   // hele børsten skrubber
     draw(g) { R(g, 0, 8, 70, 12, 6, 0x3498db); R(g, 66, 4, 34, 18, 6, 0xecf0f1); for (let x = 70; x < 98; x += 6) Q(g, x, 0, 3, 8, 0xffffff); },
@@ -3286,7 +3393,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.33.2', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.34.0', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
@@ -3800,6 +3907,8 @@ class Game extends Phaser.Scene {
     if (dmg) obs.lastDmg = now;
     this.deferred.push(() => {
       if (obs.onHit) obs.onHit(hitImp, part, other);
+      if (part.label === 'tool' && tool.zap && imp > 0.8 && now - (this.lastSpark || 0) > 350) { this.lastSpark = now; SFX.spark();   // kvægstaven giver gnister på alt andet
+        const sx = part.bounds.max.x, sy = part.position.y, sg = this.add.graphics().setDepth(16); zapArcs(sg, sx + 6, sy + 18, 24, 36); this.time.delayedCall(110, () => sg.destroy()); }
       if (dmg) this.damage((imp - 3) * obs.hardness * 1.6 * k);
       if (part.label === 'tool' && tool.punch && !other.isStatic && imp > 2 && now - (other.lastPunch || 0) > 500) {   // boksehandsken slår ting væk
         other.lastPunch = now; SFX.pow();
