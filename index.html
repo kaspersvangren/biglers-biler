@@ -28,7 +28,7 @@
 <div id="fontload">Biglers Biler</div>
 <script>
 // =====================================================================
-//  Biglers Biler – etape 3  (v0.33.1)
+//  Biglers Biler – etape 3  (v0.33.2)
 //  Enarmet tyveknægt (chassis/hjul/motor/værktøj), bakket terræn, hop,
 //  autokør/fuld styring, forhindringer, skade/røg/sammenbrud, lyd i kode
 // =====================================================================
@@ -2278,7 +2278,7 @@ function gearTex(scene, wh, n, key) {   // tandhjul med n tænder, tegnet i norm
   if (!scene.textures.exists(key)) { const g = scene.add.graphics(); wh.draw(g, wh.r, true, n); g.generateTexture(key, wh.r * 2 + 4, wh.r * 2 + 4); g.destroy(); } return key; }
 const SAUS_SKIP = new Set(['ground', 'piece', 'wheel', 'chassis', 'tool', 'dangle']);
 const SAUS = { n: 6, len: 1.0, hub: 0.3, ride: 0.75, thick: 13, segs: 5, pull: [0.22, 0.14, 0.09, 0.06, 0.04], grav: 0.3, damp: 0.94, shake: 1.4 };   // pølsehjulet: antal, længde og navets størrelse (gange r), og hvor slapt de hænger
-function drawIris(g, x, y, r) { C(g, x, y, r * 0.36, 0x1b4f72); C(g, x, y, r * 0.31, 0x2e86c1); C(g, x, y, r * 0.21, 0x5dade2, 0.5); C(g, x, y, r * 0.16, 0x111111); C(g, x - r * 0.1, y - r * 0.1, r * 0.07, 0xffffff); }   // øjets iris og pupil
+function drawIris(g, x, y, r) { C(g, x, y, r * 0.3, 0x1b4f72); C(g, x, y, r * 0.26, 0x2e86c1); C(g, x, y, r * 0.18, 0x5dade2, 0.5); C(g, x, y, r * 0.135, 0x111111); C(g, x - r * 0.085, y - r * 0.085, r * 0.06, 0xffffff); }   // øjets iris og pupil
 function drawGear(g, cx, cy, r, n, col, dark, rot) {   // tandhjul: n tænder ud til r, krop med huller og nav
   rot = rot || 0; const ri = r * 0.8, tw = Math.PI / n;
   const ring = (ro, rin) => { const pts = []; for (let i = 0; i < n; i++) { const a = rot + i * 2 * Math.PI / n; [[a - tw * 0.62, rin], [a - tw * 0.38, ro], [a + tw * 0.38, ro], [a + tw * 0.62, rin]].forEach(([aa, rr]) => pts.push({ x: cx + Math.cos(aa) * rr, y: cy + Math.sin(aa) * rr })); } return pts; };
@@ -2357,7 +2357,7 @@ PARTS.wheels = [
         let x = c + Math.cos(a) * (r - 3), y = c + Math.sin(a) * (r - 3), b = a + Math.PI; g.beginPath(); g.moveTo(x, y);
         for (let k = 0; k < n + 2; k++) { b += (k % 2 ? 0.45 : -0.4); x += Math.cos(b) * r * L / (n + 2); y += Math.sin(b) * r * L / (n + 2); g.lineTo(x, y); }
         g.strokePath(); const m = c + Math.cos(a) * (r - 3) * 0.78, mm = c + Math.sin(a) * (r - 3) * 0.78; g.beginPath(); g.moveTo(m, mm); g.lineTo(m + Math.cos(a + 2.4) * r * 0.16, mm + Math.sin(a + 2.4) * r * 0.16); g.strokePath(); });
-      if (preview) drawIris(g, c, c + r * 0.42, r); } },
+      if (preview) drawIris(g, c, c + r * 0.7 - 6, r); } },
   { id: 'sausage', name: 'Pølser', r: 40, density: 0.008, grip: 1.0, shape: 'hub', sausages: true,   // pølser som eger uden fælg: de dingler frit rundt om navet
     draw(g, r, preview) { const c = r + 2, h = r * SAUS.hub;
       if (preview) for (let i = 0; i < SAUS.n; i++) { const a = i * Math.PI * 2 / SAUS.n - Math.PI / 2; g.save(); g.translateCanvas(c, c); g.rotateCanvas(a); drawSausage(g, h * 0.6, -SAUS.thick / 2, r * 0.8, SAUS.thick); g.restore(); }
@@ -3286,7 +3286,7 @@ class Title extends Phaser.Scene {
     if (SETTINGS.best > 0) this.add.text(W / 2, 572, 'Rekord: ' + Math.floor(SETTINGS.best) + ' m', { fontFamily: FONT, fontSize: '26px', color: '#fff', stroke: '#2c3e50', strokeThickness: 5 }).setOrigin(0.5);
 
     addCornerButtons(this);
-    const ver = this.add.text(W - 14, H - 10, 'v0.33.1', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
+    const ver = this.add.text(W - 14, H - 10, 'v0.33.2', { fontFamily: FONT, fontSize: '24px', color: '#ffffff', stroke: '#2c3e50', strokeThickness: 6 }).setOrigin(1, 1).setDepth(50).setInteractive();
     let taps = [];   // hemmelig: 5 hurtige tryk på versionsnummeret åbner prøvebanen
     ver.on('pointerdown', () => { const n = this.time.now; taps = taps.filter(t => n - t < 2500); taps.push(n);
       if (taps.length >= 5) { taps = []; this.cameras.main.flash(250, 255, 255, 255); this.time.delayedCall(260, () => this.demoPicker()); } });
@@ -3638,7 +3638,7 @@ class Game extends Phaser.Scene {
     this.irises = null;
     if (BUILD.wheels.eye) {   // øjet: iris og pupil ruller frit rundt inde i hjulet, trukket af tyngden og af hjulets drejning
       if (!this.textures.exists('v_iris')) { const gi = this.add.graphics(); drawIris(gi, V.wheel.r * 0.42, V.wheel.r * 0.42, V.wheel.r); gi.generateTexture('v_iris', Math.ceil(V.wheel.r * 0.84), Math.ceil(V.wheel.r * 0.84)); gi.destroy(); }
-      this.irises = this.wheels.map(w => ({ img: this.add.image(w.x, w.y, 'v_iris').setDepth(14.05).setScale(w.scaleX), phi: 0, v: 0 }));
+      this.irises = this.wheels.map(w => ({ img: this.add.image(w.x, w.y, 'v_iris').setDepth(14.05).setScale(w.scaleX), x: Phaser.Math.FloatBetween(-6, 6), y: 6, vx: 0, vy: 0, pvx: 0, pvy: 0, rot: Phaser.Math.FloatBetween(0, 6) }));
     }
     this.sausages = [];
     if (BUILD.wheels.sausages) {   // pølsehjulet: hver pølse er en kæde af led (bløde og bøjelige), fæstnet i navet; de dasker efter, hænger, og lægger sig mod jorden
@@ -4365,10 +4365,15 @@ class Game extends Phaser.Scene {
     if (this.forkSlice) this.placeSlice();
     this.wheelSkins.forEach((sk, i) => sk.setPosition(this.wheels[i].x, this.wheels[i].y));
     if (this.sausages.length) { this.simSausages(delta); this.drawSausages(); }
-    if (this.irises) { const f = Math.min(3, delta / 16.67); this.irises.forEach((e, i) => { const w = this.wheels[i];
+    if (this.irises) { const f = Math.min(3, delta / 16.67); this.irises.forEach((e, i) => { const w = this.wheels[i];   // vakkelvorne øjne: pupillen ligger løst inde i øjet
       if (!w || !w.active || !w.body || !w.visible) { e.img.setVisible(false); return; }
-      e.v += (-0.022 * Math.sin(e.phi) + 0.07 * (w.body.angularVelocity - e.v)) * f; e.v *= Math.pow(0.975, f); e.phi += e.v * f;   // pendul: tyngden trækker ned, hjulets drejning trækker med
-      const d = V.wheel.r * 0.42 * w.scaleX; e.img.setVisible(true).setScale(w.scaleX).setAlpha(w.alpha).setPosition(w.x - Math.sin(e.phi) * d, w.y + Math.cos(e.phi) * d).setRotation(e.phi * 0.3); }); }
+      const b = w.body, k = w.scaleX, R = (V.wheel.r * 0.7 - 6) * k, ax = Phaser.Math.Clamp(b.velocity.x - e.pvx, -6, 6), ay = Phaser.Math.Clamp(b.velocity.y - e.pvy, -6, 6); e.pvx = b.velocity.x; e.pvy = b.velocity.y;
+      e.vx = (e.vx - ax * 0.9) * Math.pow(0.99, f); e.vy = (e.vy + 0.45 * f - ay * 0.9) * Math.pow(0.99, f);   // tyngde, og bump/hop kaster den rundt
+      e.x += e.vx * f; e.y += e.vy * f; const d = Math.hypot(e.x, e.y);
+      if (d > R) { const nx = e.x / d, ny = e.y / d, tx = -ny, ty = nx; e.x = nx * R; e.y = ny * R;   // rammer kanten: preller lidt af, og kanten trækker den med rundt
+        const vn = e.vx * nx + e.vy * ny; if (vn > 0) { e.vx -= 1.45 * vn * nx; e.vy -= 1.45 * vn * ny; }
+        const vt = e.vx * tx + e.vy * ty, dv = (b.angularVelocity * R - vt) * 0.25; e.vx += tx * dv; e.vy += ty * dv; e.rot += (vt / (V.wheel.r * 0.3 * k)) * f; }
+      e.img.setVisible(true).setScale(k).setAlpha(w.alpha).setPosition(w.x + e.x, w.y + e.y).setRotation(e.rot); }); }
     if (this.belt) this.drawBelt();
     if (this.midGear && !this.broken) { const [b, f] = this.wheels, al = Math.atan2(f.y - b.y, f.x - b.x), L = Math.hypot(f.x - b.x, f.y - b.y) || 1, M = this.midGear, sk = L / M.D;
       M.imgs.forEach((im, j) => { const t = M.offs[j] * sk; im.setPosition(b.x + (f.x - b.x) * t / L, b.y + (f.y - b.y) * t / L).setRotation(al + Math.PI + Math.PI / M.n + j * Math.PI / M.n + (j % 2 ? 1 : -1) * (b.rotation - al) * M.ratio); }); }
